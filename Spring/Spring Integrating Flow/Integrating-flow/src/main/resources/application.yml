@@ -1,0 +1,9 @@
+tk:
+  integrating:
+    email:
+      username: billtt%40163.com
+      password: 83756251hutao
+      host: imap.163.com
+      port: 993
+      mailbox: INBOX
+      poll-rate: 10000

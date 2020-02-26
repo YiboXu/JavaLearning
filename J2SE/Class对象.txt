@@ -1,0 +1,61 @@
+equals()方法
+
+5.public boolean equals(Object obj);
+
+    与equals在Java中经常被使用，大家也都知道与equals的区别：
+
+    ==表示的是变量值完成相同（对于基础类型，地址中存储的是值，引用类型则存储指向实际对象的地址）；
+
+    equals表示的是对象的内容完全相同，此处的内容多指对象的特征/属性。
+
+首先看一下下面的这个例子：
+
+package com.corn.objectsummary;  
+  
+import com.corn.Person;  
+  
+public class ObjectTest {  
+  
+    public static void main(String[] args) {  
+  
+        Object o1 = new Object();  
+        // The method clone() from the type Object is not visible  
+        Object clone = o1.clone();  
+    }  
+  
+}  
+
+    例子很简单，在main()方法中，new一个Oject对象后，想直接调用此对象的clone方法克隆一个对象，但是出现错误提示："The method clone() from the type Object is not visible"
+
+    why? 根据提示，第一反应是ObjectTest类中定义的Oject对象无法访问其clone()方法。回到Object类中clone()方法的定义，可以看到其被声明为protected，估计问题就在这上面了，protected修饰的属性或方法表示：在同一个包内或者不同包的子类可以访问。
+
+    显然，Object类与ObjectTest类在不同的包中，但是ObjectTest继承自Object，是Object类的子类，于是，现在却出现子类中通过Object引用不能访问protected方法，原因在于对"不同包中的子类可以访问"没有正确理解。
+
+    "不同包中的子类可以访问"，是指当两个类不在同一个包中的时候，继承自父类的子类内部且主调（调用者）为子类的引用时才能访问父类用protected修饰的成员（属性/方法）。 在子类内部，主调为父类的引用时并不能访问此protected修饰的成员。！（super关键字除外）
+
+于是，上例改成如下形式，我们发现，可以正常编译：
+
+    public class clone方法 {
+    public static void main(String[] args) {
+
+    }
+    public void test1() {
+
+        User user = new User();
+//        User copy = user.clone();
+    }
+    public void test2() {
+        User user = new User();
+//        User copy = (User)user.clone();
+    }
+}
+
+是的，因为此时的主调已经是子类的引用了。
+
+    上述代码在运行过程中会抛出"java.lang.CloneNotSupportedException",表明clone()方法并未正确执行完毕，问题的原因在与Java中的语法规定：
+
+    clone()的正确调用是需要实现Cloneable接口，如果没有实现Cloneable接口，并且子类直接调用Object类的clone()方法，则会抛出CloneNotSupportedException异常。
+
+    Cloneable接口仅是一个表示接口，接口本身不包含任何方法，用来指示Object.clone()可以合法的被子类引用所调用。
+
+    于是，上述代码改成如下形式，即可正确指定clone()方法以实现克隆。

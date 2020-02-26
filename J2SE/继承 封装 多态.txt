@@ -1,0 +1,371 @@
+1.类的继承：
+　
+A.重写要注意：
+
+　 a、返回值类型
+
+　　b、方法名
+
+　　c、参数类型及个数
+
+　都要与父类继承的方法相同，才叫方法的重写。
+
+　重载和重写的区别：
+
+　　方法重载：在同一个类中处理不同数据的多个相同方法名的多态手段。
+
+　　方法重写：相对继承而言，子类中对父类已经存在的方法进行区别化的修改。
+
+B、继承的初始化顺序
+
+　　1、初始化父类再初始化子类
+
+　　2、先执行初始化对象中属性，再执行构造方法中的初始化。
+
+　基于上面两点，我们就知道实例化一个子类，java程序的执行顺序是：
+
+　父类对象属性初始化---->父类对象构造方法---->子类对象属性初始化--->子类对象构造方法　
+
+如果仅仅访问类中的静态变量，那么不会执行构造方法,只会执行静态域初始化, 然后执行静态初始化(static {} )， 
+这个静态域和静态初始化只会执行一次，后面创建新的实例，只会执行构造方法。
+
+package chap6.item46;
+
+public class Test2 {
+    public static void main(String[] args){
+        Base b = new Child();
+        b.fun();
+
+        Base b1 = MyClass.base;
+
+        MyClass c1 = new MyClass();
+    }
+}
+
+class Base{
+    public Base(){
+        System.out.println("Base Constructor");
+    }
+
+    public void fun(){
+        System.out.println("fun() in Base");
+    }
+}
+
+class Child extends Base{
+    public void fun(){
+        System.out.println("fun() in Child");
+    }
+}
+
+class MyClass{
+    public static Base base = new Base();
+
+    static{
+        System.out.println("Static initialization");
+    }
+
+    public MyClass(){
+        System.out.println("MyClass Constructor");
+    }
+}
+
+输出：
+Base Constructor
+fun() in Child
+Base Constructor
+Static initialization
+MyClass Constructor
+
+C、final关键字
+
+　使用final关键字做标识有“最终的”含义。
+
+　　1. final 修饰类，则该类不允许被继承。
+
+　　2. final 修饰方法，则该方法不允许被覆盖(重写)。
+
+　　3. final 修饰属性，则该类的该属性不会进行隐式的初始化，所以 该final 属性的初始化属性必须有值，或在**构造方法中赋值(但只能选其一，且必须选其一，因为没有默认值！)，**且初始化之后就不能改了，只能赋值一次。
+
+　　4. final 修饰变量，则该变量的值只能赋一次值，在声明变量的时候才能赋值，即变为常量。
+
+D、super关键字
+
+　在对象的内部使用，可以代表父类对象。
+
+　　1、访问父类的属性：super.age
+
+　　 2、访问父类的方法：super.eat()
+
+　super的应用：
+
+　首先我们知道子类的构造的过程当中必须调用父类的构造方法。其实这个过程已经隐式地使用了我们的super关键字。
+
+　这是因为如果子类的构造方法中没有显示调用父类的构造方法，则系统默认调用父类无参的构造方法。
+
+　那么如果自己用super关键字在子类里调用父类的构造方法，则必须在子类的构造方法中的第一行。
+
+　要注意的是：如果子类构造方法中既没有显示调用父类的构造方法，而父类没有无参的构造方法，则编译出错。
+
+（补充说明，虽然没有显示声明父类的无参的构造方法，系统会自动默认生成一个无参构造方法，但是，如果你声明了一个有参的构造方法，而没有声明无参的构造方法，这时系统不会动默认生成一个无参构造方法，此时称为父类有没有无参的构造方法。）
+
+C、Java 中的内部类
+
+　内部类（ Inner Class ）就是定义在另外一个类里面的类。与之对应，包含内部类的类被称为外部类。
+
+　那么问题来了：那为什么要将一个类定义在另一个类里面呢？清清爽爽的独立的一个类多好啊！！
+
+　答：内部类的主要作用如下：
+
+　　1. 内部类提供了更好的封装，可以把内部类隐藏在外部类之内，不允许同一个包中的其他类访问该类。
+
+　　2. 内部类的方法可以直接访问外部类的所有数据，包括私有的数据。
+
+　　3. 内部类所实现的功能使用外部类同样可以实现，只是有时使用内部类更方便。
+
+　　内部类可分为以下几种：
+
+    成员内部类
+public class A{
+  private int x;
+  public class B{}
+}
+
+    静态内部类
+public class A{
+  private int x;
+  public static class B{}
+}
+
+    方法内部类
+class Outer{//定义一个外部类
+	private static String msg="hello world!";
+	public void fun(int num) {
+		class Inner{
+			public  void print() {
+				System.out.println("msg = "+msg);
+				System.out.println("num = "+num);
+			}
+		}
+		new Inner().print(); //产生内部类对象并调用方法
+	}
+	
+}
+public class TestDemo {
+	public static void main(String args[]) {
+		new Outer().fun(100);//  产生外部类对象并调用方法
+	}
+ 
+} 
+
+    匿名内部类　
+interface Person {
+
+    public void eat();
+
+}
+
+ 
+
+public class Demo {
+
+    public static void main(String[] args) {
+
+        Person p = new Person() {
+
+            public void eat() {
+
+                System.out.println("eat something");
+
+            }
+
+        };
+
+        p.eat();
+
+    }
+
+}
+
+-创建
+如果想从外部类的非静态方法之外的任意位置创建某个内部类的对象，那么必须具体地指明这个对象的类型:OuterClassName.InnerClassName. 
+创建内部类对象: 
+Outer o = new Outer(); 
+Outer.Inner i = o.new Inner();
+new Outer().new Inner();
+在内部类的方法里面，要想获取外部类的引用，就用'外部类名字.this'。
+-变量共享
+普通内部类可以访问任意外部类的成员变量和方法
+外部类也可以访问内部类的任意成员变量和方法
+-静态类
+如果一个类要被声明为static的，只有一种情况，就是静态内部类。如果在外部类声明为static，程序会编译都不会过。
+静态内部类跟静态方法一样，只能访问静态的成员变量和方法，不能访问非静态的方法和属性。
+静态内部类可以声明普通成员变量和方法，而普通内部类不能声明static成员变量和方法。
+静态内部类可以单独初始化: 
+Inner i = new Outer.Inner();
+静态内部类使用场景一般是当外部类需要使用内部类，而内部类无需外部类资源，并且内部类可以单独创建的时候会考虑采用静态内部类的设计，在知道如何初始化静态内部类，
+
+-在内部类的方法里面，要想获取外部类的引用，就用'外部类名字.this'。
+-如果一个内部类是public的，那么大家都可以访问
+ 如果一个内部类是private的，那么只有包含其的类能访问
+ 如果一个内部类是包访问权限的，那么只有和其在同一个包内的类可以访问
+ 如果一个内部类是protected的，那么同一个包内的其他类可以访问它，同时包含这个内部类的类的子类也可以访问，不过需要给内部类定义一个public的构造函数
+
+--定义在方法或作用域里面的内部类，就只能在这个方法或作用域里面使用，在外面无法识别。
+
+内部类访问外部类的域或方法: 外部类名.this.域名  / 外部类名.this.方法名
+
+三、多态
+1、多态的概念
+
+面向对象的多态性，即“一个接口，多个方法”。多态性体现在父类中定义的属性和方法被子类继承后，可以具有不同的属性或表现方式。多态性允许一个接口被多个同类使用，弥补了单继承的不足。
+
+- 引用多态
+父类的引用可以指向本类的对象
+Animal obj1 = new Animal();
+父类的引用可以指向子类的对象
+Animal obj2 = new Dog();
+
+- 方法多态
+创建本类对象时，调用的方法为本类方法；
+Animal obj1 = new Animal();
+obj1.eat();  调用Animal 的eat()
+
+Animal obj2 = new Dog();
+obj2.eat(); 调用Dog的eat()
+
+- 引用类型转换
+1. 向上类型转换
+Dog dog = new Dog();
+Animal animal = dog;  //自动类型提升
+这时animal可以调用Animal的方法，但是如果这个方法在dog里面重写了，就会调用对应的dog里的方法
+
+2 向下类型转换
+Dog dog = new Dog();
+Animal animal = dog;
+Dog dog2 = (Dog)animal; //向下类型转换 强制类型转换
+
+还有一种情况是父类的引用指向其他子类的对象，则不能通过强制转换转为该子类的对象：
+Dog dog = new Dog();
+Animal animal = dog;
+Dog dog2 = (Dog)animal;
+Cat cat = (Cat)animal; //编译可以通过，但是运行时报错
+
+创建子类对象时，调用的方法为子类重写的方法或者继承的方法；
+
+使用多态的时候要注意：如果我们在子类中编写一个独有的方法（没有继承父类的方法），此时就不能通过父类的引用创建的子类对象来调用该方法！！！
+
+- 重写和重载
+多态一般可以分为两种，一个是重写override，一个是重载overload。
+
+重写是由于继承关系中的子类有一个和父类同名同参数的方法，会覆盖掉父类的方法。重载是因为一个同名方法可以传入多个参数组合。
+
+注意，同名方法如果参数相同，即使返回值不同也是不能同时存在的，编译会出错。
+
+从jvm实现的角度来看，重写又叫运行时多态，编译时看不出子类调用的是哪个方法，但是运行时操作数栈会先根据子类的引用去子类的类信息中查找方法，找不到的话再到父类的类信息中查找方法。
+
+而重载则是编译时多态，因为编译期就可以确定传入的参数组合，决定调用的具体方法是哪一个了。
+
+注意： 继承是多态的基础。
+
+　　利用if语句和instanceof运算符来判断两个对象的类型是否一致。
+
+　　**补充说明：**在比较一个对象是否和另一个对象属于同一个类实例的时候，我们通常可以采用instanceof和getClass两种方法通过两者是否相等来判断，但是两者在判断上面是有差别的。Instanceof进行类型检查规则是:你属于该类吗？或者你属于该类的派生类吗？而通过getClass获得类型信息采用==来进行检查是否相等的操作是严格的判断,不会存在继承方面的考虑；
+
+　　**总结：**在写程序的时候，如果要进行类型转换，我们最好使用instanceof运算符来判断它左边的对象是否是它右边的类的实例，再进行强制转换。
+
+方法重载：
+
+public static void main(String[] args) {
+    方法重载优先级匹配 a = new 方法重载优先级匹配();
+    //普通的重载一般就是同名方法不同参数。
+    //这里我们来讨论当同名方法只有一个参数时的情况。
+    //此时会调用char参数的方法。
+    //当没有char参数的方法。会调用int类型的方法，如果没有int就调用long
+    //即存在一个调用顺序char -> int -> long ->double -> ..。
+    //当没有基本类型对应的方法时，先自动装箱，调用包装类方法。
+    //如果没有包装类方法，则调用包装类实现的接口的方法。
+    //最后再调用持有多个参数的char...方法。
+    a.eat('a');
+    a.eat('a','c','b');
+}
+public void eat(short i) {
+    System.out.println("short");
+}
+public void eat(int i) {
+    System.out.println("int");
+}
+public void eat(double i) {
+    System.out.println("double");
+}
+public void eat(long i) {
+    System.out.println("long");
+}
+public void eat(Character c) {
+    System.out.println("Character");
+}
+public void eat(Comparable c) {
+    System.out.println("Comparable");
+}
+public void eat(char ... c) {
+    System.out.println(Arrays.toString(c));
+    System.out.println("...");
+}
+
+//    public void eat(char i) {
+//        System.out.println("char");
+//    }
+
+重载属于静态分派，而重写则是动态分派的过程。
+
+静态分派只会涉及重载，而重载是在编译期间确定的，那么静态分派自然是一个静态的过程（因为还没有涉及到Java虚拟机）。静态分派的最直接的解释是在重载的时候是通过参数的静态类型而不是实际类型作为判断依据的。
+
+class Dog{}
+class WhiteDog extends Dog{}
+class BlackDog extends Dog{}
+public class Person {
+    public void feed(Dog dog){
+        System.out.println("feed Dog");
+    }
+    public void feed(WhiteDog Dog){
+        System.out.println("feed WhiteDog");
+    }
+    public void feed(BlackDog Dog){
+        System.out.println("feed BlackDog");
+    }
+    public static void main(String[] args) {
+        Dog wd = new WhiteDog();
+        Dog bd = new BlackDog();
+        Person p = new Person();
+        p.feed(wd);
+        p.feed(bd);
+    }
+ 
+}
+
+输出：
+
+feed dog
+feed dog
+
+
+动态分派的一个最直接的例子是重写。
+    class Dog{
+        public void eat(){
+            System.out.println("Dog eat");
+        }
+    }
+    public class BlackDog extends Dog{
+        public void eat(){
+            System.out.println("black Dog eat");
+        }
+        public static void main(String[] args){
+            Dog Dog = new BlackDog();
+            Dog.eat();
+        }
+    }
+
+
+输出：
+
+black Dog eat

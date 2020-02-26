@@ -1,0 +1,851 @@
+1. 启动mysql
+docker run --name some-mysql -e MYSQL_ROOT_PASSWORD=123456 -p 3306：3306 -d mysql
+
+2. 进入mysql
+docker exec -it some-mysql bash
+
+mysql -uroot -p123456
+
+use mysql;
+ALTER USER 'root'@'%' IDENTIFIED WITH mysql_native_password BY '123456';
+这一句比较重要，放开root登入权限，如果你要在其他的主机用root用户登入到数据库就需要写入这句话。其他的语句就是建表操作和插入数据的操作了。
+
+3. 创建一个测试DB及表
+create database test;
+use test;
+create table user
+(
+    id int auto_increment primary key,
+    username varchar(64) unique not null,
+    email varchar(120) unique not null,
+    password_hash varchar(128) not null,
+    avatar varchar(128) not null
+);
+insert into user values(1, "zhangsan","test12345@qq.com","passwd","avaterpath");
+insert into user values(2, "lisi","12345test@qq.com","passwd","avaterpath");
+
+4. 创建数据库
+create database mybatis default character set utf8 collate utf8_general_ci; 
+collate 表示数据库验证， utf8_general_ci表示验证规则， 里面的ci表示case insensitive的缩写,意思是大小写不敏感;相对的是cs,即case sensitive,大小写敏感;
+
+
+开始使用
+
+我下面所有的SQL语句是基于MySQL 5.6+运行。
+
+MySQL 为关系型数据库(Relational Database Management System)，一个关系型数据库由一个或数个表格组成, 如图所示的一个表格：
+
+ 
+
+    表头(header): 每一列的名称;
+
+    列(col): 具有相同数据类型的数据的集合;
+
+    行(row): 每一行用来描述某个人/物的具体信息;
+
+    值(value): 行的具体信息, 每个值必须与该列的数据类型相同;
+
+    键(key): 表中用来识别某个特定的人物的方法, 键的值在当前列中具有唯一性。
+
+登录MySQL
+
+    mysql -h 127.0.0.1 -u 用户名 -p
+    mysql -D 所选择的数据库名 -h 主机名 -u 用户名 -p
+    mysql> exit # 退出 使用 “quit;” 或 “\q;” 一样的效果
+    mysql> status;  # 显示当前mysql的version的各种信息
+    mysql> select version(); # 显示当前mysql的version信息
+    mysql> show global variables like 'port'; # 查看MySQL端口号
+
+创建数据库
+
+对于表的操作需要先进入库use 库名;
+
+    -- 创建一个名为 samp_db 的数据库，数据库字符编码指定为 gbk
+    create database samp_db character set gbk;
+    drop database samp_db; -- 删除 库名为samp_db的库
+    show databases;        -- 显示数据库列表。
+    use samp_db;     -- 选择创建的数据库samp_db
+    show tables;     -- 显示samp_db下面所有的表名字
+    describe 表名;    -- 显示数据表的结构
+    delete from 表名; -- 清空表中记录
+
+创建数据库表
+
+    使用 create table 语句可完成对表的创建, create table 的常见形式:
+    语法：create table 表名称(列声明);
+
+    CREATE TABLE `user_accounts` (
+      `id`             int(100) unsigned NOT NULL AUTO_INCREMENT primary key,
+      `password`       varchar(32)       NOT NULL DEFAULT '' COMMENT '用户密码',
+      `reset_password` tinyint(32)       NOT NULL DEFAULT 0 COMMENT '用户类型：0－不需要重置密码；1-需要重置密码',
+      `mobile`         varchar(20)       NOT NULL DEFAULT '' COMMENT '手机',
+      `create_at`      timestamp(6)      NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+      `update_at`      timestamp(6)      NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
+      -- 创建唯一索引，不允许重复
+      UNIQUE INDEX idx_user_mobile(`mobile`)
+    )
+    ENGINE=InnoDB DEFAULT CHARSET=utf8
+    COMMENT='用户表信息';
+
+数据类型的属性解释
+
+    NULL：数据列可包含NULL值；
+
+    NOT NULL：数据列不允许包含NULL值；
+
+    DEFAULT：默认值；
+
+    PRIMARY：KEY 主键；
+
+    AUTO_INCREMENT：自动递增，适用于整数类型；
+
+    UNSIGNED：是指数值类型只能为正数；
+
+    CHARACTER SET name：指定一个字符集；
+
+    COMMENT：对表或者字段说明；
+
+增删改查
+SELECT
+
+    SELECT 语句用于从表中选取数据。 
+    语法：SELECT 列名称 FROM 表名称 
+    语法：SELECT * FROM 表名称
+
+    -- 表station取个别名叫s，表station中不包含 字段id=13或者14 的，并且id不等于4的 查询出来，只显示id
+    SELECT s.id from station s WHERE id in (13,14) and user_id not in (4);
+     
+    -- 从表 Persons 选取 LastName 列的数据
+    SELECT LastName FROM Persons
+     
+    -- 结果集中会自动去重复数据
+    SELECT DISTINCT Company FROM Orders 
+    -- 表 Persons 字段 Id_P 等于 Orders 字段 Id_P 的值，
+    -- 结果集显示 Persons表的 LastName、FirstName字段，Orders表的OrderNo字段
+    SELECT p.LastName, p.FirstName, o.OrderNo FROM Persons p, Orders o WHERE p.Id_P = o.Id_P 
+     
+    -- gbk 和 utf8 中英文混合排序最简单的办法 
+    -- ci是 case insensitive, 即 “大小写不敏感”
+    SELECT tag, COUNT(tag) from news GROUP BY tag order by convert(tag using gbk) collate gbk_chinese_ci;
+    SELECT tag, COUNT(tag) from news GROUP BY tag order by convert(tag using utf8) collate utf8_unicode_ci;
+
+UPDATE
+
+    Update 语句用于修改表中的数据。 
+    语法：UPDATE 表名称 SET 列名称 = 新值 WHERE 列名称 = 某值
+
+    -- update语句设置字段值为另一个结果取出来的字段
+    update user set name = (select name from user1 where user1 .id = 1 )
+    where id = (select id from user2 where user2 .name='小苏');
+    -- 更新表 orders 中 id=1 的那一行数据更新它的 title 字段
+    UPDATE `orders` set title='这里是标题' WHERE id=1;
+
+INSERT
+
+    INSERT INTO 语句用于向表格中插入新的行。 
+    语法：INSERT INTO 表名称 VALUES (值1, 值2,....) 
+    语法：INSERT INTO 表名称 (列1, 列2,...) VALUES (值1, 值2,....)
+
+    -- 向表 Persons 插入一条字段 LastName = JSLite 字段 Address = shanghai
+    INSERT INTO Persons (LastName, Address) VALUES ('JSLite', 'shanghai');
+    -- 向表 meeting 插入 字段 a=1 和字段 b=2
+    INSERT INTO meeting SET a=1,b=2;
+    -- 
+    -- SQL实现将一个表的数据插入到另外一个表的代码
+    -- 如果只希望导入指定字段，可以用这种方法：
+    -- INSERT INTO 目标表 (字段1, 字段2, ...) SELECT 字段1, 字段2, ... FROM 来源表;
+    INSERT INTO orders (user_account_id, title) SELECT m.user_id, m.title FROM meeting m where m.id=1;
+
+DELETE
+
+    DELETE 语句用于删除表中的行。 
+    语法：DELETE FROM 表名称 WHERE 列名称 = 值
+
+    -- 在不删除table_name表的情况下删除所有的行，清空表。
+    DELETE FROM table_name
+    -- 或者
+    DELETE * FROM table_name
+    -- 删除 Person表字段 LastName = 'JSLite' 
+    DELETE FROM Person WHERE LastName = 'JSLite' 
+    -- 删除 表meeting id 为2和3的两条数据
+    DELETE from meeting where id in (2,3);
+
+WHERE
+
+    WHERE 子句用于规定选择的标准。 
+    语法：SELECT 列名称 FROM 表名称 WHERE 列 运算符 值
+
+    -- 从表 Persons 中选出 Year 字段大于 1965 的数据
+    SELECT * FROM Persons WHERE Year>1965
+
+AND 和 OR
+
+    AND - 如果第一个条件和第二个条件都成立； 
+    OR - 如果第一个条件和第二个条件中只要有一个成立；
+
+AND
+
+    -- 删除 meeting 表字段 
+    -- id=2 并且 user_id=5 的数据  和
+    -- id=3 并且 user_id=6 的数据 
+    DELETE from meeting where id in (2,3) and user_id in (5,6);
+     
+    -- 使用 AND 来显示所有姓为 "Carter" 并且名为 "Thomas" 的人：
+    SELECT * FROM Persons WHERE FirstName='Thomas' AND LastName='Carter';
+
+OR
+
+    -- 使用 OR 来显示所有姓为 "Carter" 或者名为 "Thomas" 的人：
+    SELECT * FROM Persons WHERE firstname='Thomas' OR lastname='Carter'
+
+ORDER BY
+
+    语句默认按照升序对记录进行排序。 
+    ORDER BY - 语句用于根据指定的列对结果集进行排序。 
+    DESC - 按照降序对记录进行排序。 
+    ASC - 按照顺序对记录进行排序。
+
+    -- Company在表Orders中为字母，则会以字母顺序显示公司名称
+    SELECT Company, OrderNumber FROM Orders ORDER BY Company
+     
+    -- 后面跟上 DESC 则为降序显示
+    SELECT Company, OrderNumber FROM Orders ORDER BY Company DESC
+     
+    -- Company以降序显示公司名称，并OrderNumber以顺序显示
+    SELECT Company, OrderNumber FROM Orders ORDER BY Company DESC, OrderNumber ASC
+
+IN
+
+    IN - 操作符允许我们在 WHERE 子句中规定多个值。 
+    IN - 操作符用来指定范围，范围中的每一条，都进行匹配。IN取值规律，由逗号分割，全部放置括号中。
+    语法：SELECT "字段名"FROM "表格名"WHERE "字段名" IN ('值一', '值二', ...);
+
+    -- 从表 Persons 选取 字段 LastName 等于 Adams、Carter
+    SELECT * FROM Persons WHERE LastName IN ('Adams','Carter')
+
+NOT
+
+    NOT - 操作符总是与其他操作符一起使用，用在要过滤的前面。
+
+SELECT vend_id, prod_name FROM Products WHERE NOT vend_id = 'DLL01' ORDER BYprod_name;
+
+UNION
+
+    UNION - 操作符用于合并两个或多个 SELECT 语句的结果集。
+
+    -- 列出所有在中国表（Employees_China）和美国（Employees_USA）的不同的雇员名
+    SELECT E_Name FROM Employees_China UNION SELECT E_Name FROM Employees_USA
+     
+    -- 列出 meeting 表中的 pic_url，
+    -- station 表中的 number_station 别名设置成 pic_url 避免字段不一样报错
+    -- 按更新时间排序
+    SELECT id,pic_url FROM meeting UNION ALL SELECT id,number_station AS pic_url FROM station  ORDER BY update_at;
+
+AS
+
+    as - 可理解为：用作、当成，作为；别名 
+    一般是重命名列名或者表名。 
+    语法：select column_1 as 列1,column_2 as 列2 from table as 表
+
+    SELECT * FROM Employee AS emp
+    -- 这句意思是查找所有Employee 表里面的数据，并把Employee表格命名为 emp。
+    -- 当你命名一个表之后，你可以在下面用 emp 代替 Employee.
+    -- 例如 SELECT * FROM emp.
+     
+    SELECT MAX(OrderPrice) AS LargestOrderPrice FROM Orders
+    -- 列出表 Orders 字段 OrderPrice 列最大值，
+    -- 结果集列不显示 OrderPrice 显示 LargestOrderPrice
+     
+    -- 显示表 users_profile 中的 name 列
+    SELECT t.name from (SELECT * from users_profile a) AS t;
+     
+    -- 表 user_accounts 命名别名 ua，表 users_profile 命名别名 up
+    -- 满足条件 表 user_accounts 字段 id 等于 表 users_profile 字段 user_id
+    -- 结果集只显示mobile、name两列
+    SELECT ua.mobile,up.name FROM user_accounts as ua INNER JOIN users_profile as up ON ua.id = up.user_id;
+
+JOIN
+
+    用于根据两个或多个表中的列之间的关系，从这些表中查询数据。
+
+    JOIN: 如果表中有至少一个匹配，则返回行
+
+    INNER JOIN:在表中存在至少一个匹配时，INNER JOIN 关键字返回行。
+
+    LEFT JOIN: 即使右表中没有匹配，也从左表返回所有的行
+
+    RIGHT JOIN: 即使左表中没有匹配，也从右表返回所有的行
+
+    FULL JOIN: 只要其中一个表中存在匹配，就返回行
+
+    SELECT Persons.LastName, Persons.FirstName, Orders.OrderNo
+    FROM Persons
+    INNER JOIN Orders
+    ON Persons.Id_P = Orders.Id_P
+    ORDER BY Persons.LastName;
+
+SQL 函数
+COUNT
+
+    COUNT 让我们能够数出在表格中有多少笔资料被选出来。 
+    语法：SELECT COUNT("字段名") FROM "表格名";
+
+    -- 表 Store_Information 有几笔 store_name 栏不是空白的资料。
+    -- "IS NOT NULL" 是 "这个栏位不是空白" 的意思。
+    SELECT COUNT (Store_Name) FROM Store_Information WHERE Store_Name IS NOT NULL; 
+    -- 获取 Persons 表的总数
+    SELECT COUNT(1) AS totals FROM Persons;
+    -- 获取表 station 字段 user_id 相同的总数
+    select user_id, count(*) as totals from station group by user_id;
+
+MAX
+
+    MAX 函数返回一列中的最大值。NULL 值不包括在计算中。 
+    语法：SELECT MAX("字段名") FROM "表格名"
+
+    -- 列出表 Orders 字段 OrderPrice 列最大值，
+    -- 结果集列不显示 OrderPrice 显示 LargestOrderPrice
+    SELECT MAX(OrderPrice) AS LargestOrderPrice FROM Orders
+
+触发器
+
+    语法：
+    create trigger <触发器名称>
+    { before | after} # 之前或者之后出发
+    insert | update | delete # 指明了激活触发程序的语句的类型
+    on <表名> # 操作哪张表
+    for each row # 触发器的执行间隔，for each row 通知触发器每隔一行执行一次动作，而不是对整个表执行一次。
+    <触发器SQL语句>
+
+    DELIMITER $ -- 自定义结束符号
+    CREATE TRIGGER set_userdate BEFORE INSERT 
+    on `message`
+    for EACH ROW
+    BEGIN
+      UPDATE `user_accounts` SET status=1 WHERE openid=NEW.openid;
+    END
+    $
+    DELIMITER ; -- 恢复结束符号
+
+OLD和NEW不区分大小写
+
+    NEW 用NEW.col_name，没有旧行。在DELETE触发程序中，仅能使用OLD.col_name，没有新行。
+
+    OLD 用OLD.col_name来引用更新前的某一行的列
+
+添加索引
+普通索引(INDEX)
+
+    语法：ALTER TABLE 表名字 ADD INDEX 索引名字 ( 字段名字 )
+
+    -- –直接创建索引
+    CREATE INDEX index_user ON user(title)
+    -- –修改表结构的方式添加索引
+    ALTER TABLE table_name ADD INDEX index_name ON (column(length))
+    -- 给 user 表中的 name字段 添加普通索引(INDEX)
+    ALTER TABLE `table` ADD INDEX index_name (name)
+    -- –创建表的时候同时创建索引
+    CREATE TABLE `table` (
+        `id` int(11) NOT NULL AUTO_INCREMENT ,
+        `title` char(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL ,
+        `content` text CHARACTER SET utf8 COLLATE utf8_general_ci NULL ,
+        `time` int(10) NULL DEFAULT NULL ,
+        PRIMARY KEY (`id`),
+        INDEX index_name (title(length))
+    )
+    -- –删除索引
+    DROP INDEX index_name ON table
+
+主键索引(PRIMARY key)
+
+    语法：ALTER TABLE 表名字 ADD PRIMARY KEY ( 字段名字 )
+
+    -- 给 user 表中的 id字段 添加主键索引(PRIMARY key)
+    ALTER TABLE `user` ADD PRIMARY key (id);
+
+唯一索引(UNIQUE)
+
+    语法：ALTER TABLE 表名字 ADD UNIQUE (字段名字)
+
+    -- 给 user 表中的 creattime 字段添加唯一索引(UNIQUE)
+    ALTER TABLE `user` ADD UNIQUE (creattime);
+
+全文索引(FULLTEXT)
+
+    语法：ALTER TABLE 表名字 ADD FULLTEXT (字段名字)
+
+    -- 给 user 表中的 description 字段添加全文索引(FULLTEXT)
+    ALTER TABLE `user` ADD FULLTEXT (description);
+
+添加多列索引
+
+    语法：
+
+ALTER TABLE table_name ADD INDEX index_name ( column1, column2, column3)
+
+    -- 给 user 表中的 name、city、age 字段添加名字为name_city_age的普通索引(INDEX)
+    ALTER TABLE user ADD INDEX name_city_age (name(10),city,age); 
+
+建立索引的时机
+
+在WHERE和JOIN中出现的列需要建立索引，但也不完全如此：
+
+    MySQL只对<，<=，=，>，>=，BETWEEN，IN使用索引
+
+    某些时候的LIKE也会使用索引。
+
+    在LIKE以通配符%和_开头作查询时，MySQL不会使用索引。
+
+    -- 此时就需要对city和age建立索引，
+    -- 由于mytable表的userame也出现在了JOIN子句中，也有对它建立索引的必要。
+    SELECT t.Name  
+    FROM mytable t LEFT JOIN mytable m ON t.Name=m.username 
+    WHERE m.age=20 AND m.city='上海';
+     
+    SELECT * FROM mytable WHERE username like'admin%'; -- 而下句就不会使用：
+    SELECT * FROM mytable WHEREt Name like'%admin'; -- 因此，在使用LIKE时应注意以上的区别。
+
+索引的注意事项
+
+    索引不会包含有NULL值的列
+
+    使用短索引
+
+    不要在列上进行运算 索引会失效
+
+创建后表的修改
+添加列
+
+    语法：alter table 表名 add 列名 列数据类型 [after 插入位置];
+
+示例:
+
+    -- 在表students的最后追加列 address: 
+    alter table students add address char(60);
+    -- 在名为 age 的列后插入列 birthday: 
+    alter table students add birthday date after age;
+    -- 在名为 number_people 的列后插入列 weeks: 
+    alter table students add column `weeks` varchar(5) not null default "" after `number_people`;
+
+修改列
+
+    语法：alter table 表名 change 列名称 列新名称 新数据类型;
+
+    -- 将表 tel 列改名为 telphone: 
+    alter table students change tel telphone char(13) default "-";
+    -- 将 name 列的数据类型改为 char(16): 
+    alter table students change name name char(16) not null;
+    -- 修改 COMMENT 前面必须得有类型属性
+    alter table students change name name char(16) COMMENT '这里是名字';
+    -- 修改列属性的时候 建议使用modify,不需要重建表
+    -- change用于修改列名字，这个需要重建表
+    alter table meeting modify `weeks` varchar(20) NOT NULL DEFAULT "" COMMENT "开放日期 周一到周日：0~6，间隔用英文逗号隔开";
+
+删除列
+
+    语法：alter table 表名 drop 列名称;
+
+    -- 删除表students中的 birthday 列: 
+    alter table students drop birthday;
+
+重命名表
+
+    语法：alter table 表名 rename 新表名;
+
+    -- 重命名 students 表为 workmates: 
+    alter table students rename workmates;
+
+清空表数据
+
+    方法一：delete from 表名;
+    方法二：truncate from "表名";
+
+    DELETE:1. DML语言;2. 可以回退;3. 可以有条件的删除;
+
+    TRUNCATE:1. DDL语言;2. 无法回退;3. 默认所有的表内容都删除;4. 删除速度比delete快。
+
+    -- 清空表为 workmates 里面的数据，不删除表。 
+    delete from workmates;
+    -- 删除workmates表中的所有数据，且无法恢复
+    truncate from workmates;
+
+删除整张表
+
+    语法：drop table 表名;
+
+    -- 删除 workmates 表: 
+    drop table workmates;
+
+删除整个数据库
+
+    语法：drop database 数据库名;
+
+    -- 删除 samp_db 数据库: 
+    drop database samp_db;
+
+
+1. 数据类型
+TIMESTAMP还有一个重要特点，就是和时区相关。当插入日期时，会先转换为本地时区
+后存放；而从数据库里面取出时，也同样需要将日期转换为本地时区后显示。这样，两个不
+同时区的用户看到的同一个日期可能是不一样的，
+（1）创建表t8，包含字段id1（TIMESTAMP）和id2（DATETIME），设置id2的目的是为
+了和id1做对比：
+CREATE TABLE `t8` (
+`id1` timestamp NOT NULL default CURRENT_TIMESTAMP,
+`id2` datetime default NULL
+)
+(2)用now()函数插入当前日期：
+insert into t8 values(now(),now());
+
+(3)mysql> select * from t8;
++---------------------+---------------------+
+| id1 | id2 |
++---------------------+---------------------+
+| 2007-09-25 17:26:50 | 2007-09-25 17:26:50 |
++---------------------+---------------------+
+结果显示id1 和id2 的值完全相同。
+（4）修改时区为东九区，再次查看表中日期：
+mysql> set time_zone='+9:00';
+Query OK, 0 rows affected (0.00 sec)
+mysql> select * from t8;
++---------------------+---------------------+
+| id1 | id2 |
++---------------------+---------------------+
+| 2007-09-25 18:26:50 | 2007-09-25 17:26:50 |
++---------------------+---------------------+
+
+TIMESTAMP的取值范围为19700101080001到2038年的某一天，因此它不适合存放比较久远的日期
+
+2. 存储引擎
+在创建新表的时候，可以通过增加ENGINE 关键字设置新建表的存储引擎，例如，在下
+面的例子中，表ai 就是MyISAM 存储引擎的，而country 表就是InnoDB 存储引擎的：
+CREATE TABLE ai (
+i bigint(20) NOT NULL AUTO_INCREMENT,
+PRIMARY KEY (i)
+) ENGINE=MyISAM DEFAULT CHARSET=gbk;
+
+CREATE TABLE country (
+country_id SMALLINT UNSIGNED NOT NULL AUTO_INCREMENT,
+country VARCHAR(50) NOT NULL,
+last_update TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+PRIMARY KEY (country_id)
+)ENGINE=InnoDB DEFAULT CHARSET=gbk;
+也可以使用ALTER TABLE 语句，将一个已经存在的表修改成其他的存储引擎。下面的例子介
+绍了如何将表ai 从MyISAM 存储引擎修改成InnoDB 存储引擎：
+mysql> alter table ai engine = innodb;
+
+3. 数据类型选择
+在MySQL 中，不同的存储引擎对CHAR 和VARCHAR 的使用原则有所不同，这里简单概
+括如下。
+ MyISAM 存储引擎：建议使用固定长度的数据列代替可变长度的数据列。
+ MEMORY 存储引擎：目前都使用固定长度的数据行存储，因此无论使用CHAR 或
+VARCHAR 列都没有关系。两者都是作为CHAR 类型处理。
+ InnoDB 存储引擎：建议使用VARCHAR 类型。对于InnoDB 数据表，内部的行存储
+格式没有区分固定长度和可变长度列（所有数据行都使用指向数据列值的头指针），因此在
+本质上，使用固定长度的CHAR 列不一定比使用可变长度VARCHAR 列性能要好。因而，主
+要的性能因素是数据行使用的存储总量。由于CHAR 平均占用的空间多于VARCHAR，因此使
+用VARCHAR 来最小化需要处理的数据行的存储总量和磁盘I/O 是比较好的。
+
+
+TEXT 与BLOB
+一般在保存少量字符串的时候，我们会选择CHAR 或者VARCHAR；而在保存较大文本时，
+通常会选择使用TEXT 或者BLOB，二者之间的主要差别是BLOB 能用来保存二进制数据，比
+如照片；而TEXT 只能保存字符数据，比如一篇文章或者日记。
+
+BLOB 和TEXT 值会引起一些性能问题，特别是在执行了大量的删除操作时。
+删除操作会在数据表中留下很大的“空洞”，以后填入这些“空洞”的记录在插入的性能上
+会有影响。为了提高性能，建议定期使用OPTIMIZE TABLE 功能对这类表进行碎片整理，避
+免因为“空洞”导致性能问题。
+
+mysql> OPTIMIZE TABLE t;
++--------+----------+----------+----------+
+| Table | Op | Msg_type | Msg_text |
++--------+----------+----------+----------+
+| test.t | optimize | status | OK |
++--------+----------+----------+----------+
+1 row in set (2.88 sec)
+
+FLOAT vs DECIMAL
+注意：在今后关于浮点数和定点数的应用中，用户要考虑到以下几个原则：
+ 浮点数存在误差问题；
+ 对货币等对精度敏感的数据，应该用定点数表示或存储；
+ 在编程中，如果用到浮点数，要特别注意误差问题，并尽量避免做浮点数比较；
+ 要注意浮点数中一些特殊值的处理。
+
+SQL优化
+- show global status like 'Com_%';  
+ show global status like 'Innodb_%';
+获取系统SQL执行次数统计
+Com_xxx 表示每个xxx 语句执行的次数，我们通常比较关心的是以下几个统计参数。
+ Com_select：执行select 操作的次数，一次查询只累加1。
+ Com_insert：执行INSERT 操作的次数，对于批量插入的INSERT 操作，只累加一次。
+ Com_update：执行UPDATE 操作的次数。
+ Com_delete：执行DELETE 操作的次数。
+ Innodb_rows_read：select 查询返回的行数。
+ Innodb_rows_inserted：执行INSERT 操作插入的行数。
+ Innodb_rows_updated：执行UPDATE 操作更新的行数。
+ Innodb_rows_deleted：执行DELETE 操作删除的行数。
+ Connections：试图连接MySQL 服务器的次数。
+ Uptime：服务器工作时间。
+ Slow_queries：慢查询的次数。
+
+-，可以使用show processlist 命令查看当前MySQL 在进行的线程，
+包括线程的状态、是否锁表等，可以实时地查看SQL 的执行情况，同时对一些锁表操
+作进行优化。
+
+- 通过EXPLAIN 分析低效SQL 的执行计划
+mysql> explain select sum(moneys) from sales a,company b where a.company_id = b.id and a.year = 2006\G;
+
+*************************** 1. row ***************************
+id: 1
+select_type: SIMPLE
+table: a
+type: ALL
+possible_keys: NULL
+key: NULL
+key_len: NULL
+ref: NULL
+rows: 1000
+Extra: Using where
+*************************** 2. row ***************************
+id: 1
+select_type: SIMPLE
+table: b
+type: ref
+possible_keys: ind_company_id
+key: ind_company_id
+key_len: 5
+ref: sakila.a.company_id
+rows: 1
+Extra: Using where; Using index
+2 rows in set (0.00 sec)
+每个列的简单解释如下：
+ select_type：表示SELECT 的类型，常见的取值有SIMPLE（简单表，即不使用表连接
+或者子查询）、PRIMARY（主查询，即外层的查询）、UNION（UNION 中的第二个或
+者后面的查询语句）、SUBQUERY（子查询中的第一个SELECT）等。
+ table：输出结果集的表。
+ type：表示表的连接类型，性能由好到差的连接类型为
+system（表中仅有一行，即常量表）、
+const（单表中最多有一个匹配行，例如primary key 或者unique index）、
+eq_ref（对于前面的每一行，在此表中只查询一条记录，简单来说，就是多表连接
+中使用primary key或者unique index）、ref 与eq_ref类似，区别在于不是使用primary
+key 或者unique index，而是使用普通的索引）、ref_or_null（与ref 类似，区别在于
+条件中包含对NULL 的查询）、index_merge(索引合并优化)、unique_subquery（in
+的后面是一个查询主键字段的子查询）、index_subquery（与unique_subquery 类似，
+区别在于in 的后面是查询非唯一索引字段的子查询）、range（单表中的范围查询）、
+index（对于前面的每一行，都通过查询索引来得到数据）、all（对于前面的每一行，都通过全表扫描来得到数据）。
+ possible_keys：表示查询时，可能使用的索引。
+ key：表示实际使用的索引。
+ key_len：索引字段的长度。
+ rows：扫描行的数量。
+ Extra：执行情况的说明和描述。
+
+经过以上步骤，基本就可以确认问题出现的原因。此时用户可以根据情况采取相应的措
+施，进行优化提高执行的效率。
+在上面的例子中，已经可以确认是对a 表的全表扫描导致效率的不理想，那么对a 表的
+year 字段创建索引，具体如下：
+mysql> create index ind_sales2_year on sales2(year);
+Query OK, 1000 rows affected (0.03 sec)
+Records: 1000 Duplicates: 0 Warnings: 0
+创建索引后，再看一下这条语句的执行计划，具体如下：
+mysql> explain select sum(moneys) from sales2 a,company2 b where a.company_id = b.id and
+a.year = 2006\G;
+*************************** 1. row ***************************
+id: 1
+select_type: SIMPLE
+table: a
+type: ref
+possible_keys: ind_sales2_year
+key: ind_sales2_year
+key_len: 2
+ref: const
+rows: 1
+Extra: Using where
+*************************** 2. row ***************************
+id: 1
+select_type: SIMPLE
+table: b
+type: ref
+possible_keys: ind_company2_id
+key: ind_company2_id
+key_len: 5
+ref: sakila.a.company_id
+rows: 1
+Extra: Using where; Using index
+2 rows in set (0.00 sec)
+可以发现建立索引后对a 表需要扫描的行数明显减少（从1000 行减少到1 行），可见索引的
+使用可以大大提高数据库的访问速度，尤其在表很庞大的时候这种优势更为明显。
+
+
+如果索引正在工作，Handler_read_key 的值将很高，这个值代表了一个行被索引值读的
+次数，很低的值表明增加索引得到的性能改善不高，因为索引并不经常使用。
+Handler_read_rnd_next 的值高则意味着查询运行低效，并且应该建立索引补救。这个值
+的含义是在数据文件中读下一行的请求数。如果正进行大量的表扫描，
+Handler_read_rnd_next 的值较高，则通常说明表索引不正确或写入的查询没有利用索引，具
+体如下。
+mysql> show status like 'Handler_read%';
++-----------------------+-------+
+| Variable_name | Value |
++-----------------------+-------+
+| Handler_read_first | 0 |
+| Handler_read_key | 5 |
+| Handler_read_next | 0 |
+| Handler_read_prev | 0 |
+| Handler_read_rnd | 0 |
+| Handler_read_rnd_next | 2055 |
++-----------------------+-------+
+
+
+优化INSERT 语句
+当进行数据INSERT 的时候，可以考虑采用以下几种优化方式。
+ 如果同时从同一客户插入很多行，尽量使用多个值表的INSERT 语句，这种方式将大大
+缩减客户端与数据库之间的连接、关闭等消耗，使得效率比分开执行的单个INSERT 语
+句快(在一些情况中几倍)。下面是一次插入多值的一个例子：
+insert into test values(1,2),(1,3),(1,4)…
+ 如果从不同客户插入很多行，能通过使用INSERT DELAYED 语句得到更高的速度。
+DELAYED 的含义是让INSERT 语句马上执行，其实数据都被放在内存的队列中，并没有
+真正写入磁盘，这比每条语句分别插入要快的多；LOW_PRIORITY 刚好相反，在所有其
+他用户对表的读写完后才进行插入；
+ 将索引文件和数据文件分在不同的磁盘上存放（利用建表中的选项）；
+ 如果进行批量插入，可以增加bulk_insert_buffer_size 变量值的方法来提高速度，但是，
+这只能对MyISAM 表使用；
+ 当从一个文本文件装载一个表时，使用LOAD DATA INFILE。这通常比使用很多INSERT 语
+句快20 倍。
+
+
+锁
+
+MyISAM 表锁
+MyISAM 在执行查询语句（SELECT）前，会自动给涉及的所有表加读锁，在执行更新操作
+（UPDATE、DELETE、INSERT 等）前，会自动给涉及的表加写锁，这个过程并不需要用户干
+预，因此，用户一般不需要直接用LOCK TABLE 命令给MyISAM 表显式加锁
+
+当使用LOCK TABLES 时，不仅需要一次锁定用到的所有表，而且，同一个表在SQL 语句
+中出现多少次，就要通过与SQL 语句中相同的别名锁定多少次，否则也会出错！
+
+MyISAM存储引擎有一个系统变量concurrent_insert，专门用以控制其并发插入的行为，其值
+分别可以为0、1或2。
+ 当concurrent_insert设置为0时，不允许并发插入。
+ 当concurrent_insert设置为1时，如果MyISAM表中没有空洞（即表的中间没有被删除的
+行），MyISAM允许在一个进程读表的同时，另一个进程从表尾插入记录。这也是MySQL
+的默认设置。
+ 当concurrent_insert设置为2时，无论MyISAM表中有没有空洞，都允许在表尾并发插入
+记录。
+
+（1）共享读锁（S）之间是兼容的，但共享读锁（S）与排他写锁（X）之间，以及排他
+写锁（X）之间是互斥的，也就是说读和写是串行的。
+（2）在一定条件下，MyISAM 允许查询和插入并发执行，我们可以利用这一点来解决
+应用中对同一表查询和插入的锁争用问题。
+（3）MyISAM 默认的锁调度机制是写优先，这并不一定适合所有应用，用户可以通过
+设置LOW_PRIORITY_UPDATES 参数，或在INSERT、UPDATE、DELETE 语句中指定
+LOW_PRIORITY 选项来调节读写锁的争用。
+（4）由于表锁的锁定粒度大，读写之间又是串行的，因此，如果更新操作较多，MyISAM
+表可能会出现严重的锁等待，可以考虑采用InnoDB 表来减少锁冲突。
+
+InnoDB 行锁
+set autocommit=0指事务非自动提交，自此句执行以后，每个SQL语句或者语句块所在的事务都需要显示"commit"才能提交事务。
+
+1、不管autocommit 是1还是0 
+     START TRANSACTION 后，只有当commit数据才会生效，ROLLBACK后就会回滚。
+
+2、当autocommit 为 0 时
+    不管有没有START TRANSACTION。
+    只有当commit数据才会生效，ROLLBACK后就会回滚。
+
+3、如果autocommit 为1 ，并且没有START TRANSACTION 。
+    调用ROLLBACK是没有用的。即便设置了SAVEPOINT。
+
+ 共享锁（S）：SELECT * FROM table_name WHERE ... LOCK IN SHARE MODE。
+ 排他锁（X)：SELECT * FROM table_name WHERE ... FOR UPDATE。
+
+用SELECT ... IN SHARE MODE 获得共享锁，主要用在需要数据依存关系时来确认某行记
+录是否存在，并确保没有人对这个记录进行UPDATE 或者DELETE 操作。但是如果当前事务
+也需要对该记录进行更新操作，则很有可能造成死锁，对于锁定行记录后需要进行更新操作
+的应用，应该使用SELECT... FOR UPDATE 方式获得排他锁。
+
+============================重要==================================================
+InnoDB 行锁是通过给索引上的索引项加锁来实现的，这一点MySQL 与Oracle 不同，后者是
+通过在数据块中对相应数据行加锁来实现的。InnoDB 这种行锁实现特点意味着：只有通过
+索引条件检索数据，InnoDB 才使用行级锁，否则，InnoDB 将使用表锁！
+在实际应用中，要特别注意InnoDB 行锁的这一特性，不然的话，可能导致大量的锁冲突，
+从而影响并发性能
+
+由于MySQL 的行锁是针对索引加的锁，不是针对记录加的锁，所以虽然是访问不同行
+的记录，但是如果是使用相同的索引键，是会出现锁冲突的。应用设计的时候要注意这一点。
+假设表tab_with_index只有一个包含id的索引
+session 1:
+select * from tab_with_index where id = 1 and name = '1' for update;
+
+session 2:
+select * from tab_with_index where id = 1 and name = '4' for update;
+
+虽然session_2 访问的是和session_1 不同的记录，但是因为使用了相同的索引，所以需要等待锁：
+
+不论是使用主键索引、唯一索引或普通索引，InnoDB 都会使用行锁来对数据加锁。
+
+即便在条件中使用了索引字段，但是否使用索引来检索数据是由MySQL 通过判断不同
+执行计划的代价来决定的，如果MySQL 认为全表扫描效率更高，比如对一些很小的表，它
+就不会使用索引，这种情况下InnoDB 将使用表锁，而不是行锁。因此，在分析锁冲突时，
+别忘了检查SQL 的执行计划，以确认是否真正使用了索引
+===============================================================================
+
+间隙锁（Next-Key 锁）
+
+当我们用范围条件而不是相等条件检索数据，并请求共享或排他锁时，InnoDB 会给符合条
+件的已有数据记录的索引项加锁；对于键值在条件范围内但并不存在的记录，叫做“间隙
+（GAP)”，InnoDB 也会对这个“间隙”加锁，这种锁机制就是所谓的间隙锁（Next-Key 锁）。
+举例来说，假如emp 表中只有101 条记录，其empid 的值分别是 1,2,...,100,101，下面的SQL：
+Select * from emp where empid > 100 for update;
+是一个范围条件的检索，InnoDB 不仅会对符合条件的empid 值为101 的记录加锁，也会对
+empid 大于101（这些记录并不存在）的“间隙”加锁。
+InnoDB 使用间隙锁的目的，一方面是为了防止幻读，以满足相关隔离级别的要求，对于上
+面的例子，要是不使用间隙锁，如果其他事务插入了empid 大于100 的任何记录，那么本
+事务如果再次执行上述语句，就会发生幻读；另外一方面，是为了满足其恢复和复制的需要。
+有关其恢复和复制对锁机制的影响，以及不同隔离级别下InnoDB 使用间隙锁的情况，在后
+续的章节中会做进一步介绍。
+很显然，在使用范围条件检索并锁定记录时，InnoDB 这种加锁机制会阻塞符合条件范围内
+键值的并发插入，这往往会造成严重的锁等待。因此，在实际应用开发中，尤其是并发插入
+比较多的应用，我们要尽量优化业务逻辑，尽量使用相等条件来访问更新数据，避免使用范
+围条件。
+还要特别说明的是，InnoDB 除了通过范围条件加锁时使用间隙锁外，如果使用相等条件请
+求给一个不存在的记录加锁，InnoDB 也会使用间隙锁！
+
+
+，INSERT...SELECT...和CREATE TABLE...SELECT...语句，可能会阻止对源表的并发更新，造成
+对源表锁的等待。如果查询比较复杂的话，会造成严重的性能问题，我们在应用中应尽量避
+免使用。实际上，MySQL将这种SQL叫作不确定（non-deterministic）的SQL，不推荐使用。
+如果应用中一定要用这种SQL 来实现业务逻辑，又不希望对源表的并发更新产生影响，
+可以采取以下两种措施：
+ 一是采取上面示例中的做法，将innodb_locks_unsafe_for_binlog 的值设置为“on”，
+强制MySQL 使用多版本数据一致性读。但付出的代价是可能无法用binlog 正确地恢复或复
+制数据，因此，不推荐使用这种方式。
+ 二是通过使用“select * from source_tab ... Into outfile”和“load data infile ...”语句组
+合来间接实现，采用这种方式MySQL 不会给source_tab 加锁。
+
+
+什么时候使用表锁
+对于InnoDB 表，在绝大部分情况下都应该使用行级锁，因为事务和行锁往往是我们之所以
+选择InnoDB 表的理由。但在个别特殊事务中，也可以考虑使用表级锁。
+ 第一种情况是：事务需要更新大部分或全部数据，表又比较大，如果使用默认的行锁，
+不仅这个事务执行效率低，而且可能造成其他事务长时间锁等待和锁冲突，这种情况下可以
+考虑使用表锁来提高该事务的执行速度。
+ 第二种情况是：事务涉及多个表，比较复杂，很可能引起死锁，造成大量事务回滚。这
+种情况也可以考虑一次性锁定事务涉及的表，从而避免死锁、减少数据库因事务回滚带来的
+开销。
+当然，应用中这两种事务不能太多，否则，就应该考虑使用MyISAM 表了。
+
+正确的方式见如下语句：
+例如，如果需要写表t1 并从表t 读，可以按如下做：
+SET AUTOCOMMIT=0;
+LOCK TABLES t1 WRITE, t2 READ, ...;
+[do something with tables t1 and t2 here];
+COMMIT;
+UNLOCK TABLES;
+
+ 精心设计索引，并尽量使用索引访问数据，使加锁更精确，从而减少锁冲突的机会；
+ 选择合理的事务大小，小事务发生锁冲突的几率也更小；
+ 给记录集显示加锁时，最好一次性请求足够级别的锁。比如要修改数据的话，最好
+直接申请排他锁，而不是先申请共享锁，修改时再请求排他锁，这样容易产生死锁；
+ 不同的程序访问一组表时，应尽量约定以相同的顺序访问各表，对一个表而言，尽
+可能以固定的顺序存取表中的行。这样可以大大减少死锁的机会；
+ 尽量用相等条件访问数据，这样可以避免间隙锁对并发插入的影响

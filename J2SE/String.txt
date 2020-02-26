@@ -1,0 +1,256 @@
+一.创建字符串分析
+1.直接使用双引号创建字符串
+
+ 判断这个常量是否存在于常量池，
+  如果存在，
+   判断这个常量是存在的引用还是常量，
+    如果是引用，返回引用地址指向的堆空间对象，
+    如果是常量，则直接返回常量池常量，
+  如果不存在，
+    在常量池中创建该常量，并返回此常量
+
+    String a1 = "AA";//在常量池上创建常量AA
+    String a2 = "AA";//直接返回已经存在的常量AA
+    System.out.println(a1 == a2); //true
+
+    1
+    2
+    3
+
+    String a3 = new String("AA");    //在堆上创建对象AA
+    a3.intern(); //在常量池上创建对象AA的引用
+    String a4 = "AA"; //常量池上存在引用AA，直接返回该引用指向的堆空间对象，即a3
+    System.out.println(a3 == a4); //false,如果这个例子不理解，请看完整篇文章再回来看这里
+
+    1
+    2
+    3
+    4
+
+2.new String创建字符串
+
+ 首先在堆上创建对象(无论堆上是否存在相同字面量的对象),
+ 然后判断常量池上是否存在字符串的字面量，
+  如果不存在
+   在常量池上创建常量
+  如果存在
+   不做任何操作
+
+    String a1 = new String("AA");
+    String a2 = new String("AA");
+    System.out.println(a1 == a2); //false
+
+    1
+    2
+    3
+
+    //如果常量池上不存在常量AA,也不存在引用AA，则创建常量AA
+    String a1 = new String("AA");
+    System.out.println(a1 == a1.intern()); //false
+
+    1
+    2
+    3
+
+3.双引号相加
+
+ 判断这两个常量、相加后的常量在常量池上是否存在
+  如果不存在
+   则在常量池上创建相应的常量
+  如果存在
+   判断这个常量是存在的引用还是常量，
+    如果是引用，返回引用地址指向的堆空间对象，
+    如果是常量，则直接返回常量池常量，
+
+    String a1 = "AA" + "BB";//在常量池上创建常量AA、BB和AABB，并返回AABB
+
+    1
+
+    //常量池上存在常量AABB
+    String a2 = "AABB";
+    String a3 = "AA" + "BB";
+    System.out.println(a2 == a3); //true
+
+    1
+    2
+    3
+    4
+
+    //常量池上存在引用AABB
+    String a4 = new String("AA") + new String("BB"); //在堆上创建对象AA、BB和AABB，在常量池上创建常量AA和BB
+    a4.intern();
+    String a5 = "AA" + "BB";
+    System.out.println(a4 == a5); //true
+
+    1
+    2
+    3
+    4
+    5
+
+4.两个new String相加
+
+ 首先会创建这两个对象以及相加后的对象
+ 然后判断常量池中是否存在这两个对象的字面量常量
+  如果存在
+   不做任何操作
+  如果不存在
+   则在常量池上创建对应常量
+
+    //常量AA不存在，所以第一步在常量池中创建了常量AA
+    String a2 = new String("AA") + new String("BB");
+    String a3 = new String("A")+new String("A"); //创建对象AA
+    System.out.println(a3 == a3.intern()); //false
+
+    1
+    2
+    3
+    4
+
+    //只在堆上创建AABB对象，没有在常量池中创建常量AABB
+    String a2 = new String("AA") + new String("BB");
+    System.out.println(a2 == a2.intern()); //true
+
+    1
+    2
+    3
+
+5.双引号字符串与new String字符串
+
+ 首先创建两个对象，一个是new String的对象，一个是相加后的对象
+ 然后判断双引号常量与new String的字面量在常量池是否存在
+  如果存在
+   不做操作
+  如果不存在
+   则在常量池上创建对象的常量
+
+    String a1 = "AABB";
+    String a2 = "AA" + new String("BB");
+    System.out.println(a1 == a2.intern());//true
+    System.out.println(a2 == a2.intern()); //false
+
+    1
+    2
+    3
+    4
+
+二.String.intern()分析
+
+ 判断这个常量是否存在于常量池。
+  如果存在
+   判断存在内容是引用还是常量，
+    如果是引用，
+     返回引用地址指向堆空间对象，
+    如果是常量，
+     直接返回常量池常量
+  如果不存在，
+   将当前对象引用复制到常量池,并且返回的是当前对象的引用
+
+    String a1 = "AA";
+    System.out.println(a1 == a1.intern()); //true
+    String a2 = new String("B") + new String("B");
+    a2.intern();
+    String a3 = new String("B") + new String("B");
+    System.out.println(a2 == a3.intern());//true
+    System.out.println(a3 == a3.intern());//false
+    String a4 = new String("C") + new String("C");
+    System.out.println(a4 == a4.intern()); //true
+
+    1
+    2
+    3
+    4
+    5
+    6
+    7
+    8
+    9
+
+三.总结
+1.只在常量池上创建常量
+
+    String a1 = "AA";
+
+    1
+
+2.只在堆上创建对象
+
+    String a2 = new String("A") + new String("A");
+
+    1
+
+3.在堆上创建对象，在常量池上创建常量
+
+    String a3 = new String("AA");
+
+    1
+
+4.在堆上创建对象，在常量池上创建引用
+
+    String a4 = new String("A") + new String("A");//只在堆上创建对象AA
+    a4.intern();//将该对象AA的引用保存到常量池上
+
+    1
+    2
+
+5.在堆上创建对象，在常量池上创建常量，在常量池上创建引用（不可能）
+
+    String a5 = new String("A") + new String("A");//只在堆上创建对象
+    a5.intern();//在常量池上创建引用
+    String a6 = "AA";//此时不会再在常量池上创建常量AA，而是将a5的引用返回给a6
+    System.out.println(a5 == a6); //true
+
+intern方法还是会先去查询常量池中是否有已经存在，如果存在，则返回常量池中的引用，如果在常量池找不到对应的字符串，则不会再将字符串拷贝到常量池，而只是在常量池中生成一个对原字符串的引用,同时返回堆里面的字符串引用.
+
+package chap6.item46.duotai;
+
+public class Test6 {
+    public static void main(String[] args){
+//在堆上创建对象，在常量池上创建引用
+//s1 指向堆里面的字符串对象"AA", s1.intern()返回的是常量池里面的一个地址，这个地址里面存放的值就是堆中"AA"的地址
+        String s1 = new String("AA");        
+        System.out.println(s1==s1.intern());  //false
+
+//因为常量池里面已经有字符串"AA"，所以这里s2就是常量池里面的一个地址，等同于s1.intern()
+        String s2 = "AA";
+        System.out.println(s2==s1.intern());   //true
+
+//只在常量池上创建常量
+//常量池地址
+        String s3 = "BB";
+//在堆上创建对象，因为常量池里面已经存在"BB",所以不会在常量池创建"BB", s4.intern()返回的就是在常量池里面的存放"BB"
+        String s4 = new String("BB");
+        System.out.println(s3==s4);     //false
+        System.out.println(s3==s4.intern());  //true
+
+//常量池地址，直接在常量池里面存放的变量"AABB"
+        String s5="AA" + "BB";
+        System.out.println(s5==s5.intern());   //true
+//只在堆上创建对象"AABB"，返回堆地址给s6
+//因为常量池已经有"AABB",s6.intern()直接返回常量池里"AABB"
+        String s6=new String("AA") + new String("BB");   
+        System.out.println(s5==s6);   //false
+        System.out.println(s5==s6.intern());   //true
+        System.out.println(s6==s6.intern());   //false
+
+//在堆上创建对象，在常量池上创建引用
+        String s7=new String("CC");
+        System.out.println(s7==s7.intern());       //false
+//s8指向堆里面的"CCDD", 因为常量池里面没有"CCDD",所以s8.intern()会在常量池里面创建一个指向堆里面"CCDD"的引用，然后返回堆里面的"CCDD"
+        String s8=new String("CC") + new String("DD");
+        System.out.println(s8==s8.intern());    //true
+
+//s9指向堆里面的"CCDD", 因为常量池里面有"CCDD",所以s9.intern()会返回常量池里的"CCDD"，注意这个是一个指向堆里面的"CCDD"的引用
+        String s9=new String("CC") + new String("DD");
+        System.out.println(s9==s9.intern());  //false
+	//System.out.println(s8==s9.intern());   //？？？ true
+    }
+}
+
+
+
+StringBuffer就是为了解决大量拼接字符串时产生很多中间对象问题而提供的一个类，提供append和add方法，可以将字符串添加到已有序列的末尾或指定位置，它的本质是一个线程安全的可修改的字符序列，把所有修改数据的方法都加上了synchronized。但是保证了线程安全是需要性能的代价的。
+
+在很多情况下我们的字符串拼接操作不需要线程安全，这时候StringBuilder登场了，StringBuilder是JDK1.5发布的，它和StringBuffer本质上没什么区别，就是去掉了保证线程安全的那部分，减少了开销。
+
+StringBuffer 和 StringBuilder 二者都继承了 AbstractStringBuilder ，底层都是利用可修改的char数组(JDK 9 以后是 byte数组)。

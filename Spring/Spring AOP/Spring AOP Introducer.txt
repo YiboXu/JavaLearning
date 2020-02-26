@@ -1,0 +1,123 @@
+﻿AOP Advice 是用来给Bean的某个方法前后添加一些新的执行方法。
+AOP introducer用处是为了给Bean添加新的方法
+
+下面我们看看如何创建 introducer
+
+- 创建原始interface
+public interface Performance {
+	public void perform();
+	public void report(String name);
+}
+
+- 创建Performance的实现
+package tacos;
+
+import java.io.PrintStream;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+public class Movie implements Performance{
+
+	private PrintStream out;
+	
+	public Movie(PrintStream out) {
+		this.out = out;
+	}
+	
+	@Override
+	public void perform() {
+		// TODO Auto-generated method stub
+		out.println("Movie is performing!");
+	}
+
+	public void report(String name) {
+		// TODO Auto-generated method stub
+		out.println("Movie "+name+" is performing!");
+	}
+}
+
+现在为了给Performance添加一个新的方法performEncore()
+
+- 创建introducer interface
+package tacos;
+
+public interface Encoreable {
+	void performEncore();
+}
+
+- 创建introducer interface的实现
+package tacos;
+
+public class DefaultEncoreable implements Encoreable{
+
+	@Override
+	public void performEncore() {
+		// TODO Auto-generated method stub
+		System.out.println("Perform Encore!");
+	}
+
+}
+
+- 定义切面
+package tacos;
+
+import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.DeclareParents;
+
+@Aspect
+public class EncoreableIntroducer {
+	
+	@DeclareParents(value="tacos.Performance+",defaultImpl=DefaultEncoreable.class)
+	public static Encoreable encoreable;
+}
+
+- 修改xml
+  <bean class="tacos.EncoreableIntroducer" />
+
+- 或修改Config类 
+ @Bean 
+ EncoreableIntroducer encoreableIntroducer(){ 
+      return new EncoreableIntroducer(); 
+ }
+==================================================================
+注意：如果是通过config类来添加introduce， 这个value="tacos.Performance+"里面不能用加号， 所以需要把所有需要应用到这个introduce的类列出来
+比如@DeclareParents(value="tacos.Movie",defaultImpl=DefaultEncoreable.class)
+或者@DeclareParents(value="tacos.*",defaultImpl=DefaultEncoreable.class)
+具体为什么，我还不清楚
+==================================================================
+
+- 现在Performance已经有了interface Encoreable的方法performEncore()， 方法的实现由类DefaultEncoreable 提供
+
+最后我们来看看如何使用
+package test;
+
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+
+import concert.Performance2;
+import tacos.DefaultEncoreable;
+import tacos.Encoreable;
+import tacos.EncoreableIntroducer;
+import tacos.Performance;
+
+public class KnightMain3 {
+
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("META-INF/spring/minstrel.xml");
+		
+		Performance movie = context.getBean(Performance.class);
+		movie.perform();
+		
+		movie.report("Good Forever");
+		
+		Encoreable enco = (Encoreable)movie;    ====>这里将movie这个Performance类型转换成Encoreable 
+		enco.performEncore();                   ====>从而可以调用Encoreable的performEncore()方法，所以看起来好像给Performance添加了新的方法。
+		
+		//Performance2 drama = context.getBean(Performance2.class);
+		//drama.perform();
+		
+		context.close();
+	}
+
+}

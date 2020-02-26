@@ -1,0 +1,4 @@
+tk\mybatis\App.class
+tk\mybatis\simple\model\Country.class
+tk\mybatis\simple\type\Enabled.class
+tk\mybatis\simple\type\EnabledTypeHandler.class

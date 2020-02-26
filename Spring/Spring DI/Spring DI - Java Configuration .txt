@@ -1,0 +1,99 @@
+﻿1. 依赖注入的三种方式
+Explicit configuration in XML
+Explicit configuration in Java
+Implicit bean discovery and automatic wiring
+
+
+第二种： Explicit configuration in Java
+
+- 定义接口
+package tacos;
+
+public interface Knight {
+
+	void embarkOnQuest();
+
+}
+
+package tacos;
+
+public interface Quest {
+	void embark();
+}
+
+- 定义bean
+package tacos;
+
+public class BraveKnight implements Knight {
+
+	  private Quest quest;
+
+	  public BraveKnight(Quest quest) {
+	    this.quest = quest;
+	  }
+
+	  public void embarkOnQuest() {
+	    quest.embark();
+	  }
+}
+
+import java.io.PrintStream;
+
+public class SlayDragonQuest implements Quest {
+
+	  private PrintStream stream;
+
+	  public SlayDragonQuest(PrintStream stream) {
+	    this.stream = stream;
+	  }
+
+	  public void embark() {
+	    stream.println("Embarking on quest to slay the dragon!");
+	  }
+
+}
+
+- 定义Java configuration
+package tacos;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+public class KnightConfig {
+
+	@Bean
+	public Knight knight() {
+		return new BraveKnight(quest());
+	}
+
+	@Bean
+	public Quest quest() {
+		return new SlayDragonQuest(System.out);
+	}
+}
+
+- 执行
+package tacos;
+
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+
+public class KnightMain2 {
+	
+	public static void main(String[] args) {
+		
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(KnightConfig.class);
+		
+		Knight knight = context.getBean(Knight.class);
+		
+		knight.embarkOnQuest();
+		
+		context.close();
+	}
+}
+
+这里AnnotationConfigApplicationContext 读取了KnightConfig.class的设置，知道了如何获取Bean Knight.class和Quest.class (通过KnightConfig.class里面的注解@Bean)
+
+==========================================================================================
+注意一点，通过任何一种方式注入的类，都是同一个实例。比如你获取多个Knight， 其实都是同一个Knight实例。
+==========================================================================================

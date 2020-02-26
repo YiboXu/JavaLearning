@@ -1,0 +1,75 @@
+Spring Integrating Flow:
+主要的用途就是用来将多个系统连接起来，共同处理一个功能。
+
+比如监控一个目录，一旦目录里面有新文件出现，就触发相应的数据处理.
+又或者监控一个邮箱，一旦又新邮件进来，就进行相应的逻辑处理。
+
+Spring Integrating Flow就是用来指定监控的资源以及定义后续的逻辑处理流程。
+
+监控的资源包括：
+AMQP 				spring-integration-amqp
+Spring application events 	spring-integration-event
+RSS and Atom 			spring-integration-feed
+Filesystem 			spring-integration-file
+FTP/FTPS 			spring-integration-ftp
+GemFire 			spring-integration-gemfire
+HTTP 				spring-integration-http
+JDBC 				spring-integration-jdbc
+JPA 				spring-integration-jpa
+JMS 				spring-integration-jms
+Email 				spring-integration-mail
+MongoDB 			spring-integration-mongodb
+MQTT 				spring-integration-mqtt
+Redis 				spring-integration-redis
+RMI 				spring-integration-rmi
+SFTP 				spring-integration-sftp
+STOMP 				spring-integration-stomp
+Stream 				spring-integration-stream
+Syslog 				spring-integration-syslog
+TCP/UDP 			spring-integration-ip
+Twitter 			spring-integration-twitter
+Web Services 			spring-integration-ws
+WebFlux 			spring-integration-webflux
+WebSocket 			spring-integration-websocket
+XMPP 				spring-integration-xmpp
+ZooKeeper 			spring-integration-zookeeper
+
+参考https://docs.spring.io/spring-integration/docs/5.2.1.RELEASE/reference/html/ 获取相关资源如何监控
+这个文档里面都是基于XML的配置，还不知道什么地方有基于DSL的配置
+
+	@Bean
+	public IntegrationFlow fileReaderFlow1() {
+		
+		return IntegrationFlows
+				.from(Files.inboundAdapter(new File("C:\\testFiles"))
+				.patternFilter("*"),c -> c.poller(Pollers.fixedRate(1000)))
+				.handle(m -> {
+					try (BufferedReader br = new BufferedReader(new FileReader(m.getPayload().toString()));){
+						String rec = br.readLine();
+						while(rec != null) {
+							System.out.println(rec);
+							rec = br.readLine();
+						}
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				})
+				.get();
+	}
+
+比如上面这个就是配置的健康目录C:\\testFiles，一旦有文件变动，就将其内容打印出来。
+
+监控资源配置好了后，还可以配置相关的逻辑。主要是通过一些组件来将各种逻辑连接起来。
+
+ Channels—Pass messages from one element to another.
+ Filters—Conditionally allow messages to pass through the flow based on some criteria.
+ Transformers—Change message values and/or convert message payloads from one type to another.
+ Routers—Direct messages to one of several channels, typically based on message headers.
+ Splitters—Split incoming messages into two or more messages, each sent to different channels.
+ Aggregators—The opposite of splitters, combining multiple messages coming in from separate channels into a single message.
+ Service activators—Hand a message off to some Java method for processing, and then publish the return value on an output channel.
+ Channel adapters—Connect a channel to some external system or transport. Can either accept input or write to the external system.
+ Gateways—Pass data into an integration flow via an interface.
+
+具体各个组件的用法，参看Integrating-flow里面的例子 

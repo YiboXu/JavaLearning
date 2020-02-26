@@ -1,0 +1,252 @@
+﻿关于切面的定义，可以按如下的方式定义在xml里面
+  <aop:config>
+    <aop:aspect ref="audience">
+      <aop:pointcut id="thanks"
+          expression="execution(* *.perform(..))"/>
+        
+      <aop:before pointcut-ref="thanks" 
+          method="handClap"/>
+
+      <aop:after pointcut-ref="thanks" 
+          method="handClap"/>
+    </aop:aspect>
+  </aop:config>
+
+还可以直接通过注解来实现
+
+@After              The advice method is called after the advised method returns or throws an exception.
+@AfterReturning     The advice method is called after the advised method returns.
+@AfterThrowing      The advice method is called after the advised method throws an exception.
+@Around             The advice method wraps the advised method.
+@Before             The advice method is called before the advised method is called.
+
+定义interface
+package tacos;
+
+public interface Performance {
+	public void perform();
+}
+
+定义类
+package tacos;
+
+import java.io.PrintStream;
+
+import org.aspectj.lang.annotation.After;
+import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Before;
+import org.aspectj.lang.annotation.Pointcut;
+
+//@Component
+@Aspect
+public class Audience {
+	private PrintStream out;
+	
+	//@Autowired
+	public Audience(PrintStream out) {
+		this.out = out;
+	}
+	
+	@Pointcut("execution(** tacos.Performance.perform(..))")      ====>定义pointscut
+	public void performance() {}
+	
+	@Before("performance()")                                      =====>指定advice在哪个pointcut上什么时候执行
+	public void handClap() {
+		out.println("Audience is handclapping!");
+	}
+}
+
+通过注解来定义切面，还需要修改相应的config或xml
+
+- config
+
+package concert;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.EnableAspectJAutoProxy;
+
+@Configuration
+@EnableAspectJAutoProxy         =====>添加注解@EnableAspectJAutoProxy
+@ComponentScan
+public class ConcertConfig {
+  @Bean
+  public Audience audience() {
+	return new Audience();
+  }
+}
+
+- xml
+添加   <aop:aspectj-autoproxy />
+
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:aop="http://www.springframework.org/schema/aop"
+  xsi:schemaLocation="http://www.springframework.org/schema/aop 
+      http://www.springframework.org/schema/aop/spring-aop.xsd
+		http://www.springframework.org/schema/beans 
+      http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+  <aop:aspectj-autoproxy />
+
+  <bean id="movie" class="tacos.Movie">
+    <constructor-arg value="#{T(System).out}" />
+  </bean>
+
+  <bean id="audience" class="tacos.Audience">
+    <constructor-arg value="#{T(System).out}" />
+  </bean>
+  
+  <bean id="drama" class="concert.Drama">
+    <constructor-arg value="#{T(System).out}" />
+  </bean>
+  
+</beans>
+
+
+还可以添加环绕方法，这样就不用定义多个方法来控制@Before, @After....
+
+package tacos;
+
+import java.io.PrintStream;
+
+import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.annotation.Around;
+import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Before;
+import org.aspectj.lang.annotation.Pointcut;
+
+//@Component
+@Aspect
+public class Audience {
+	private PrintStream out;
+	
+	//@Autowired
+	public Audience(PrintStream out) {
+		this.out = out;
+	}
+	
+	@Pointcut("execution(** tacos.Performance.perform(..))")
+	public void performance() {}
+	
+	@Before("performance()")
+	public void handClap() {
+		out.println("Audience is handclapping!");
+	}
+	
+	@Around("performance()")        ==============>环绕方法
+	public void watchPerformance(ProceedingJoinPoint jp) {
+		try {
+			out.println("Silencing cell phones");
+			out.println("Taking seats");
+			jp.proceed();
+			out.println("CLAP CLAP CLAP!!!");
+		} catch (Throwable e) {
+			out.println("Demanding a refund");
+		}
+	}
+	
+}
+
+
+当方法符合切点规则不符合环绕通知的规则时候，执行的顺序如下
+
+@Before→@After→@AfterRunning(如果有异常→@AfterThrowing)
+
+当方法符合切点规则并且符合环绕通知的规则时候，执行的顺序如下
+
+@Around→@Before→@After→@Around执行 ProceedingJoinPoint.proceed() 之后的操作→@AfterRunning(如果有异常→@AfterThrowing)
+
+
+还可以给advice添加参数
+
+定义interface
+package tacos;
+
+public interface Performance {
+	public void perform();
+	public void report(String name);
+}
+
+定义类
+package tacos;
+
+import java.io.PrintStream;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+public class Movie implements Performance{
+
+	private PrintStream out;
+	
+	public Movie(PrintStream out) {
+		this.out = out;
+	}
+	
+	@Override
+	public void perform() {
+		// TODO Auto-generated method stub
+		out.println("Movie is performing!");
+	}
+
+	public void report(String name) {
+		// TODO Auto-generated method stub
+		out.println("Movie "+name+" is performing!");
+	}
+
+}
+
+定义切面
+package tacos;
+
+import java.io.PrintStream;
+
+import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.annotation.Around;
+import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Before;
+import org.aspectj.lang.annotation.Pointcut;
+
+//@Component
+@Aspect
+public class Audience {
+	private PrintStream out;
+	
+	//@Autowired
+	public Audience(PrintStream out) {
+		this.out = out;
+	}
+	
+	@Pointcut("execution(* tacos.Performance.perform(..))")
+	public void performance() {}
+	
+	@Before("performance()")
+	public void handClap() {
+		out.println("Audience is handclapping!");
+	}
+	
+	@Pointcut("execution(* tacos.Performance.report(String)) && args(movieName)")     =========>定义所带参数
+	public void report(String movieName) {}
+	
+	@Before("report(movieName)")                                                      ========>匹配pointcut下定义的方法report(String movieName)
+	public void handClapWithName(String movieName) {
+		out.println("Audience is handclapping for "+movieName+"!");
+	}
+	
+	@Around("performance()")
+	public void watchPerformance(ProceedingJoinPoint jp) {
+		try {
+			//out.println("********"+movieName+"**********");
+			out.println("Silencing cell phones");
+			out.println("Taking seats");
+			jp.proceed();
+			out.println("CLAP CLAP CLAP!!!");
+		} catch (Throwable e) {
+			out.println("Demanding a refund");
+		}
+	}
+	
+}
+

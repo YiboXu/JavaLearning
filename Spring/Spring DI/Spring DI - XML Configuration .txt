@@ -1,0 +1,102 @@
+﻿1. 依赖注入的三种方式
+Explicit configuration in XML
+Explicit configuration in Java
+Implicit bean discovery and automatic wiring
+
+
+第一种： Explicit configuration in XML
+
+- 定义接口
+package tacos;
+
+public interface Knight {
+
+	void embarkOnQuest();
+
+}
+
+package tacos;
+
+public interface Quest {
+	void embark();
+}
+
+- 定义bean
+package tacos;
+
+public class BraveKnight implements Knight {
+
+	  private Quest quest;
+
+	  public BraveKnight(Quest quest) {
+	    this.quest = quest;
+	  }
+
+	  public void embarkOnQuest() {
+	    quest.embark();
+	  }
+}
+
+import java.io.PrintStream;
+
+public class SlayDragonQuest implements Quest {
+
+	  private PrintStream stream;
+
+	  public SlayDragonQuest(PrintStream stream) {
+	    this.stream = stream;
+	  }
+
+	  public void embark() {
+	    stream.println("Embarking on quest to slay the dragon!");
+	  }
+
+}
+
+- 定义xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.springframework.org/schema/beans 
+      http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+  <bean id="knight" class="tacos.BraveKnight">
+    <constructor-arg ref="quest" />
+  </bean>
+
+  <bean id="quest" class="tacos.SlayDragonQuest">
+    <constructor-arg value="#{T(System).out}" />
+  </bean>
+
+</beans>
+
+- 执行
+package tacos;
+
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+
+public class KnightMain {
+
+	public static void main(String[] args) throws Exception {
+		
+		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("META-INF/spring/knight.xml");
+	
+		Knight knight = context.getBean(Knight.class);
+	
+		knight.embarkOnQuest();
+	
+		context.close();
+	}
+
+}
+
+这里ClassPathXmlApplicationContext 读取了xml的设置，知道了如何获取Bean Knight.class和Quest.class (通过xml里的bean id)
+
+==========================================================================================
+注意一点，通过任何一种方式注入的类，都是同一个实例。比如你获取多个Knight， 其实都是同一个Knight实例。
+==========================================================================================
+
+可以通过STS创建xml
+Select File > New > Spring Bean Configuration
+File from Spring Tool Suite’s menu to create a Spring XML configuration file,
+and select from one of the available configuration namespaces.

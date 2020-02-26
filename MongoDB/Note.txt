@@ -1,0 +1,627 @@
+https://hub.docker.com/_/mongo
+
+docker run --name some-mongo -p 27017:27017 -d mongo
+
+docker exec -it some-mongo bash
+
+use tutorial
+
+db.users.insert({username: "smith"})
+
+save()方法是insert和update的包装，如果对象文档存在就更新，反之就添加。
+
+db.numbers.save({num:10})  
+
+db.users.find({username:"smith"}) 
+
+db.users.find({ $or: [ { username: "smith" }, { username: "jones" } ]})
+
+> db.values.find({},{_id:0,exchange:1,stock_symbol:1})
+{ "exchange" : "NASDAQ", "stock_symbol" : "AACC" }
+{ "exchange" : "NASDAQ", "stock_symbol" : "AACC" }
+{ "exchange" : "NASDAQ", "stock_symbol" : "AACC" }
+
+.pretty() 返回更易读的结果
+> db.values.find({stock_symbol:"GOOG"}).limit(1).pretty()
+{
+        "_id" : ObjectId("4d094f7ec96767d7a02a0af6"),
+        "exchange" : "NASDAQ",
+        "stock_symbol" : "GOOG",
+        "date" : "2008-03-07",
+        "open" : 428.88,
+        "high" : 440,
+        "low" : 426.24,
+        "close" : 433.35,
+        "volume" : 8071800,
+        "adj close" : 433.35
+}
+
+{}表示查找所有文档，{_id:0,exchange:1,stock_symbol:1}表示显示exchange和stock_symbol
+
+update:
+db.users.update({username:"smith"},{$set:{country:"Canada"}})
+
+replace:
+db.users.update({username:"jones"},{username:"jones",country:"USA"})
+
+高级更新
+db.users.update({username:"smith"},{$set:{favorites:{cities:["Chicago","Cheyenne"],movies:["Casablanca","For a Few Dollars More","The Sting"]}}})
+
+db.users.update({"favorites.movies":"Casablanca"},{$addToSet:{"favorites.movies":"The Maltese Falcon"}},false,true)
+
+第一个参数 {"favorites.movies":"Casablanca"}  表明更新哪个对象
+第二个参数 {$addToSet:{"favorites.movies":"The Maltese Falcon"}} 表明在满足要求的对象中，向favorites里面的movies添加一个对象 "The Maltese Falcon"  
+$addToSet可以避免重复添加， 如果这个地方用$push，那么就可以重复添加
+第三个参数 false 控制是否允许upsert。 它告诉更新操作，当一个文档不存在的时候是否插入它，针对更新操作和替换操作，这个参数的行为不一样。
+第四个参数 true 表明是否是多个更新。默认情况下更新在只针对第一个匹配的文档，如果想更新所有匹配的文档，就必须显示指定这个参数。
+
+高级查询
+db.users.find({"favorites.movies":"Casablanca"})
+db.users.find({username:{$in:["billhu","sofica"]}})   查询用户名在["billhu","sofica"]里面的文档对象
+db.users.find({"userRoles.roleName":{$all:["user","guest"]}})  查询角色满足所有["user","guest"]的文档对象
+db.users.find({"userRoles.roleName":{$in:["user","xxx"]}})  查询角色满足任意["user","guest"]的文档对象
+db.users.find({"userRoles":{$exists:true}})  查询userRoles存在的文档对象
+db.users.find({"userRoles":{$exists:false}})  查询userRoles不存在的文档对象
+db.users.find({"userRoles":{$size:2}})  查询拥有2个角色的文档对象
+
+Operator Description
+$ne 	 Matches if the argument is not equal to the element
+$not 	 Inverts the result of a match
+$or 	 Matches if any of the supplied set of query terms is true
+$nor 	 Matches if none of the supplied set of query terms are true
+$and 	 Matches if all of the supplied set of query terms are true
+$exists  Matches if the element exists in the document.
+$size    Matches if the size of the array subdocument is the same as the supplied literal value
+
+$in
+$all
+$nin
+
+db.users.find().limit(1)
+db.users.find().slip(1)
+db.users.find().sort({"username":-1})
+db.users.find().sort({"username":-1,"password":1})
+
+删除
+db.foo.remove() 清空集合foo里的所有文档。
+db.users.remove({"favorites.cities":"Cheyenne"})  删除满足条件的文档
+
+remove()不会删除集合，它只会删除集合中的某个文档。
+
+如果要删除集合及其附带的索引数据，可以使用drop()
+db.users.drop()
+
+批量添加
+for(i=0;i<20000;i++){db.numbers.save({num:i});} 
+
+$gt  $lt $gte $lte $ne
+db.numbers.find({num:{$gt:19995}})
+db.numbers.find({num:{$lt:5}})
+db.numbers.find({num:{$gt:5,$lt:10}})
+
+explain()
+db.numbers.find({num:{$gt:19995}}).explain("executionStats")  
+
+创建索引
+db.numbers.createIndex({num:1})
+db.test1.createIndex({_id:1,num:1}) 
+
+查看索引
+db.numbers.getIndexes()
+
+打印系统中所有的数据库列表信息：
+show dbs
+
+展示当前数据库里所有的集合
+show collections
+
+展示当前数据库信息
+db.stats()
+
+展示当前集合信息
+db.numbers.stats()
+
+获取帮助
+db.help()
+
+aggregate:
+数据源
+[{"id":"5dd241ce4819d1583c632030","username":"billhu","password":"123456","userRoles":[{"roleName":"user","url":"/user"},{"roleName":"admin","url":"/admin"},{"roleName":"librarian","url":"/librarian"}]},
+ {"id":"5dd241da4819d1583c632031","username":"sofica","password":"654321","userRoles":[{"roleName":"user","url":"/user"},{"roleName":"manager","url":"/manager"}]},
+ {"id":"5dd24b9dec398714b01618f8","username":"James","password":"222222","userRoles":[{"roleName":"user","url":"/user"}]},
+ {"id":"5dd24d2dec398720f47339b5","username":"James","password":"222222","userRoles":[{"roleName":"user","url":"/user"},{"roleName":"guest","url":"/guest"}]}]
+分组
+> db.users.aggregate([{$group:{_id:'$userRoles.roleName',count:{$sum:1}}}])
+{ "_id" : [ "user", "admin", "librarian" ], "count" : 1 }
+{ "_id" : [ "user", "manager" ], "count" : 1 }
+{ "_id" : [ "user" ], "count" : 1 }
+{ "_id" : [ "user", "guest" ], "count" : 1 }
+
+筛选
+> db.users.aggregate([
+                      {$match:{_id:user['_id']}},
+                      {$group:{_id:'$userRoles.roleName',count:{$sum:1}}}
+                     ])
+{ "_id" : [ "user", "admin", "librarian" ], "count" : 1 }
+
+求平均值
+> db.users.find()
+{ "_id" : ObjectId("5dd241ce4819d1583c632030"), "username" : "billhu", "password" : "123456", "userRoles" : [ { "roleName" : "user", "url" : "/user" }, { "roleName" : "admin", "url" : "/admin" }, { "roleName" : "librarian", "url" : "/librarian" } ], "_class" : "tk.mongodb.model.Users", "rating" : 2 }
+{ "_id" : ObjectId("5dd241da4819d1583c632031"), "username" : "sofica", "password" : "654321", "userRoles" : [ { "roleName" : "user", "url" : "/user" }, { "roleName" : "manager", "url" : "/manager" } ], "_class" : "tk.mongodb.model.Users", "rating" : 2 }
+{ "_id" : ObjectId("5dd24b9dec398714b01618f8"), "username" : "James", "password" : "222222", "userRoles" : [ { "roleName" : "user", "url" : "/user" } ], "_class" : "tk.mongodb.model.Users", "rating" : 2 }
+{ "_id" : ObjectId("5dd24d2dec398720f47339b5"), "username" : "James", "password" : "222222", "userRoles" : [ { "roleName" : "user", "url" : "/user" }, { "roleName" : "guest", "url" : "/guest" } ], "_class" : "tk.mongodb.model.Users", "rating" : 2 }
+
+> db.users.aggregate([{$match:{username:'James'}},{$group:{_id:'$userRoles.roleName',average:{$avg:'$rating'},count:{$sum:1}}}])
+{ "_id" : [ "user" ], "average" : 2, "count" : 1 }
+{ "_id" : [ "user", "guest" ], "average" : 2, "count" : 1 }
+
+将输出放到一个新的集合
+> db.users.aggregate([{$match:{username:'James'}},{$group:{_id:'$_id',average:{$avg:'$rating'},count:{$sum:1}}},{$out:'test1'}])
+> db.test1.find()
+{ "_id" : ObjectId("5dd24b9dec398714b01618f8"), "average" : 2, "count" : 1 }
+{ "_id" : ObjectId("5dd24d2dec398720f47339b5"), "average" : 2, "count" : 1 }
+
+筛选输出字段
+> db.users.aggregate([{$project:{username:1,password:1}}])
+{ "_id" : ObjectId("5dd241ce4819d1583c632030"), "username" : "billhu", "password" : "123456" }
+{ "_id" : ObjectId("5dd241da4819d1583c632031"), "username" : "sofica", "password" : "654321" }
+{ "_id" : ObjectId("5dd24b9dec398714b01618f8"), "username" : "James", "password" : "222222" }
+{ "_id" : ObjectId("5dd24d2dec398720f47339b5"), "username" : "James", "password" : "222222" } 
+
+
+unwind
+> db.users.find()
+{ "_id" : ObjectId("5dd241ce4819d1583c632030"), "username" : "billhu", "password" : "123456", "userRoles" : [ { "roleName" : "user", "url" : "/user" }, { "roleName" : "admin", "url" : "/admin" }, { "roleName" : "librarian", "url" : "/librarian" } ], "_class" : "tk.mongodb.model.Users", "rating" : 2 }
+{ "_id" : ObjectId("5dd241da4819d1583c632031"), "username" : "sofica", "password" : "654321", "userRoles" : [ { "roleName" : "user", "url" : "/user" }, { "roleName" : "manager", "url" : "/manager" } ], "_class" : "tk.mongodb.model.Users", "rating" : 2 }
+{ "_id" : ObjectId("5dd24b9dec398714b01618f8"), "username" : "James", "password" : "222222", "userRoles" : [ { "roleName" : "user", "url" : "/user" } ], "_class" : "tk.mongodb.model.Users", "rating" : 2 }
+{ "_id" : ObjectId("5dd24d2dec398720f47339b5"), "username" : "James", "password" : "222222", "userRoles" : [ { "roleName" : "user", "url" : "/user" }, { "roleName" : "guest", "url" : "/guest" } ], "_class" : "tk.mongodb.model.Users", "rating" : 2 }
+
+> db.users.aggregate([{$match:{'userRoles':{$exists:true}}},{$project:{userRoles:1}},{$unwind:'$userRoles'},{$group:{_id:'$userRoles.roleName',count:{$sum:1}}}])
+{ "_id" : "manager", "count" : 1 }
+{ "_id" : "user", "count" : 4 }
+{ "_id" : "admin", "count" : 1 }
+{ "_id" : "librarian", "count" : 1 }
+{ "_id" : "guest", "count" : 1 } 
+
+project
+The string functions shown below allow you to manipulate strings.
+
+$concat 	Concatenates two or more strings into a single string
+$strcasecmp 	Case-insensitive string comparison that returns a number
+$substr 	Creates a substring of a string
+$toLower 	Converts a string to all lowercase
+$toUpper 	Converts a string to all uppercase
+
+db.users.aggregate([{$match: {username: 'kbanker'}},
+		    {$project: 
+			{name: {$concat:['$first_name', ' ', '$last_name']},
+			 firstInitial: {$substr: ['$first_name',0,1]},
+			 usernameUpperCase: {$toUpper: '$username'}
+			}
+		    }
+		  ])
+
+$add 		Adds array numbers
+$divide 	Divides the first number by the second number
+$mod 		Divides remainder of the first number by the second number
+$multiply 	Multiplies an array of numbers
+$subtract 	Subtracts the second number from the first number
+
+> db.users.aggregate([{$project:{username:1,rating:{$add:['$rating',1]}}}])
+{ "_id" : ObjectId("5dd241ce4819d1583c632030"), "username" : "billhu", "rating" : 3 }
+{ "_id" : ObjectId("5dd241da4819d1583c632031"), "username" : "sofica", "rating" : 3 }
+{ "_id" : ObjectId("5dd24b9dec398714b01618f8"), "username" : "James", "rating" : 3 }
+{ "_id" : ObjectId("5dd24d2dec398720f47339b5"), "username" : "James", "rating" : 3 }
+
+
+$dayOfYear 	The day of the year, 1 to 366
+$dayOfMonth 	The day of month, 1 to 31
+$dayOfWeek 	The day of week, 1 to 7, where 1 is Sunday
+$year 		The year portion of a date
+$month 		The month portion of a date, 1 to 12
+$week 		The week of the year, 0 to 53
+$hour 		The hours portion of a date, 0 to 23
+$minute 	The minutes portion of a date, 0 to 59
+$second 	The seconds portion of a date, 0 to 59 (60 for leap seconds)
+$millisecond 	The milliseconds portion of a date, 0 to 999
+
+db.orders.aggregate([{$match: {purchase_data: {$gte: new Date(2010, 0, 1)}}},
+		     {$group: {_id: {year : {$year :'$purchase_data'},
+			       month: {$month :'$purchase_data'}},
+			       count: {$sum:1},
+			       total: {$sum:'$sub_total'}}
+                     },
+		     {$sort: {_id:-1}}
+		    ]);
+
+
+$and 	true if all of the values in an array are true.
+$cmp 	Returns a number from the comparison of two values, 0 if they’re equal.
+$cond 	if… then… else conditional logic.
+$eq 	Are two values equal?
+$gt 	Is value 1 greater than value 2?
+$gte 	Is value 1 greater than or equal value 2?
+$ifNull Converts a null value/expression to a specified value.
+$lt 	Is value 1 less than value 2?
+$lte 	Is value 1 less than or equal value 2?
+$ne 	Is value 1 not equal to value 2?
+$not 	Returns opposite condition of value: false if value is true, true if value is false.
+$or 	true if any of the values in an array are true.
+
+> db.users.find({$and:[{username:'billhu'},{password:'000000'}]})
+{ "_id" : ObjectId("5dd241ce4819d1583c632030"), "username" : "billhu", "password" : "000000", "userRoles" : [ { "roleName" : "user", "url" : "/user" }, { "roleName" : "admin", "url" : "/admin" }, { "roleName" : "librarian", "url" : "/librarian" } ], "_class" : "tk.mongodb.model.Users", "rating" : 2 }
+
+> db.users.find({'rating':{$gt:1}})
+{ "_id" : ObjectId("5dd241ce4819d1583c632030"), "username" : "billhu", "password" : "000000", "userRoles" : [ { "roleName" : "user", "url" : "/user" }, { "roleName" : "admin", "url" : "/admin" }, { "roleName" : "librarian", "url" : "/librarian" } ], "_class" : "tk.mongodb.model.Users", "rating" : 2 }
+{ "_id" : ObjectId("5dd241da4819d1583c632031"), "username" : "sofica", "password" : "654321", "userRoles" : [ { "roleName" : "user", "url" : "/user" }, { "roleName" : "manager", "url" : "/manager" } ], "_class" : "tk.mongodb.model.Users", "rating" : 2 }
+{ "_id" : ObjectId("5dd24b9dec398714b01618f8"), "username" : "James", "password" : "222222", "userRoles" : [ { "roleName" : "user", "url" : "/user" } ], "_class" : "tk.mongodb.model.Users", "rating" : 2 }
+{ "_id" : ObjectId("5dd24d2dec398720f47339b5"), "username" : "James", "password" : "222222", "userRoles" : [ { "roleName" : "user", "url" : "/user" }, { "roleName" : "guest", "url" : "/guest" } ], "_class" : "tk.mongodb.model.Users", "rating" : 2 }
+
+
+$setEquals 		true if two sets have exactly the same elements
+$setIntersection 	Returns an array with the common elements in two sets
+$setDifference 		Returns elements of the first set that aren’t in the second set
+$setUnion 		Returns a set that’s the combination of two sets
+$setIsSubset 		true if the second set is a subset of the first set: all elements in the second are also in the first
+$anyElementTrue 	true if any element of a set is true
+$allElementsTrue 	true if all elements of a set are true
+
+{ "_id" : ObjectId("4c4b1476238d3b4dd5003981"),"productName" : "Extra Large Wheel Barrow","tags" : [ "tools", "gardening", "soil" ]}
+{ "_id" : ObjectId("4c4b1476238d3b4dd5003982"),"productName" : "Rubberized Work Glove, Black","tags" : [ "gardening" ]}
+
+If you union the tags in these products, you’ll get the array named testSet1 as
+shown here:
+
+testSet1 = ['tools']
+db.products.aggregate([{$project:
+			  {productName: '$name',
+			   tags:1,
+			   setUnion: {$setUnion:['$tags',testSet1]},
+			  }
+		       }])
+
+The results will contain tags as shown here:
+
+{ "_id" : ObjectId("4c4b1476238d3b4dd5003981"),"productName" : "Extra Large Wheel Barrow","tags" : ["tools", "gardening", "soil"],"setUnion" : ["gardening","tools","soil"]}
+{ "_id" : ObjectId("4c4b1476238d3b4dd5003982"),"productName" : "Rubberized Work Glove, Black","tags" : ["gardening"],"setUnion" : ["tools", "gardening"]}
+
+$meta 	 Accesses text search–related information. See chapter 9 on text search
+$size 	 Returns the size of an array
+$map 	 Applies an expression to each member of an array
+$let 	 Defines variables used within the scope of an expression
+$literal Returns the value of an expression without evaluating it
+
+
+在Aggregate中使用 explain, allowDiskUse
+countsByRating = db.reviews.aggregate([{$match : {'product_id': product['_id']}},
+						 {$group : { _id:'$rating', count:{$sum:1}}}
+                                      ],{explain:true})
+
+当数据量很大的时候(大于100M)，aggregate会失败，解决办法就是加上allowDiskUse:true，但是这个会影响aggregate的性能，所以只有在需要的时候才用，另外就是尽可能在match阶段将文档数量降低。
+db.orders.aggregate([{$match: {purchase_data: {$gte: new Date(2010, 0, 1)}}},
+		      {$group: {_id: {year : {$year :'$purchase_data'},
+				month: {$month :'$purchase_data'}},
+				count: {$sum:1},
+				total: {$sum:'$sub_total'}}},
+		      {$sort: {_id:-1}}
+		    ], {allowDiskUse:true});
+
+cursor:
+countsByRating = db.reviews.aggregate([{$match : {'product_id': product['_id']}},
+				       {$group : { _id:'$rating',count:{$sum:1}}}
+                                      ],{cursor:{}})
+
+The cursor returned by the aggregation pipeline supports the following calls:
+■ cursor.hasNext()—Determine whether there’s a next document in the results.
+■ cursor.next()—Return the next document in the results.
+■ cursor.toArray()—Return the entire result as an array.
+■ cursor.forEach()—Execute a function for each row in the results.
+■ cursor.map()—Execute a function for each row in the results and return an
+array of function return values.
+■ cursor.itcount()—Return a count of items (for testing only).
+■ cursor.pretty()—Display an array of formatted results.
+
+文档更新
+db.products.update({}, {$addToSet: {tags: 'Green'}})
+db.products.update({_id: product_id}, {$inc: {total_reviews: 1}})
+
+cart_item = {_id: ObjectId("4c4b1476238d3b4dd5003981"),slug: "wheel-barrow-9092",sku: "9092",name: "Extra Large Wheel Barrow",pricing: {retail: 5897,sale: 4897}}
+selector = {user_id: ObjectId("4c4b1476238d3b4dd5000001"),state: 'CART'}
+update = {$inc: {sub_total: cart_item['pricing']['sale']}}
+db.orders.update(selector, update, {upsert: true})
+这里upsert: true表示如果没有selector没有找到对应的文档，就将添加如下文档
+{ "_id" : ObjectId("5dd3b5911a4f4635587549ff"), "state" : "CART", "user_id" : ObjectId("4c4b1476238d3b4dd5000001"), "sub_total" : 4897 }
+
+
+addToSet
+> db.products.find()
+{ "_id" : ObjectId("5dd3b81998b6bffb24594cb9"), "name" : "Pitchfork" }
+
+> db.products.update({},{$addToSet:{tags:'cheap'}},{multi:true})
+WriteResult({ "nMatched" : 1, "nUpserted" : 0, "nModified" : 1 })
+
+> db.products.find()
+{ "_id" : ObjectId("5dd3b81998b6bffb24594cb9"), "name" : "Pitchfork", "tags" : [ "cheap" ] }
+
+inc
+> db.products.find()
+{ "_id" : ObjectId("5dd3b81998b6bffb24594cb9"), "name" : "Pitchfork", "tags" : [ "cheap" ], "password_retries" : 5 }
+> db.products.update({},{$inc:{password_retries:1}})
+WriteResult({ "nMatched" : 1, "nUpserted" : 0, "nModified" : 1 })
+> db.products.find()
+{ "_id" : ObjectId("5dd3b81998b6bffb24594cb9"), "name" : "Pitchfork", "tags" : [ "cheap" ], "password_retries" : 6 }
+
+
+$unset
+> db.products.find()
+{ "_id" : ObjectId("5dd3b81998b6bffb24594cb9"), "name" : "Pitchfork", "tags" : [ "cheap" ], "password_retries" : 6 }
+> db.products.update({},{$unset:{name:1}})
+WriteResult({ "nMatched" : 1, "nUpserted" : 0, "nModified" : 1 })
+> db.products.find()
+{ "_id" : ObjectId("5dd3b81998b6bffb24594cb9"), "tags" : [ "cheap" ], "password_retries" : 6 }
+
+To completely remove an array element, see the $pull and $pop operators:
+
+{_id: 325, 'temp': {f: 212, c: 100}}
+{_id: 326, temps: [97.6, 98.4, 99.1]}
+
+db.readings.update({_id: 325}, {$unset: {'temp.f': 1}})
+db.readings.update({_id: 326}, {$pop: {temps: -1}})
+
+$RENAME
+If you need to change the name of a key, use $rename:
+db.readings.update({_id: 324}, {$rename: {'temp': 'temperature'}})
+You can also rename a subdocument:
+db.readings.update({_id: 325}, {$rename: {'temp.f': 'temp.fahrenheit'}})
+
+
+$setOnInsert
+db.products.update({slug: 'hammer'}, 
+		   {$inc: {quantity: 1},
+		    $setOnInsert: {state: 'AVAILABLE'}
+		   }, {upsert: true})
+
+这个$setOnInsert: {state: 'AVAILABLE'}只有在新加入的时候才会设置state，当更新的时候，这个state不会被更新
+
+
+$PUSH, $PUSHALL, AND $EACH  $POP
+If you need to append values to an array, $push is your friend. By default, it will add a
+single element to the end of an array. For example, adding a new tag to the shovel
+product is easy enough:
+
+db.products.update({slug: 'shovel'}, {$push: {tags: 'tools'}})
+
+If you need to add a few tags in the same update, you can use $each in conjunction with $push:
+
+db.products.update({slug: 'shovel'},{$push: {tags: {$each: ['tools', 'dirt', 'garden']}}})
+
+从数组tags里面删除最后一个添加的元素
+db.products.update({slug: 'shovel'}, {$pop: {'tags': 1}})
+
+$pull 和 $pullall
+
+$pull是$pop的复杂形式。使用$pull，可以通过值精确指定要删除的元素。
+db.products.update({slug: 'shovel'}, {$pull: {tags: 'dirt'}})
+db.products.update({slug: 'shovel'},{$pullAll: {'tags': ['dirt', 'garden']}})
+
+删除温度大于100的文档
+db.readings.update({_id: 326}, {$pull: {temps: {$gt: 100}}})
+
+$slice
+These semantics can be confusing, so let’s look at a concrete example. Suppose
+you want to update a document that looks like this:
+
+{_id: 326,temps: [92, 93, 94]}
+
+You update this document with this command:
+
+db.temps.update({_id: 326}, 
+                {$push: {temps: {$each: [95, 96],
+                                 $slice: -4
+                                }
+                        }
+                })
+
+Beautiful syntax. Here you pass -4 to the $slice operator. After the update, your document looks like this:
+
+{_id: 326,temps: [93, 94, 95, 96]}
+
+After pushing values onto the array, you remove values from the beginning until only
+four are left. If you’d passed -1 to the $slice operator, the resulting array would be
+[96]. If you’d passed 0, it would have been [], an empty array. Note also that starting
+with MongoDB 2.6 you can pass a positive number as well. If a positive number is
+passed to $slice, it’ll remove values from the end of the array instead of the beginning.
+In the previous example, if you used $slice: 4 your result would’ve been
+temps: [92, 93, 94, 95].
+
+
+$sort
+db.temps.update({_id: 300}, 
+                {$push: {temps: {$each: [{ day: 7, temp: 92 }],
+                                 $slice: -2,
+                                 $sort: {day: 1}
+                                }
+                        }
+                })
+
+创建索引
+db.users.createIndex({username: 1}, {unique: true})
+创建索引的时候，如果有重复记录，会自动将重复的删除。
+db.users.createIndex({username: 1}, {unique: true, dropDups: true})  
+
+稀疏索引
+db.products.createIndex({sku: 1}, {unique: true, sparse: true})
+密集索引
+db.products.createIndex({sku: 1}, {unique: true})
+
+密集索引会将索引字段为空的文档统计进来，比如创建一个文档，并不包含索引字段，那么第一次添加文档可以成功，第二次就不行了，因为这个索引字段为null，成为了重复的值。
+稀疏索引不会将索引字段为空的文档对象统计在内，只会计算索引字段不为空的文档对象.
+
+还可以通过如下的方法创建索引
+use green
+spec = {ns: "green.users", key: {'addresses.zip': 1}, name: 'zip'}
+db.system.indexes.insert(spec, true)
+
+默认情况下，在创建索引的时候就会进行build index，可以通过db.currentOp()来查看进度
+如果是生产环境，无法停止数据库的访问，可以设置build index在后台进行
+
+db.values.createIndex({open: 1, close: 1}, {background: true})
+
+
+优化查询
+使用PROFILER分析器进行慢速查询分析
+db.setProfilingLevel(1,50)   
+第一个参数是监控级别，0 – 不开启 1 – 记录慢命令 (默认为>100ms) 2 – 记录所有命令 
+第二个参数是记录超过多少ms的查询会被记录，上例中就是超过50ms的查询会被记录
+
+监控结果保存到一个特殊的集合system.profile里，它存储在执行db.setProfilingLevel命令的数据库中，它有固定的大小，一旦达到最大数量，
+新文档就会取代旧的文档。system.profile集合分配的128KB空间.
+
+查找超过150ms的查询
+db.system.profile.find({millis: {$gt: 150}})
+显示最近的5条记录
+db.system.profile.find().sort({$natural: -1}).limit(5).pretty()
+
+找到慢查询后，通过explain()来查找慢的原因
+db.values.find({stock_symbol:"GOOG",close:{$gt:200}}).explain(true)
+
+https://docs.mongodb.com/manual/reference/explain-results/#executionstats
+
+可以通过hint来强制使用某个索引
+query = {stock_symbol: "GOOG", close: {$gt: 200}}
+db.values.find(query).hint({close: 1}).explain()
+
+As you write your own applications, here are some things to remember:
+
+■ Indexes are incredibly useful but carry a cost—they make writes slower.
+■ MongoDB generally uses only one index in a query, so queries on multiple
+fields require compound indexes to be efficient.
+■ Order matters when you declare compound indexes.
+■ You should plan for, and avoid, expensive queries. Use MongoDB’s explain
+command, its expensive query logs, and its profiler to discover queries that
+should be optimized.
+■ MongoDB gives you several commands for building indexes, but these always
+include a cost and may interfere with your application. This means you
+should optimize your queries and create indexes early, before you have much
+traffic or data.
+■ Optimize queries by reducing the number of documents scanned. The explain
+command is immensely useful for discovering what a query is doing; use it as a
+guide for optimization.
+
+
+文本搜索
+db.products.find({$text: {$search: 'gardens'}},{_id:0, name:1,description:1,tags:1}).pretty()
+pretty() is actually cursor.pretty(), which is a way of configuring a cursor to display results in an easyto-read format.
+
+导入数据到mongodb
+mongoimport --db catalog --collection books --type json --drop --file catalog.books.json
+
+There are a few other important differences between the regular indexes covered in
+section 7.2.2 and text indexes:
+■ Instead of specifying a 1 or –1 after the field being indexed, you use text.
+■ You can specify as many fields as you want to become part of the text index and
+all the fields will be searched together as if they were a single field.
+■ You can have only one text search index per collection, but it can index as many
+fields as you like.
+
+索引名字不能超过123个字节，有几种方法可以避免索引名字过长的问题：
+-指定索引名
+db.books.createIndex(
+	{title: 'text',
+	 shortDescription: 'text',
+	 longDescription: 'text',
+	 authors: 'text',
+	 categories: 'text'},
+	{weights:{title: 10,categories: 5},
+	name : 'books_text_index'
+	}
+);
+
+-通配符
+db.books.createIndex({'$**': 'text'},
+	 	     {weights:{title: 10,categories: 5},
+		    );
+这样就会将所有字符串字段添加到文本索引，默认的名字是 $**_text
+
+搜索
+db.books.find({$text: {$search: 'MongoDB in Action'}},{title:1})   任意包含MongoDB或Action的文档都满足要求
+db.books.find({$text: {$search: ' "mongodb" in action'}})          文档中必须包含"mongodb"
+db.books.find({$text: {$search: ' "mongodb" "second edition" '}},{_id:0, title:1})  文档中必须包含"mongodb"和"second edition"
+{ "title" : "MongoDB in Action, Second Edition" }
+
+排除某个字符串
+db.books.find({$text: {$search: ' mongodb -second '}},{_id:0, title:1 })
+{ "title" : "MongoDB in Action" }
+
+> db.books.find({$text: {$search: ' mongodb -"second edition" '}},{_id:0, title:1})
+{ "title" : "MongoDB in Action" }
+
+文本搜索和其他一般查询混合
+> db.books.find({$text: {$search: ' mongodb '}, status: 'MEAP' },{_id:0, title:1, status:1})
+{ "title" : "MongoDB in Action, Second Edition","status" : "MEAP"}
+
+文本搜索分数 score: { $meta: "textScore" }
+这个分数表示文档的相关性，这个数值一句关键字在文档中出现的次数而定。
+我们在创建文本搜索索引的时候，添加了权重（weights),这个权重字段影响最后文本搜索分数的数值。
+> db.books.find({$text: {$search: 'mongodb in action'}},{_id:0, title:1, score: { $meta: "textScore" }}).limit(4);
+{ "title" : "Machine Learning in Action", "score" : 16.83933933933934 }
+{ "title" : "Distributed Agile in Action", "score" : 19.371088861076345 }
+{ "title" : "PostGIS in Action", "score" : 17.67825896762905 }
+{ "title" : "MongoDB in Action", "score" : 49.48653394500073 }
+
+一般获得了文本搜索分数，可以根据其将返回文档排序
+db.books.find({$text: {$search: 'mongodb in action'}},{title:1, score: { $meta: "textScore" }}).sort({ score: { $meta: "textScore" } })
+
+在聚合中使用文本搜索
+db.books.aggregate([{ $match: { $text: { $search: 'mongodb in action' } } },
+		    { $sort: { score: { $meta: 'textScore' } } },
+		    { $project: { title: 1, score: { $meta: 'textScore' } } }
+	 	   ])
+
+db.books.aggregate([{ $match: { $text: { $search: 'mongodb in action' } } },
+		    { $project: { title: 1, score: { $meta: 'textScore' } } },
+		    { $sort: { score: -1 } }
+		    
+	 	   ])
+
+Using the $text search in the aggregation framework has some limitations:
+
+■ The $match operator using $text function search must be the first operation in
+the pipeline and must precede any other references to $meta:'textScore'.
+■ The $text function can appear only once in the pipeline.
+■ The $text function can’t be used with $or or $not.
+
+With the $match text search string, use the same format you would with the find()
+command:
+■ If a word or phrase is enclosed in double quotes, the document must contain an
+exact match of the word or phrase.
+■ A word or phrase preceded by a minus sign (–) excludes documents with that
+word or phrase.
+
+
+指定语言
+为什么要指定语言呢，因为文本搜索是依赖于词根处理机制的的，比如英语， a, the, in....不会进行搜索, 搜索action和actions结果是一样的，因为他们有相同的词根。
+但是词根处理是跟语言相关的，MongoDB无法识别复数或其他没有词根处理的非英语语言，除非我们告诉MongoDB使用了哪种语言。
+
+有三条途径可以告诉MongoDB我们使用了何种语言：
+-索引中 - 可以为集合指定默认的语言
+db.books.createIndex({'$**': 'text'},
+		     {weights:{title: 10,categories: 5},
+                      name : 'books_text_index',default_language: 'french'
+                     });
+-插入文档时 - 我们可以重写某个文档或则字段默认的语言，告诉MongoDB这个文档或字段使用了和索引不同的语言
+db.books.insert({
+_id: 999,
+title: 'Le Petite Prince',
+pageCount: 85,
+publishedDate: ISODate('1943-01-01T01:00:00Z'),
+shortDescription: "Le Petit Prince est une oeuvre de langue française,
+la plus connue d'Antoine de Saint-Exupéry. Publié en 1943 à New York
+simultanément en anglais et en français. C'est un conte poétique et
+philosophique sous l'apparence d'un conte pour enfants.",
+status: 'PUBLISH',
+authors: ['Antoine de Saint-Exupéry'],
+language: 'french'
+})
+-当find()或aggregate()执行文本搜索时
+> db.books.find({$text: {$search:'simultanment',$language:'french'}},{title:1})

@@ -1,0 +1,2027 @@
+<!DOCTYPE html>
+<html lang="zh-cn"><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="origin">
+    <meta property="og:description" content="官方定义 Spring Cloud Stream 是一个构建消息驱动微服务的框架。 应用程序通过 inputs 或者 outputs 来与 Spring Cloud Stream 中binder 交互">
+    <meta http-equiv="Cache-Control" content="no-transform">
+    <meta http-equiv="Cache-Control" content="no-siteapp">
+    <title>SpringCloud实战9-Stream消息驱动 - 妮蔻 - 博客园</title>
+    
+    <link rel="stylesheet" href="SpringCloud%E5%AE%9E%E6%88%989-Stream%E6%B6%88%E6%81%AF%E9%A9%B1%E5%8A%A8%20-%20%E5%A6%AE%E8%94%BB%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/blog-common.css">
+    <link id="MainCss" rel="stylesheet" href="SpringCloud%E5%AE%9E%E6%88%989-Stream%E6%B6%88%E6%81%AF%E9%A9%B1%E5%8A%A8%20-%20%E5%A6%AE%E8%94%BB%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/bundle-codinglife.css">
+    
+    <link id="mobile-style" media="only screen and (max-width: 767px)" type="text/css" rel="stylesheet" href="SpringCloud%E5%AE%9E%E6%88%989-Stream%E6%B6%88%E6%81%AF%E9%A9%B1%E5%8A%A8%20-%20%E5%A6%AE%E8%94%BB%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/bundle-codinglife-mobile.css">
+    
+    <link type="application/rss+xml" rel="alternate" href="https://www.cnblogs.com/huangjuncong/rss">
+    <link type="application/rsd+xml" rel="EditURI" href="https://www.cnblogs.com/huangjuncong/rsd.xml">
+    <link type="application/wlwmanifest+xml" rel="wlwmanifest" href="https://www.cnblogs.com/huangjuncong/wlwmanifest.xml">
+    <script src="SpringCloud%E5%AE%9E%E6%88%989-Stream%E6%B6%88%E6%81%AF%E9%A9%B1%E5%8A%A8%20-%20%E5%A6%AE%E8%94%BB%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/amp4ads-host-v0.js"></script><script src="SpringCloud%E5%AE%9E%E6%88%989-Stream%E6%B6%88%E6%81%AF%E9%A9%B1%E5%8A%A8%20-%20%E5%A6%AE%E8%94%BB%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/pubads_impl_rendering_2019102101.js"></script><script async="" src="SpringCloud%E5%AE%9E%E6%88%989-Stream%E6%B6%88%E6%81%AF%E9%A9%B1%E5%8A%A8%20-%20%E5%A6%AE%E8%94%BB%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/analytics.js"></script><script type="text/javascript" src="SpringCloud%E5%AE%9E%E6%88%989-Stream%E6%B6%88%E6%81%AF%E9%A9%B1%E5%8A%A8%20-%20%E5%A6%AE%E8%94%BB%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/encoder.js"></script><script src="SpringCloud%E5%AE%9E%E6%88%989-Stream%E6%B6%88%E6%81%AF%E9%A9%B1%E5%8A%A8%20-%20%E5%A6%AE%E8%94%BB%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/jquery-2.js"></script>
+    <script src="SpringCloud%E5%AE%9E%E6%88%989-Stream%E6%B6%88%E6%81%AF%E9%A9%B1%E5%8A%A8%20-%20%E5%A6%AE%E8%94%BB%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/blog-common.js"></script>
+    <script>
+        var currentBlogId = 368233;
+        var currentBlogApp = 'huangjuncong';
+        var cb_enable_mathjax = false;
+        var isLogined = false;
+    </script>
+    
+    
+    
+<link rel="preload" href="SpringCloud%E5%AE%9E%E6%88%989-Stream%E6%B6%88%E6%81%AF%E9%A9%B1%E5%8A%A8%20-%20%E5%A6%AE%E8%94%BB%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/integrator.js" as="script"><script type="text/javascript" src="SpringCloud%E5%AE%9E%E6%88%989-Stream%E6%B6%88%E6%81%AF%E9%A9%B1%E5%8A%A8%20-%20%E5%A6%AE%E8%94%BB%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/integrator.js"></script><script src="SpringCloud%E5%AE%9E%E6%88%989-Stream%E6%B6%88%E6%81%AF%E9%A9%B1%E5%8A%A8%20-%20%E5%A6%AE%E8%94%BB%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/pubads_impl_2019102101.js" async=""></script><link rel="prefetch" href="https://tpc.googlesyndication.com/safeframe/1-0-35/html/container.html"></head>
+<body>
+    <a name="top"></a>
+    
+    
+<!--done-->
+<div id="home">
+<div id="header">
+	<div id="blogTitle">
+        <a id="lnkBlogLogo" href="https://www.cnblogs.com/huangjuncong/"><img id="blogLogo" src="SpringCloud%E5%AE%9E%E6%88%989-Stream%E6%B6%88%E6%81%AF%E9%A9%B1%E5%8A%A8%20-%20%E5%A6%AE%E8%94%BB%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/logo.gif" alt="返回主页"></a>		
+		
+<!--done-->
+<h1><a id="Header1_HeaderTitle" class="headermaintitle HeaderMainTitle" href="https://www.cnblogs.com/huangjuncong/">妮蔻</a>
+</h1>
+<h2>
+
+</h2>
+
+
+
+
+		
+	</div><!--end: blogTitle 博客的标题和副标题 -->
+	<div id="navigator">
+		
+<ul id="navList">
+<li><a id="blog_nav_sitehome" class="menu" href="https://www.cnblogs.com/">
+博客园</a>
+</li>
+<li>
+<a id="blog_nav_myhome" class="menu" href="https://www.cnblogs.com/huangjuncong/">
+首页</a>
+</li>
+<li>
+
+<a id="blog_nav_newpost" class="menu" href="https://i.cnblogs.com/EditPosts.aspx?opt=1">
+新随笔</a>
+</li>
+<li>
+<a id="blog_nav_contact" class="menu" href="https://msg.cnblogs.com/send/%E5%A6%AE%E8%94%BB">
+联系</a></li>
+<li>
+<a id="blog_nav_rss" class="menu" href="https://www.cnblogs.com/huangjuncong/rss/">
+订阅</a>
+<!--<partial name="./Shared/_XmlLink.cshtml" model="Model" /></li>--></li>
+<li>
+<a id="blog_nav_admin" class="menu" href="https://i.cnblogs.com/">
+管理</a>
+</li>
+</ul>
+
+
+		<div class="blogStats">
+			
+			<span id="stats_post_count">随笔 - 
+89&nbsp; </span>
+<span id="stats_article_count">文章 - 
+0&nbsp; </span>
+<span id="stats-comment_count">评论 - 
+67</span>
+
+			
+		</div><!--end: blogStats -->
+	</div><!--end: navigator 博客导航栏 -->
+</div><!--end: header 头部 -->
+
+<div id="main">
+	<div id="mainContent">
+	<div class="forFlow">
+		<div id="post_detail">
+    <!--done-->
+    <div id="topics">
+        <div class="post">
+            <h1 class="postTitle">
+                
+<a id="cb_post_title_url" class="postTitle2" href="https://www.cnblogs.com/huangjuncong/p/9102843.html">SpringCloud实战9-Stream消息驱动</a>
+
+            </h1>
+            <div class="clear"></div>
+            <div class="postBody">
+                
+<div id="cnblogs_post_body" class="blogpost-body ">
+    <h2>官方定义 Spring Cloud Stream 是一个构建消息驱动微服务的框架。</h2>
+<div>
+<div>　　应用程序通过 inputs 或者 outputs 来与 Spring Cloud Stream 中binder 
+交互，通过我们配置来 binding ，而 Spring Cloud Stream 的 binder 
+负责与消息中间件交互。所以，我们只需要搞清楚如何与 Spring Cloud Stream 交互就可以方便使用消息驱动的方式。</div>
+<div>通过使用Spring Integration来连接消息代理中间件以实现消息事件驱动。Spring Cloud Stream 
+为一些供应商的消息中间件产品提供了个性化的自动化配置实现，引用了发布-订阅、消费组、分区的三个核心概念。目前仅支持RabbitMQ、Kafka。</div>
+<div>
+<p>这里还要讲解一下什么是Spring&nbsp;Integration &nbsp;？ Integration &nbsp;集成</p>
+<p><strong>企业应用集成（EAI）是集成应用之间数据和服务的一种应用技术。四种集成风格：</strong></p>
+<p>　　1.文件传输：两个系统生成文件，文件的有效负载就是由另一个系统处理的消息。该类风格的例子之一是针对文件轮询目录或FTP目录，并处理该文件。</p>
+<p>　　2.共享数据库：两个系统查询同一个数据库以获取要传递的数据。一个例子是你部署了两个EAR应用，它们的实体类（JPA、Hibernate等）共用同一个表。</p>
+<p>　　3.远程过程调用：两个系统都暴露另一个能调用的服务。该类例子有EJB服务，或SOAP和REST服务。</p>
+<p>　　4.消息：两个系统连接到一个公用的消息系统，互相交换数据，并利用消息调用行为。该风格的例子就是众所周知的中心辐射式的（hub-and-spoke）JMS架构。</p>
+<h2><strong>&nbsp;为什么需要SpringCloud Stream消息驱动呢？</strong></h2>
+<p>　　比方说我们用到了RabbitMQ和Kafka，由于这两个消息中间件的架构上的不同，像RabbitMQ有exchange，kafka有
+Topic，partitions分区，这些中间件的差异性导致我们实际项目开发给我们造成了一定的困扰，我们如果用了两个消息队列的其中一种，</p>
+<p>后面的业务需求，我想往另外一种消息队列进行迁移，这时候无疑就是一个灾难性的，一大堆东西都要重新推倒重新做，因为它跟我们的系统耦合了，这时候springcloud Stream给我们提供了一种解耦合的方式。</p>
+</div>
+<div>如下是官方文档提供的架构图所示：</div>
+<div><img src="SpringCloud%E5%AE%9E%E6%88%989-Stream%E6%B6%88%E6%81%AF%E9%A9%B1%E5%8A%A8%20-%20%E5%A6%AE%E8%94%BB%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/1202638-20180528204400011-1996551371.png" alt="">
+<p>Spring Cloud Stream由一个中间件中立的核组成。应用通过Spring Cloud 
+Stream插入的input(相当于消费者consumer，它是从队列中接收消息的)和output(相当于生产者producer，它是从队列中发
+送消息的。)通道与外界交流。</p>
+<p>通道通过指定中间件的Binder实现与外部代理连接。业务开发者不再关注具体消息中间件，只需关注Binder对应用程序提供的抽象概念来使用消息中间件实现业务即可。</p>
+</div>
+<p>&nbsp;</p>
+<p>Binder</p>
+<p>　　通过定义绑定器作为中间层，实现了应用程序与消息中间件(Middleware)细节之间的隔离。通过向应用程序暴露统一的Channel通
+过，使得应用程序不需要再考虑各种不同的消息中间件的实现。当需要升级消息中间件，或者是更换其他消息中间件产品时，我们需要做的就是更换对应的
+Binder绑定器而不需要修改任何应用逻辑 
+。甚至可以任意的改变中间件的类型而不需要修改一行代码。目前只提供了RabbitMQ和Kafka的Binder实现。</p>
+<p>&nbsp;</p>
+<p>Springcloud 
+Stream还有个好处就是像Kafka一样引入了一点分区的概念，像RabbitMQ不支持分区的队列，你用了SpringCloud 
+Stream技术，它就会帮RabbitMQ引入了分区的特性，SpringCloud 
+Stream就是天然支持分区的，我们用起来还是很方便的。后面会详细讲解</p>
+<p>&nbsp;</p>
+<p>接下来进行一个Demo进行演练。</p>
+<p>首先我们要在先前的工程中新建三个子模块，分别是springcloud-stream，springcloud-
+stream1，springcloud-stream2&nbsp; 
+这三个模块，其中springcloud-stream作为生产者进行发消息模块，springcloud-stream1，springcloud-
+stream2作为消息接收模块。</p>
+<p>如下图所示：</p>
+<p><img src="SpringCloud%E5%AE%9E%E6%88%989-Stream%E6%B6%88%E6%81%AF%E9%A9%B1%E5%8A%A8%20-%20%E5%A6%AE%E8%94%BB%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/1202638-20180528211802374-479472695.png" alt=""></p>
+<p>&nbsp;</p>
+<p>&nbsp;分别在springcloud-stream，springcloud-stream1，springcloud-stream2&nbsp; 这三个模块引入如下依赖：</p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="SpringCloud%E5%AE%9E%E6%88%989-Stream%E6%B6%88%E6%81%AF%E9%A9%B1%E5%8A%A8%20-%20%E5%A6%AE%E8%94%BB%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre>　　　　&lt;dependency&gt;
+            &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
+            &lt;artifactId&gt;spring-cloud-stream-binder-kafka&lt;/artifactId&gt;
+            &lt;version&gt;<span style="color: #800080;">1.3</span>.<span style="color: #800080;">0</span>.RELEASE&lt;/version&gt;
+        &lt;/dependency&gt;<br><br></pre>
+<pre>　　　　&lt;dependency&gt;<br>   　　　　&lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;<br>   　　　　&lt;artifactId&gt;spring-boot-starter-web&lt;/artifactId&gt;<br>　　　　&lt;/dependency&gt;</pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="SpringCloud%E5%AE%9E%E6%88%989-Stream%E6%B6%88%E6%81%AF%E9%A9%B1%E5%8A%A8%20-%20%E5%A6%AE%E8%94%BB%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p>&nbsp;</p>
+<p>接着进行application.yml进行配置如下：</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="SpringCloud%E5%AE%9E%E6%88%989-Stream%E6%B6%88%E6%81%AF%E9%A9%B1%E5%8A%A8%20-%20%E5%A6%AE%E8%94%BB%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre><span style="color: #000000;">server:
+  port: </span><span style="color: #800080;">7888</span><span style="color: #000000;">
+spring:
+  application:
+    name: producer
+  cloud:
+    stream:
+      kafka:
+        binder:
+#Kafka的消息中间件服务器
+          brokers: localhost:</span><span style="color: #800080;">9092</span><span style="color: #000000;">
+#Zookeeper的节点，如果集群，后面加,号分隔
+          zk</span>-nodes: localhost:<span style="color: #800080;">2181</span><span style="color: #000000;">
+#如果设置为false,就不会自动创建Topic 有可能你Topic还没创建就直接调用了。
+          auto</span>-create-topics: <span style="color: #0000ff;">true</span><span style="color: #000000;">
+      bindings:
+#这里用stream给我们提供的默认output，后面会讲到自定义output
+        output:
+#消息发往的目的地        
+            destination: stream</span>-<span style="color: #000000;">demo
+#消息发送的格式，接收端不用指定格式，但是发送端要            
+            content</span>-type: text/plain</pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="SpringCloud%E5%AE%9E%E6%88%989-Stream%E6%B6%88%E6%81%AF%E9%A9%B1%E5%8A%A8%20-%20%E5%A6%AE%E8%94%BB%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p>&nbsp;</p>
+<p>接下来进行第一个springcloud-stream模块的代码编写，在该模块下定义一个SendService，如下：</p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="SpringCloud%E5%AE%9E%E6%88%989-Stream%E6%B6%88%E6%81%AF%E9%A9%B1%E5%8A%A8%20-%20%E5%A6%AE%E8%94%BB%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre><span style="color: #000000;">package hjc.producer;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.stream.annotation.EnableBinding;
+import org.springframework.cloud.stream.messaging.Source;
+import org.springframework.messaging.support.MessageBuilder;
+
+</span><span style="color: #008000;">/*</span><span style="color: #008000;">*
+ * Created by cong on 2018/5/28.
+ </span><span style="color: #008000;">*/</span>
+<span style="color: #008000;">//</span><span style="color: #008000;">这个注解给我们绑定消息通道的，Source是Stream给我们提供的，可以点进去看源码，可以看到output和input,这和配置文件中的output，input对应的。</span>
+@EnableBinding(Source.<span style="color: #0000ff;">class</span><span style="color: #000000;">)
+
+</span><span style="color: #0000ff;">public</span> <span style="color: #0000ff;">class</span><span style="color: #000000;"> SendService {
+
+    @Autowired
+    </span><span style="color: #0000ff;">private</span><span style="color: #000000;"> Source source;
+
+
+    </span><span style="color: #0000ff;">public</span> <span style="color: #0000ff;">void</span><span style="color: #000000;"> sendMsg(String msg){
+        source.output().send(MessageBuilder.withPayload(msg).build());
+    }
+
+}</span></pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="SpringCloud%E5%AE%9E%E6%88%989-Stream%E6%B6%88%E6%81%AF%E9%A9%B1%E5%8A%A8%20-%20%E5%A6%AE%E8%94%BB%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p>&nbsp;</p>
+<p>springcloud-stream 的controller层代码如下：</p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="SpringCloud%E5%AE%9E%E6%88%989-Stream%E6%B6%88%E6%81%AF%E9%A9%B1%E5%8A%A8%20-%20%E5%A6%AE%E8%94%BB%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre><span style="color: #000000;">package hjc.producer;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+</span><span style="color: #008000;">/*</span><span style="color: #008000;">*
+ * Created by cong 2018/5/28
+ </span><span style="color: #008000;">*/</span><span style="color: #000000;">
+@RestController
+</span><span style="color: #0000ff;">public</span> <span style="color: #0000ff;">class</span><span style="color: #000000;"> ProducerController {
+
+
+    @Autowired
+    </span><span style="color: #0000ff;">private</span><span style="color: #000000;"> SendService sendService;
+
+
+    @RequestMapping(</span><span style="color: #800000;">"</span><span style="color: #800000;">/send/{msg}</span><span style="color: #800000;">"</span><span style="color: #000000;">)
+    </span><span style="color: #0000ff;">public</span> <span style="color: #0000ff;">void</span> send(@PathVariable(<span style="color: #800000;">"</span><span style="color: #800000;">msg</span><span style="color: #800000;">"</span><span style="color: #000000;">) String msg){
+        sendService.sendMsg(msg);
+    }
+}</span></pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="SpringCloud%E5%AE%9E%E6%88%989-Stream%E6%B6%88%E6%81%AF%E9%A9%B1%E5%8A%A8%20-%20%E5%A6%AE%E8%94%BB%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p>&nbsp;</p>
+<p>接下来进行springcloud-stream1，springcloud-stream2两个模块的代码编写</p>
+<p>首先需要引入的依赖，上面已经提到。</p>
+<p>接着进行springcloud-stream1和springcloud-stream2模块application.yml的配置，如下：</p>
+<p>springcloud-stream1配置如下：</p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="SpringCloud%E5%AE%9E%E6%88%989-Stream%E6%B6%88%E6%81%AF%E9%A9%B1%E5%8A%A8%20-%20%E5%A6%AE%E8%94%BB%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre><span style="color: #000000;">server:
+  port: </span><span style="color: #800080;">7889</span><span style="color: #000000;">
+spring:
+  application:
+    name: consumer_1
+  cloud:
+    stream:
+      kafka:
+        binder:
+          brokers: localhost:</span><span style="color: #800080;">9092</span><span style="color: #000000;">
+          zk</span>-nodes: localhost:<span style="color: #800080;">2181</span><span style="color: #000000;">
+          auto</span>-create-topics: <span style="color: #0000ff;">true</span><span style="color: #000000;">
+      bindings:
+#input是接收，注意这里不能再像前面一样写output了
+          input:
+            destination: stream</span>-demo</pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="SpringCloud%E5%AE%9E%E6%88%989-Stream%E6%B6%88%E6%81%AF%E9%A9%B1%E5%8A%A8%20-%20%E5%A6%AE%E8%94%BB%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p>&nbsp;</p>
+<p>springcloud-stream2模块application.yml的配置如下：</p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="SpringCloud%E5%AE%9E%E6%88%989-Stream%E6%B6%88%E6%81%AF%E9%A9%B1%E5%8A%A8%20-%20%E5%A6%AE%E8%94%BB%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre><span style="color: #000000;">server:
+  port: </span><span style="color: #800080;">7890</span><span style="color: #000000;">
+spring:
+  application:
+    name: consumer_2
+  cloud:
+    stream:
+      kafka:
+        binder:
+          brokers: localhost:</span><span style="color: #800080;">9092</span><span style="color: #000000;">
+          zk</span>-nodes: localhost:<span style="color: #800080;">2181</span><span style="color: #000000;">
+          auto</span>-create-topics: <span style="color: #0000ff;">true</span><span style="color: #000000;">
+      bindings:
+          input:
+            destination: stream</span>-demo</pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="SpringCloud%E5%AE%9E%E6%88%989-Stream%E6%B6%88%E6%81%AF%E9%A9%B1%E5%8A%A8%20-%20%E5%A6%AE%E8%94%BB%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p>&nbsp;</p>
+<p>好了接下来进行springcloud-stream1模块和springcloud-stream2模块的消息接受代码的编写，springcloud-stream1模块和springcloud-stream2模块的消息接受代码都是一样的，如下：</p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="SpringCloud%E5%AE%9E%E6%88%989-Stream%E6%B6%88%E6%81%AF%E9%A9%B1%E5%8A%A8%20-%20%E5%A6%AE%E8%94%BB%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre><span style="color: #008000;">//</span><span style="color: #008000;">消息接受端，stream给我们提供了Sink,Sink源码里面是绑定input的，要跟我们配置文件的imput关联的。</span>
+@EnableBinding(Sink.<span style="color: #0000ff;">class</span><span style="color: #000000;">)
+</span><span style="color: #0000ff;">public</span> <span style="color: #0000ff;">class</span><span style="color: #000000;"> RecieveService {
+
+    @StreamListener(Sink.INPUT)
+    </span><span style="color: #0000ff;">public</span> <span style="color: #0000ff;">void</span><span style="color: #000000;"> recieve(Object payload){
+        System.</span><span style="color: #0000ff;">out</span><span style="color: #000000;">.println(payload);
+    }
+
+}</span></pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="SpringCloud%E5%AE%9E%E6%88%989-Stream%E6%B6%88%E6%81%AF%E9%A9%B1%E5%8A%A8%20-%20%E5%A6%AE%E8%94%BB%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p>&nbsp;</p>
+<p>好了接着我们首先要启动上一篇随笔所提到的zookeeper，和Kafka，如下：</p>
+<p><img src="SpringCloud%E5%AE%9E%E6%88%989-Stream%E6%B6%88%E6%81%AF%E9%A9%B1%E5%8A%A8%20-%20%E5%A6%AE%E8%94%BB%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/1202638-20180528215904458-1482325469.png" alt=""></p>
+<p>&nbsp;</p>
+<p>接着分别现后启动启动springcloud-stream，springcloud-stream1，springcloud-stream2,模块运行结果如下：</p>
+<p>首先进行springcloud-stream模块的访问，如下：</p>
+<p><img src="SpringCloud%E5%AE%9E%E6%88%989-Stream%E6%B6%88%E6%81%AF%E9%A9%B1%E5%8A%A8%20-%20%E5%A6%AE%E8%94%BB%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/1202638-20180528220124402-850836236.png" alt=""></p>
+<p>回车后可以看到，Kafka CommitId,说明消息发送成功，再看一下，那两个消息接受模块的输出，如下：</p>
+<p><img src="SpringCloud%E5%AE%9E%E6%88%989-Stream%E6%B6%88%E6%81%AF%E9%A9%B1%E5%8A%A8%20-%20%E5%A6%AE%E8%94%BB%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/1202638-20180528220240086-1680216814.png" alt=""></p>
+<p><img src="SpringCloud%E5%AE%9E%E6%88%989-Stream%E6%B6%88%E6%81%AF%E9%A9%B1%E5%8A%A8%20-%20%E5%A6%AE%E8%94%BB%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/1202638-20180528220246925-1443296478.png" alt=""></p>
+<p>可以看到这两消息模块都接收到了消息并且打印了出来。</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>好了到现在为止，我们进行了一个简单的消息发送和接收，用的是Stream给我们提供的默认Source，Sink，接下来我们要自己进行自定义，这种方式在工作中还是用的比较多的，因为我们要往不同的消息通道发消息，</p>
+<p>必然不能全都叫input,output的，那样的话就乱套了，因此首先自定义一个接口，如下：</p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="SpringCloud%E5%AE%9E%E6%88%989-Stream%E6%B6%88%E6%81%AF%E9%A9%B1%E5%8A%A8%20-%20%E5%A6%AE%E8%94%BB%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre><span style="color: #008000;">/*</span><span style="color: #008000;">*
+ * Created by cong on 2018/5/28.
+ </span><span style="color: #008000;">*/</span>
+<span style="color: #0000ff;">public</span> <span style="color: #0000ff;">interface</span><span style="color: #000000;"> MySource {
+
+    @Output(</span><span style="color: #800000;">"</span><span style="color: #800000;">myOutput</span><span style="color: #800000;">"</span><span style="color: #000000;">)
+    MessageChannel myOutput();
+
+}</span></pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="SpringCloud%E5%AE%9E%E6%88%989-Stream%E6%B6%88%E6%81%AF%E9%A9%B1%E5%8A%A8%20-%20%E5%A6%AE%E8%94%BB%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p>这里要注意一下，可以看到上面的代码，其中myOutput是要和你的配置文件的消息发送端配置对应的，因此修改springcloud-stream中application.yml配置，如下：</p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="SpringCloud%E5%AE%9E%E6%88%989-Stream%E6%B6%88%E6%81%AF%E9%A9%B1%E5%8A%A8%20-%20%E5%A6%AE%E8%94%BB%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre><span style="color: #000000;">server:
+  port: </span><span style="color: #800080;">7888</span><span style="color: #000000;">
+spring:
+  application:
+    name: producer
+  cloud:
+    stream:
+      kafka:
+        binder:
+#Kafka的消息中间件服务器
+          brokers: localhost:</span><span style="color: #800080;">9092</span><span style="color: #000000;">
+#Zookeeper的节点，如果集群，后面加,号分隔
+          zk</span>-nodes: localhost:<span style="color: #800080;">2181</span><span style="color: #000000;">
+#如果设置为false,就不会自动创建Topic 有可能你Topic还没创建就直接调用了。
+          auto</span>-create-topics: <span style="color: #0000ff;">true</span><span style="color: #000000;">
+      bindings:
+#自定义output
+        myOutput:
+#消息发往的目的地
+            destination: stream</span>-<span style="color: #000000;">demo
+#消息发送的格式，接收端不用指定格式，但是发送端要
+            content</span>-type: text/plain</pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="SpringCloud%E5%AE%9E%E6%88%989-Stream%E6%B6%88%E6%81%AF%E9%A9%B1%E5%8A%A8%20-%20%E5%A6%AE%E8%94%BB%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>这样还不行，还必须改造springcloud-stream消息发送端的SendService这个类，代码如下：</p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="SpringCloud%E5%AE%9E%E6%88%989-Stream%E6%B6%88%E6%81%AF%E9%A9%B1%E5%8A%A8%20-%20%E5%A6%AE%E8%94%BB%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre><span style="color: #000000;">package hjc.producer;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.stream.annotation.EnableBinding;
+import org.springframework.cloud.stream.messaging.Source;
+import org.springframework.messaging.support.MessageBuilder;
+
+</span><span style="color: #008000;">/*</span><span style="color: #008000;">*
+ * Created by cong on 2018/5/28.
+ </span><span style="color: #008000;">*/</span><span style="color: #000000;">
+
+@EnableBinding(MySource.</span><span style="color: #0000ff;">class</span><span style="color: #000000;">)
+</span><span style="color: #0000ff;">public</span> <span style="color: #0000ff;">class</span><span style="color: #000000;"> SendService {
+    
+    @Autowired
+    </span><span style="color: #0000ff;">private</span><span style="color: #000000;"> MySource source;
+
+    </span><span style="color: #0000ff;">public</span> <span style="color: #0000ff;">void</span><span style="color: #000000;"> sendMsg(String msg){
+        source.myOutput().send(MessageBuilder.withPayload(msg).build());
+    }
+
+}</span></pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="SpringCloud%E5%AE%9E%E6%88%989-Stream%E6%B6%88%E6%81%AF%E9%A9%B1%E5%8A%A8%20-%20%E5%A6%AE%E8%94%BB%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p>&nbsp;</p>
+<p>接下来重新启动那三个模块，运行结果如下：</p>
+<p><img src="SpringCloud%E5%AE%9E%E6%88%989-Stream%E6%B6%88%E6%81%AF%E9%A9%B1%E5%8A%A8%20-%20%E5%A6%AE%E8%94%BB%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/1202638-20180528221842583-182842722.png" alt=""></p>
+<p><img src="SpringCloud%E5%AE%9E%E6%88%989-Stream%E6%B6%88%E6%81%AF%E9%A9%B1%E5%8A%A8%20-%20%E5%A6%AE%E8%94%BB%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/1202638-20180528221845618-1249482281.png" alt=""></p>
+<p>可以看到两个消息接收端还是依然能接受消息。</p>
+<p>接收端的自定义接收也是类似的修改的，这里就不演示了。</p>
+<p>&nbsp;</p>
+<p><strong>springcloud-stream还给我们提供了一个Processor接口，用于进行消息处理后再进行发送出去，相当于一个消息中转站。下面我们进行演示</strong></p>
+<p>　　首先我们需要改造springcloud-stream1模块，把它作为一个消息中转站。用于springcloud-stream1消息处理后再进行发送给springcloud-stream2模块</p>
+<p>&nbsp;</p>
+<p>首先修改springcloud-stream1模块的配置，如下：</p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="SpringCloud%E5%AE%9E%E6%88%989-Stream%E6%B6%88%E6%81%AF%E9%A9%B1%E5%8A%A8%20-%20%E5%A6%AE%E8%94%BB%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre><span style="color: #000000;">server:
+  port: </span><span style="color: #800080;">7889</span><span style="color: #000000;">
+spring:
+  application:
+    name: consumer_1
+  cloud:
+    stream:
+      kafka:
+        binder:
+          brokers: localhost:</span><span style="color: #800080;">9092</span><span style="color: #000000;">
+          zk</span>-nodes: localhost:<span style="color: #800080;">2181</span><span style="color: #000000;">
+          auto</span>-create-topics: <span style="color: #0000ff;">true</span><span style="color: #000000;">
+      bindings:
+#input是接收，注意这里不能再像前面一样写output了
+          input:
+            destination: stream</span>-<span style="color: #000000;">demo
+ #进行消息中转处理后，在进行转发出去           
+          output:
+            destination: stream</span>-demo-trans</pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="SpringCloud%E5%AE%9E%E6%88%989-Stream%E6%B6%88%E6%81%AF%E9%A9%B1%E5%8A%A8%20-%20%E5%A6%AE%E8%94%BB%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p>&nbsp;</p>
+<p>接着在新建一个消息中转类，代码如下：</p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="SpringCloud%E5%AE%9E%E6%88%989-Stream%E6%B6%88%E6%81%AF%E9%A9%B1%E5%8A%A8%20-%20%E5%A6%AE%E8%94%BB%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre><span style="color: #000000;">package hjc.consumer;
+
+import org.springframework.cloud.stream.annotation.EnableBinding;
+import org.springframework.cloud.stream.messaging.Processor;
+import org.springframework.integration.annotation.ServiceActivator;
+
+</span><span style="color: #008000;">/*</span><span style="color: #008000;">*
+ * Created by cong on 2018/5/28.
+ </span><span style="color: #008000;">*/</span><span style="color: #000000;">
+@EnableBinding(Processor.</span><span style="color: #0000ff;">class</span><span style="color: #000000;">)
+</span><span style="color: #0000ff;">public</span> <span style="color: #0000ff;">class</span><span style="color: #000000;"> TransFormService {
+
+    @ServiceActivator(inputChannel </span>= Processor.INPUT,outputChannel =<span style="color: #000000;"> Processor.OUTPUT)
+    </span><span style="color: #0000ff;">public</span><span style="color: #000000;"> Object transform(Object payload){
+        System.</span><span style="color: #0000ff;">out</span>.println(<span style="color: #800000;">"</span><span style="color: #800000;">消息中转站：</span><span style="color: #800000;">"</span>+<span style="color: #000000;">payload);
+        </span><span style="color: #0000ff;">return</span><span style="color: #000000;"> payload;
+    }
+
+}</span></pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="SpringCloud%E5%AE%9E%E6%88%989-Stream%E6%B6%88%E6%81%AF%E9%A9%B1%E5%8A%A8%20-%20%E5%A6%AE%E8%94%BB%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p>&nbsp;</p>
+<p>接着要修改消息中转站发送消息出去的接收端springcloud-stream2的配置，如下：</p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="SpringCloud%E5%AE%9E%E6%88%989-Stream%E6%B6%88%E6%81%AF%E9%A9%B1%E5%8A%A8%20-%20%E5%A6%AE%E8%94%BB%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre><span style="color: #000000;">server:
+  port: </span><span style="color: #800080;">7890</span><span style="color: #000000;">
+spring:
+  application:
+    name: consumer_2
+  cloud:
+    stream:
+      kafka:
+        binder:
+          brokers: localhost:</span><span style="color: #800080;">9092</span><span style="color: #000000;">
+          zk</span>-nodes: localhost:<span style="color: #800080;">2181</span><span style="color: #000000;">
+          auto</span>-create-topics: <span style="color: #0000ff;">true</span><span style="color: #000000;">
+      bindings:
+          input:
+            destination: stream</span>-demo-trans</pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="SpringCloud%E5%AE%9E%E6%88%989-Stream%E6%B6%88%E6%81%AF%E9%A9%B1%E5%8A%A8%20-%20%E5%A6%AE%E8%94%BB%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p>&nbsp;</p>
+<p>这里要强调一下，要把先前RecieveService类的绑定注解全都注释掉，不然，会绑定冲突的，接下来分别重启这三个模块，运行结果如下：<br>先进性springcloud-stream模块的访问。</p>
+<p><img src="SpringCloud%E5%AE%9E%E6%88%989-Stream%E6%B6%88%E6%81%AF%E9%A9%B1%E5%8A%A8%20-%20%E5%A6%AE%E8%94%BB%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/1202638-20180528224131037-1419501404.png" alt=""></p>
+<p>&nbsp;</p>
+<p>中转站运行结果取下：</p>
+<p><img src="SpringCloud%E5%AE%9E%E6%88%989-Stream%E6%B6%88%E6%81%AF%E9%A9%B1%E5%8A%A8%20-%20%E5%A6%AE%E8%94%BB%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/1202638-20180528225201404-444898453.png" alt=""></p>
+<p>&nbsp;</p>
+<p>接下来，看中转后的的接受端Springcloud-stream2的消息，到底有没有消息过来，如下:</p>
+<p><img src="SpringCloud%E5%AE%9E%E6%88%989-Stream%E6%B6%88%E6%81%AF%E9%A9%B1%E5%8A%A8%20-%20%E5%A6%AE%E8%94%BB%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/1202638-20180528230331292-1476215686.png" alt=""></p>
+<p>可以看到，中转后消息被接受到了。</p>
+<p>&nbsp;</p>
+<p>我们还可能会遇到一个场景就是，我们接收到消息后，给别人一个反馈ACK，SpringCloud stream 给我们提供了一个SendTo注解可以帮我们干这些事情。</p>
+<p>首先我们先实现一个接口SendToBinder去实现output和input,代码如下：</p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="SpringCloud%E5%AE%9E%E6%88%989-Stream%E6%B6%88%E6%81%AF%E9%A9%B1%E5%8A%A8%20-%20%E5%A6%AE%E8%94%BB%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre><span style="color: #000000;">package hjc.consumer;
+
+import org.springframework.cloud.stream.annotation.Input;
+import org.springframework.cloud.stream.annotation.Output;
+import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.SubscribableChannel;
+
+</span><span style="color: #008000;">/*</span><span style="color: #008000;">*
+ * Created by cong on 2018/5/28.
+ </span><span style="color: #008000;">*/</span>
+<span style="color: #0000ff;">public</span> <span style="color: #0000ff;">interface</span><span style="color: #000000;"> SendToBinder {
+
+    @Output(</span><span style="color: #800000;">"</span><span style="color: #800000;">output</span><span style="color: #800000;">"</span><span style="color: #000000;">)
+    MessageChannel output();
+
+    @Input(</span><span style="color: #800000;">"</span><span style="color: #800000;">input</span><span style="color: #800000;">"</span><span style="color: #000000;">)
+    SubscribableChannel input();
+
+}</span></pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="SpringCloud%E5%AE%9E%E6%88%989-Stream%E6%B6%88%E6%81%AF%E9%A9%B1%E5%8A%A8%20-%20%E5%A6%AE%E8%94%BB%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p>&nbsp;</p>
+<p>接着再新建一个SendToService类来绑定自己的SendToBinder接口，然后监听input,返回ACK表示中转站收到消息了，再转发消息出去，代码如下：</p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="SpringCloud%E5%AE%9E%E6%88%989-Stream%E6%B6%88%E6%81%AF%E9%A9%B1%E5%8A%A8%20-%20%E5%A6%AE%E8%94%BB%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre><span style="color: #000000;">package hjc.consumer;
+
+import org.springframework.cloud.stream.annotation.EnableBinding;
+import org.springframework.cloud.stream.annotation.StreamListener;
+import org.springframework.messaging.handler.annotation.SendTo;
+
+</span><span style="color: #008000;">/*</span><span style="color: #008000;">*
+ * Created by cong on 2018/5/28.
+ </span><span style="color: #008000;">*/</span><span style="color: #000000;">
+@EnableBinding(SendToBinder.</span><span style="color: #0000ff;">class</span><span style="color: #000000;">)
+</span><span style="color: #0000ff;">public</span> <span style="color: #0000ff;">class</span><span style="color: #000000;"> SendToService {
+
+    @StreamListener(</span><span style="color: #800000;">"</span><span style="color: #800000;">input</span><span style="color: #800000;">"</span><span style="color: #000000;">)
+    @SendTo(</span><span style="color: #800000;">"</span><span style="color: #800000;">output</span><span style="color: #800000;">"</span><span style="color: #000000;">)
+    </span><span style="color: #0000ff;">public</span><span style="color: #000000;"> Object receiveFromInput(Object payload){
+        System.</span><span style="color: #0000ff;">out</span>.println(<span style="color: #800000;">"</span><span style="color: #800000;">中转消息。。</span><span style="color: #800000;">"</span>+<span style="color: #000000;">payload);
+        </span><span style="color: #0000ff;">return</span> <span style="color: #800000;">"</span><span style="color: #800000;">xxxxx</span><span style="color: #800000;">"</span><span style="color: #000000;">;
+    }
+
+}</span></pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="SpringCloud%E5%AE%9E%E6%88%989-Stream%E6%B6%88%E6%81%AF%E9%A9%B1%E5%8A%A8%20-%20%E5%A6%AE%E8%94%BB%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p>这里要注意一点就是，启动前下那边之前的用到的哪些绑定注解，先注释掉，不然与这里会发生冲突。</p>
+<p>运行结果如下：</p>
+<p><img src="SpringCloud%E5%AE%9E%E6%88%989-Stream%E6%B6%88%E6%81%AF%E9%A9%B1%E5%8A%A8%20-%20%E5%A6%AE%E8%94%BB%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/1202638-20180529140201080-2102996311.png" alt=""></p>
+<p><img src="SpringCloud%E5%AE%9E%E6%88%989-Stream%E6%B6%88%E6%81%AF%E9%A9%B1%E5%8A%A8%20-%20%E5%A6%AE%E8%94%BB%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/1202638-20180529140249909-1931548987.png" alt=""></p>
+<p>&nbsp;</p>
+<p>可以看到发送端受到一个ACK</p>
+<p>&nbsp;</p>
+<p>可以看到先前的例子，我们都是一端发消息，两个消息接受者都接收到了，但是有时候有些业务场景我只想让其中一个消息接收者接收到消息，那么该怎么办呢？</p>
+<p>这时候就涉及一个消息分组(Consumer Groups)的概念了。</p>
+<p>&nbsp;</p>
+<h2><strong>消息分组(Consumer Groups)</strong></h2>
+<div>
+<div>
+<p>　　“Group”，如果使用过 Kafka 的读者并不会陌生。Spring Cloud Stream 的这个分组概念的意思基本和 
+Kafka 一致。微服务中动态的缩放同一个应用的数量以此来达到更高的处理能力是非常必须的。对于这种情况，同一个事件防止被重复消费，</p>
+<p>　　只要把这些应用放置于同一个 “group” 中，就能够保证消息只会被其中一个应用消费一次。不同的组是可以消费的，同一个组内会发生竞争关系，只有其中一个可以消费。</p>
+</div>
+</div>
+<div>首先修改该springcloud-stream1模块的配置，修改代码如下：</div>
+<div>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="SpringCloud%E5%AE%9E%E6%88%989-Stream%E6%B6%88%E6%81%AF%E9%A9%B1%E5%8A%A8%20-%20%E5%A6%AE%E8%94%BB%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre><span style="color: #000000;">server:
+  port: </span><span style="color: #800080;">7889</span><span style="color: #000000;">
+spring:
+  application:
+    name: consumer_1
+  cloud:
+    stream:
+      kafka:
+        binder:
+          brokers: localhost:</span><span style="color: #800080;">9092</span><span style="color: #000000;">
+          zk</span>-nodes: localhost:<span style="color: #800080;">2181</span><span style="color: #000000;">
+          auto</span>-create-topics: <span style="color: #0000ff;">true</span><span style="color: #000000;">
+      bindings:
+#input是接收，注意这里不能再像前面一样写output了
+          input:
+            destination: stream</span>-<span style="color: #000000;">demo
+#分组的组名
+            group: group</span></pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="SpringCloud%E5%AE%9E%E6%88%989-Stream%E6%B6%88%E6%81%AF%E9%A9%B1%E5%8A%A8%20-%20%E5%A6%AE%E8%94%BB%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p>接着修改springcloud-stream2模块的配置，代码如下：</p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="SpringCloud%E5%AE%9E%E6%88%989-Stream%E6%B6%88%E6%81%AF%E9%A9%B1%E5%8A%A8%20-%20%E5%A6%AE%E8%94%BB%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre><span style="color: #000000;">server:
+  port: </span><span style="color: #800080;">7890</span><span style="color: #000000;">
+spring:
+  application:
+    name: consumer_2
+  cloud:
+    stream:
+      kafka:
+        binder:
+          brokers: localhost:</span><span style="color: #800080;">9092</span><span style="color: #000000;">
+          zk</span>-nodes: localhost:<span style="color: #800080;">2181</span><span style="color: #000000;">
+          auto</span>-create-topics: <span style="color: #0000ff;">true</span><span style="color: #000000;">
+      bindings:
+          input:
+            destination: stream</span>-demo-<span style="color: #000000;">trans
+            group: group</span></pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="SpringCloud%E5%AE%9E%E6%88%989-Stream%E6%B6%88%E6%81%AF%E9%A9%B1%E5%8A%A8%20-%20%E5%A6%AE%E8%94%BB%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p>可以看到springcloud-stream1和springcloud-stream2是属于同一组的。springcloud-stream
+模块的发的消息只能被springcloud-stream1或springcloud-stream2其中一个接收到，这样避免了重复消费。</p>
+<p>springcloud-stream1模块代码恢复成如下代码：</p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="SpringCloud%E5%AE%9E%E6%88%989-Stream%E6%B6%88%E6%81%AF%E9%A9%B1%E5%8A%A8%20-%20%E5%A6%AE%E8%94%BB%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre><span style="color: #000000;">package hjc.consumer;
+
+import org.springframework.cloud.stream.annotation.EnableBinding;
+import org.springframework.cloud.stream.annotation.StreamListener;
+import org.springframework.cloud.stream.messaging.Sink;
+
+</span><span style="color: #008000;">/*</span><span style="color: #008000;">*
+ * Created by cong on 2018/5/28.
+ </span><span style="color: #008000;">*/</span>
+<span style="color: #008000;">//</span><span style="color: #008000;">消息接受端，stream给我们提供了Sink,Sink源码里面是绑定input的，要跟我们配置文件的imput关联的。</span>
+@EnableBinding(Sink.<span style="color: #0000ff;">class</span><span style="color: #000000;">)
+</span><span style="color: #0000ff;">public</span> <span style="color: #0000ff;">class</span><span style="color: #000000;"> RecieveService {
+
+    @StreamListener(Sink.INPUT)
+    </span><span style="color: #0000ff;">public</span> <span style="color: #0000ff;">void</span><span style="color: #000000;"> recieve(Object payload){
+        System.</span><span style="color: #0000ff;">out</span><span style="color: #000000;">.println(payload);
+    }
+
+}</span></pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="SpringCloud%E5%AE%9E%E6%88%989-Stream%E6%B6%88%E6%81%AF%E9%A9%B1%E5%8A%A8%20-%20%E5%A6%AE%E8%94%BB%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p>&nbsp;</p>
+<p>springcloud-stream2的接收端代码不变，依然跟上面代码一样。</p>
+<p>接着，运行结果如下：</p>
+<p><img src="SpringCloud%E5%AE%9E%E6%88%989-Stream%E6%B6%88%E6%81%AF%E9%A9%B1%E5%8A%A8%20-%20%E5%A6%AE%E8%94%BB%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/1202638-20180529145457323-650885518.png" alt=""></p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>控制台如下：</p>
+<p>&nbsp;<img src="SpringCloud%E5%AE%9E%E6%88%989-Stream%E6%B6%88%E6%81%AF%E9%A9%B1%E5%8A%A8%20-%20%E5%A6%AE%E8%94%BB%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/1202638-20180529145552588-1904059448.png" alt=""></p>
+<p>&nbsp;</p>
+<p>&nbsp;<img src="SpringCloud%E5%AE%9E%E6%88%989-Stream%E6%B6%88%E6%81%AF%E9%A9%B1%E5%8A%A8%20-%20%E5%A6%AE%E8%94%BB%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/1202638-20180529150013079-518851817.png" alt=""></p>
+<p>可以看到只有其中一个受到消息。避免了消息重复消费。</p>
+</div>
+<p>&nbsp;</p>
+<p>有时候我们只想给特定的消费者消费消息，那么又该真么做呢？</p>
+<p>这是后又涉及到消息分区的概念了。</p>
+<p>&nbsp;</p>
+<h2>消息分区()</h2>
+<p>　　Spring Cloud 
+Stream对给定应用的多个实例之间分隔数据予以支持。在分隔方案中，物理交流媒介（如：代理主题）被视为分隔成了多个片（partitions）。一
+个或者多个生产者应用实例给多个消费者应用实例发送消息并确保相同特征的数据被同一消费者实例处理。&nbsp;</p>
+<p>Spring Cloud Stream对分割的进程实例实现进行了抽象。使得Spring Cloud Stream 为不具备分区功能的消息中间件（RabbitMQ）也增加了分区功能扩展。</p>
+<p>那么我们就要进行一些配置了，比如我只想要springcloud-stream2模块接收到消息，</p>
+<p>springcloud-stream2配置如下：</p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="SpringCloud%E5%AE%9E%E6%88%989-Stream%E6%B6%88%E6%81%AF%E9%A9%B1%E5%8A%A8%20-%20%E5%A6%AE%E8%94%BB%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre><span style="color: #000000;">server:
+  port: </span><span style="color: #800080;">7890</span><span style="color: #000000;">
+spring:
+  application:
+    name: consumer_2
+  cloud:
+    stream:
+      kafka:
+        binder:
+          brokers: localhost:</span><span style="color: #800080;">9092</span><span style="color: #000000;">
+          zk</span>-nodes: localhost:<span style="color: #800080;">2181</span><span style="color: #000000;">
+          auto</span>-create-topics: <span style="color: #0000ff;">true</span><span style="color: #000000;">
+      bindings:
+          input:
+            destination: stream</span>-demo-<span style="color: #000000;">trans
+            group: group
+            consumer:
+#开启分区
+              partitioned: </span><span style="color: #0000ff;">true</span><span style="color: #000000;">
+#分区数量
+      instance</span>-count: <span style="color: #800080;">2</span></pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="SpringCloud%E5%AE%9E%E6%88%989-Stream%E6%B6%88%E6%81%AF%E9%A9%B1%E5%8A%A8%20-%20%E5%A6%AE%E8%94%BB%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p>&nbsp;</p>
+<p>生产者端springcloud-stream模块配置如下：</p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="SpringCloud%E5%AE%9E%E6%88%989-Stream%E6%B6%88%E6%81%AF%E9%A9%B1%E5%8A%A8%20-%20%E5%A6%AE%E8%94%BB%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre><span style="color: #000000;">server:
+  port: </span><span style="color: #800080;">7888</span><span style="color: #000000;">
+spring:
+  application:
+    name: producer
+  cloud:
+    stream:
+      kafka:
+        binder:
+#Kafka的消息中间件服务器
+          brokers: localhost:</span><span style="color: #800080;">9092</span><span style="color: #000000;">
+#Zookeeper的节点，如果集群，后面加,号分隔
+          zk</span>-nodes: localhost:<span style="color: #800080;">2181</span><span style="color: #000000;">
+#如果设置为false,就不会自动创建Topic 有可能你Topic还没创建就直接调用了。
+          auto</span>-create-topics: <span style="color: #0000ff;">true</span><span style="color: #000000;">
+      bindings:
+#自定义output
+        myOutput:
+#消息发往的目的地
+            destination: stream</span>-<span style="color: #000000;">demo
+#消息发送的格式，接收端不用指定格式，但是发送端要
+            content</span>-type: text/<span style="color: #000000;">plain
+            producer:
+#分区的主键，根据什么来分区，下面的payload.id只是一个对象的id用于做为Key，用来说明的。希望不要误解
+              partitionKeyExpression: payload.id
+#Key和分区数量进行取模去分配消息，这里分区数量配置为2
+              partitionCount: </span><span style="color: #800080;">2</span></pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="SpringCloud%E5%AE%9E%E6%88%989-Stream%E6%B6%88%E6%81%AF%E9%A9%B1%E5%8A%A8%20-%20%E5%A6%AE%E8%94%BB%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p>&nbsp;</p>
+<p>其他的代码基本不变，这里就不演示了。这里要给大家说明一下，比如分区的Key是一个对象的id，比如说id=1,每次发送消息的对象的id为相同
+值1，则消息只会被同一个消费者消费，比如说Key和分区数量取模计算的结果是分到stream2模块中，那么下一次进行进行消息发送，</p>
+<p>只要分组的key即id的值依然还是1的话，消息永远只会分配到stream2模块中。</p>
+</div>
+</div>
+<div id="MySignature"></div>
+<div class="clear"></div>
+<div id="blog_post_info_block">
+<div id="EntryTag">
+    标签: 
+            <a href="https://www.cnblogs.com/huangjuncong/tag/SpringCloud/">SpringCloud</a></div>
+
+    <div id="blog_post_info">
+<div id="green_channel">
+        <a href="javascript:void(0);" id="green_channel_digg" onclick="DiggIt(9102843,cb_blogId,1);green_channel_success(this,'谢谢推荐！');">好文要顶</a>
+        <a id="green_channel_follow" onclick="follow('b15a789d-12a3-47d3-2d02-08d49c352df3');" href="javascript:void(0);">关注我</a>
+    <a id="green_channel_favorite" onclick="AddToWz(cb_entryId);return false;" href="javascript:void(0);">收藏该文</a>
+    <a id="green_channel_weibo" href="javascript:void(0);" title="分享至新浪微博" onclick="ShareToTsina()"><img src="SpringCloud%E5%AE%9E%E6%88%989-Stream%E6%B6%88%E6%81%AF%E9%A9%B1%E5%8A%A8%20-%20%E5%A6%AE%E8%94%BB%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/icon_weibo_24.png" alt=""></a>
+    <a id="green_channel_wechat" href="javascript:void(0);" title="分享至微信" onclick="shareOnWechat()"><img src="SpringCloud%E5%AE%9E%E6%88%989-Stream%E6%B6%88%E6%81%AF%E9%A9%B1%E5%8A%A8%20-%20%E5%A6%AE%E8%94%BB%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/wechat.png" alt=""></a>
+</div>
+<div id="author_profile">
+    <div id="author_profile_info" class="author_profile_info">
+            <a href="https://home.cnblogs.com/u/huangjuncong/" target="_blank"><img src="SpringCloud%E5%AE%9E%E6%88%989-Stream%E6%B6%88%E6%81%AF%E9%A9%B1%E5%8A%A8%20-%20%E5%A6%AE%E8%94%BB%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/20180612194324.png" class="author_avatar" alt=""></a>
+        <div id="author_profile_detail" class="author_profile_info">
+            <a href="https://home.cnblogs.com/u/huangjuncong/">妮蔻</a><br>
+            <a href="https://home.cnblogs.com/u/huangjuncong/followees/">关注 - 19</a><br>
+            <a href="https://home.cnblogs.com/u/huangjuncong/followers/">粉丝 - 216</a>
+        </div>
+    </div>
+    <div class="clear"></div>
+    <div id="author_profile_honor"></div>
+    <div id="author_profile_follow">
+                <a href="javascript:void(0);" onclick="follow('b15a789d-12a3-47d3-2d02-08d49c352df3');return false;">+加关注</a>
+    </div>
+</div>
+<div id="div_digg">
+    <div class="diggit" onclick="votePost(9102843,'Digg')">
+        <span class="diggnum" id="digg_count">1</span>
+    </div>
+    <div class="buryit" onclick="votePost(9102843,'Bury')">
+        <span class="burynum" id="bury_count">0</span>
+    </div>
+    <div class="clear"></div>
+    <div class="diggword" id="digg_tips">
+    </div>
+</div>
+
+<script type="text/javascript">
+    currentDiggType = 0;
+</script></div>
+    <div class="clear"></div>
+    <div id="post_next_prev">
+
+    <a href="https://www.cnblogs.com/huangjuncong/p/9077099.html" class="p_n_p_prefix">« </a> 上一篇：    <a href="https://www.cnblogs.com/huangjuncong/p/9077099.html" title="发布于 2018-05-23 15:20">SpringCloud实战8-Bus消息总线</a>
+    <br>
+    <a href="https://www.cnblogs.com/huangjuncong/p/9111604.html" class="p_n_p_prefix">» </a> 下一篇：    <a href="https://www.cnblogs.com/huangjuncong/p/9111604.html" title="发布于 2018-05-30 16:22">SpringCloud实战10-Sleuth</a>
+
+</div>
+</div>
+            </div>
+            <div class="postDesc">posted @ 
+<span id="post-date">2018-05-29 15:32</span>&nbsp;<a href="https://www.cnblogs.com/huangjuncong/">妮蔻</a> 阅读(<span id="post_view_count">23006</span>) 评论(<span id="post_comment_count">8</span>) <a href="https://i.cnblogs.com/EditPosts.aspx?postid=9102843" rel="nofollow"> 编辑</a> <a href="javascript:void(0)" onclick="AddToWz(9102843); return false;">收藏</a>
+</div>
+        </div>
+	    
+	    
+    </div><!--end: topics 文章、评论容器-->
+</div>
+<script src="SpringCloud%E5%AE%9E%E6%88%989-Stream%E6%B6%88%E6%81%AF%E9%A9%B1%E5%8A%A8%20-%20%E5%A6%AE%E8%94%BB%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/highlight.js"></script>
+<script>markdown_highlight();</script>
+<script>
+    var allowComments = true, cb_blogId = 368233, cb_blogApp = 'huangjuncong', cb_blogUserGuid = 'b15a789d-12a3-47d3-2d02-08d49c352df3';
+    var cb_entryId = 9102843, cb_entryCreatedDate = '2018-05-29 15:32', cb_postType = 1; 
+    loadViewCount(cb_entryId);
+</script><a name="!comments"></a>
+<div id="blog-comments-placeholder">
+
+<div id="comment_pager_top">
+    
+</div>
+
+<br>
+<div class="feedback_area_title">评论列表</div>
+<div class="feedbackNoItems"><div class="feedbackNoItems"></div></div>	
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+				<div class="feedbackManage">
+					&nbsp;&nbsp;
+
+<span class="comment_actions">
+    
+    
+    
+    
+</span>
+
+
+				</div>
+				
+<a href="#3985743" class="layer">#1楼</a>
+<a name="3985743" id="comment_anchor_3985743"></a>
+
+ 
+<span class="comment_date">2018-05-29 15:51</span>
+
+ 
+
+            <a id="a_comment_author_3985743" href="https://www.cnblogs.com/yyym/" target="_blank">TesterWei</a>
+
+			</div>
+			<div class="feedbackCon">
+				
+<div id="comment_body_3985743" class="blog_comment_body">
+    楼主代码功底很扎实，总结的不错，希望相互学习相互关注。
+</div>
+        <div class="comment_vote">
+            <span class="comment_error" style="color: red"></span>
+            <a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(3985743, 'Digg', this.parentElement, false);">
+                支持(0)
+            </a>
+            <a href="javascript:void(0);" class="comment_burry" onclick="return voteComment(3985743, 'Bury', this.parentElement, false);">
+                反对(0)
+            </a>
+        </div>
+        <span id="comment_3985743_avatar" style="display:none">
+            https://pic.cnblogs.com/face/1106333/20180124101925.png
+        </span>
+
+			</div>
+		</div>
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+				<div class="feedbackManage">
+					&nbsp;&nbsp;
+
+<span class="comment_actions">
+    
+    
+    
+    
+</span>
+
+
+				</div>
+				
+<a href="#3985747" class="layer">#2楼</a>
+<a name="3985747" id="comment_anchor_3985747"></a>
+[<span class="louzhu">楼主</span>]
+ 
+<span class="comment_date">2018-05-29 15:53</span>
+
+ 
+
+            <a id="a_comment_author_3985747" href="https://www.cnblogs.com/huangjuncong/" target="_blank">妮蔻</a>
+
+			</div>
+			<div class="feedbackCon">
+				
+<div id="comment_body_3985747" class="blog_comment_body">
+    <a href="#3985743" title="查看所回复的评论" onclick="commentManager.renderComments(0,50,3985743);">@</a>
+TesterWei<br>相互学习
+</div>
+        <div class="comment_vote">
+            <span class="comment_error" style="color: red"></span>
+            <a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(3985747, 'Digg', this.parentElement, false);">
+                支持(0)
+            </a>
+            <a href="javascript:void(0);" class="comment_burry" onclick="return voteComment(3985747, 'Bury', this.parentElement, false);">
+                反对(0)
+            </a>
+        </div>
+        <span id="comment_3985747_avatar" style="display:none">
+            https://pic.cnblogs.com/face/1202638/20180612194324.png
+        </span>
+
+			</div>
+		</div>
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+				<div class="feedbackManage">
+					&nbsp;&nbsp;
+
+<span class="comment_actions">
+    
+    
+    
+    
+</span>
+
+
+				</div>
+				
+<a href="#4090290" class="layer">#3楼</a>
+<a name="4090290" id="comment_anchor_4090290"></a>
+
+ 
+<span class="comment_date">2018-10-15 19:42</span>
+
+ 
+
+            <a id="a_comment_author_4090290" href="https://www.cnblogs.com/liujf-a-mad-man/" target="_blank">疯子磕雪茄</a>
+
+			</div>
+			<div class="feedbackCon">
+				
+<div id="comment_body_4090290" class="blog_comment_body">
+    楼主，Processor消息中转和@SendTo 好像效果是一样的，里面有什么区别吗
+</div>
+        <div class="comment_vote">
+            <span class="comment_error" style="color: red"></span>
+            <a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(4090290, 'Digg', this.parentElement, false);">
+                支持(0)
+            </a>
+            <a href="javascript:void(0);" class="comment_burry" onclick="return voteComment(4090290, 'Bury', this.parentElement, false);">
+                反对(0)
+            </a>
+        </div>
+        <span id="comment_4090290_avatar" style="display:none">
+            https://pic.cnblogs.com/face/873678/20190428165039.png
+        </span>
+
+			</div>
+		</div>
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+				<div class="feedbackManage">
+					&nbsp;&nbsp;
+
+<span class="comment_actions">
+    
+    
+    
+    
+</span>
+
+
+				</div>
+				
+<a href="#4126748" class="layer">#4楼</a>
+<a name="4126748" id="comment_anchor_4126748"></a>
+
+ 
+<span class="comment_date">2018-11-30 11:45</span>
+
+ 
+
+            <a id="a_comment_author_4126748" href="https://www.cnblogs.com/swg2017/" target="_blank">我去个地方</a>
+
+			</div>
+			<div class="feedbackCon">
+				
+<div id="comment_body_4126748" class="blog_comment_body">
+    请问可以把第一个demo发我邮箱吗：937883207@qq.com
+</div>
+        <div class="comment_vote">
+            <span class="comment_error" style="color: red"></span>
+            <a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(4126748, 'Digg', this.parentElement, false);">
+                支持(0)
+            </a>
+            <a href="javascript:void(0);" class="comment_burry" onclick="return voteComment(4126748, 'Bury', this.parentElement, false);">
+                反对(0)
+            </a>
+        </div>
+        <span id="comment_4126748_avatar" style="display:none">
+            https://pic.cnblogs.com/face/1120827/20171122171615.png
+        </span>
+
+			</div>
+		</div>
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+				<div class="feedbackManage">
+					&nbsp;&nbsp;
+
+<span class="comment_actions">
+    
+    
+    
+    
+</span>
+
+
+				</div>
+				
+<a href="#4167663" class="layer">#5楼</a>
+<a name="4167663" id="comment_anchor_4167663"></a>
+
+ 
+<span class="comment_date">2019-01-21 18:30</span>
+
+ 
+
+            <a id="a_comment_author_4167663" href="https://www.cnblogs.com/Honia/" target="_blank">Honia</a>
+
+			</div>
+			<div class="feedbackCon">
+				
+<div id="comment_body_4167663" class="blog_comment_body">
+    博主，你给的所有配置中 brokers的拼写都错了，可坑死我了。。。你写成brockers了
+</div>
+        <div class="comment_vote">
+            <span class="comment_error" style="color: red"></span>
+            <a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(4167663, 'Digg', this.parentElement, false);">
+                支持(0)
+            </a>
+            <a href="javascript:void(0);" class="comment_burry" onclick="return voteComment(4167663, 'Bury', this.parentElement, false);">
+                反对(0)
+            </a>
+        </div>
+        
+
+			</div>
+		</div>
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+				<div class="feedbackManage">
+					&nbsp;&nbsp;
+
+<span class="comment_actions">
+    
+    
+    
+    
+</span>
+
+
+				</div>
+				
+<a href="#4167666" class="layer">#6楼</a>
+<a name="4167666" id="comment_anchor_4167666"></a>
+[<span class="louzhu">楼主</span>]
+ 
+<span class="comment_date">2019-01-21 18:32</span>
+
+ 
+
+            <a id="a_comment_author_4167666" href="https://www.cnblogs.com/huangjuncong/" target="_blank">妮蔻</a>
+
+			</div>
+			<div class="feedbackCon">
+				
+<div id="comment_body_4167666" class="blog_comment_body">
+    <a href="#4167663" title="查看所回复的评论" onclick="commentManager.renderComments(0,50,4167663);">@</a>
+Honia<br>Sorry，可能手写写快了
+</div>
+        <div class="comment_vote">
+            <span class="comment_error" style="color: red"></span>
+            <a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(4167666, 'Digg', this.parentElement, false);">
+                支持(0)
+            </a>
+            <a href="javascript:void(0);" class="comment_burry" onclick="return voteComment(4167666, 'Bury', this.parentElement, false);">
+                反对(0)
+            </a>
+        </div>
+        <span id="comment_4167666_avatar" style="display:none">
+            https://pic.cnblogs.com/face/1202638/20180612194324.png
+        </span>
+
+			</div>
+		</div>
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+				<div class="feedbackManage">
+					&nbsp;&nbsp;
+
+<span class="comment_actions">
+    
+    
+    
+    
+</span>
+
+
+				</div>
+				
+<a href="#4190208" class="layer">#7楼</a>
+<a name="4190208" id="comment_anchor_4190208"></a>
+
+ 
+<span class="comment_date">2019-02-28 10:04</span>
+
+ 
+
+            <a id="a_comment_author_4190208" href="https://www.cnblogs.com/wangxiaoan1234/" target="_blank">wangxiaoan1234</a>
+
+			</div>
+			<div class="feedbackCon">
+				
+<div id="comment_body_4190208" class="blog_comment_body">
+    推荐、关注加收藏，喜欢博主的写作风格
+</div>
+        <div class="comment_vote">
+            <span class="comment_error" style="color: red"></span>
+            <a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(4190208, 'Digg', this.parentElement, false);">
+                支持(0)
+            </a>
+            <a href="javascript:void(0);" class="comment_burry" onclick="return voteComment(4190208, 'Bury', this.parentElement, false);">
+                反对(0)
+            </a>
+        </div>
+        <span id="comment_4190208_avatar" style="display:none">
+            https://pic.cnblogs.com/face/1206970/20170725231751.png
+        </span>
+
+			</div>
+		</div>
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+				<div class="feedbackManage">
+					&nbsp;&nbsp;
+
+<span class="comment_actions">
+    
+    
+    
+    
+</span>
+
+
+				</div>
+				
+<a href="#4190210" class="layer">#8楼</a>
+<a name="4190210" id="comment_anchor_4190210"></a>
+
+        <span id="comment-maxId" style="display:none">4190210</span>
+        <span id="comment-maxDate" style="display:none">2/28/2019 10:05:14 AM</span>
+ 
+<span class="comment_date">2019-02-28 10:05</span>
+
+ 
+
+            <a id="a_comment_author_4190210" href="https://www.cnblogs.com/wangxiaoan1234/" target="_blank">wangxiaoan1234</a>
+
+			</div>
+			<div class="feedbackCon">
+				
+<div id="comment_body_4190210" class="blog_comment_body">
+    @ServiceActivator(inputChannel = Processor.INPUT,outputChannel = Processor.OUTPUT)<br>和@SendTO感觉差不多呢？
+</div>
+        <div class="comment_vote">
+            <span class="comment_error" style="color: red"></span>
+            <a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(4190210, 'Digg', this.parentElement, false);">
+                支持(0)
+            </a>
+            <a href="javascript:void(0);" class="comment_burry" onclick="return voteComment(4190210, 'Bury', this.parentElement, false);">
+                反对(0)
+            </a>
+        </div>
+        <span id="comment_4190210_avatar" style="display:none">
+            https://pic.cnblogs.com/face/1206970/20170725231751.png
+        </span>
+
+			</div>
+		</div>
+
+<div id="comment_pager_bottom">
+    
+</div>
+
+
+</div>
+<script>
+    var commentManager = new blogCommentManager();
+    commentManager.renderComments(0);
+</script>
+
+<div id="comment_form" class="commentform">
+    <a name="commentform"></a>
+    <div id="divCommentShow"></div>
+    <div id="comment_nav"><span id="span_refresh_tips"></span><a href="javascript:void(0);" onclick="return RefreshCommentList();" id="lnk_RefreshComments" runat="server" clientidmode="Static">刷新评论</a><a href="#" onclick="return RefreshPage();">刷新页面</a><a href="#top">返回顶部</a></div>
+    <div id="comment_form_container"><div class="login_tips">
+    注册用户登录后才能发表评论，请 
+    <a rel="nofollow" href="javascript:void(0);" class="underline" onclick="return login('commentform');">登录</a>
+     或 
+    <a rel="nofollow" href="javascript:void(0);" class="underline" onclick="return register();">注册</a>，
+    <a href="https://www.cnblogs.com/">访问</a> 网站首页。
+</div></div>
+    <div class="ad_text_commentbox" id="ad_text_under_commentbox"></div>
+    <div id="ad_t2"><a href="http://www.ucancode.com/index.htm" target="_blank" onclick="ga('send', 'event', 'Link', 'click', 'T2-工控')">【推荐】超50万行VC++源码: 大型组态工控、电力仿真CAD与GIS源码库</a><br><a href="https://www.jdcloud.com/cn/activity/year-end?utm_source=DMT_cnblogs&amp;utm_medium=CH&amp;utm_campaign=q4vm&amp;utm_term=Virtual-Machines" target="_blank" onclick="ga('send', 'event', 'Link', 'click', 'T2-京东云')">【活动】京东云服务器_云主机低于1折，低价高性能产品备战双11</a><br><a href="https://www.ctyun.cn/activity/#/201910/ecs?hmsr=%E7%9C%8B%E7%9C%8B-%E5%8D%9A%E5%AE%A2%E5%9B%AD-10.16-10%E6%9C%88%E7%89%B9%E6%83%A0&amp;hmpl=&amp;hmcu=&amp;hmkw=&amp;hmci=?track=|cp:cz_blog|tgdy:46861|ttjh:shouyedingbuyoucefenlan|key:czkk12|pf:pc" target="_blank" onclick="ga('send', 'event', 'Link', 'click', 'T2-天翼云')">【推荐】天翼云双十一提前开抢，1核1G云主机3个月仅需59元</a><br><a href="https://www.huodongxing.com/event/1514061072200" target="_blank" onclick="ga('send', 'event', 'Link', 'click', 'T2-魔程')">【活动】魔程社区技术沙龙训练营—大数据主题专场等你来报名</a><br><a href="https://cloud.tencent.com/act/double11/reserve?fromSource=gwzcw.3000742.3000742.3000742&amp;utm_medium=cpc&amp;utm_id=gwzcw.3000742.3000742.3000742" target="_blank" onclick="ga('send', 'event', 'Link', 'click', 'T2-腾讯云')">【优惠】腾讯云 11.1 1智惠上云，爆款提前购与双11活动同价</a><br><a href="https://www.getui.com/2019devfest?f=5&amp;p=10&amp;c=15&amp;ch=1&amp;hmsr=%E5%8D%9A%E5%AE%A2%E5%9B%AD&amp;hmpl=2019%E5%BC%80%E5%8F%91%E8%80%85%E8%8A%82&amp;hmcu=PC&amp;hmkw=&amp;hmci=" target="_blank">【福利】个推四大热门移动开发SDK全部免费用一年，限时抢！</a><br></div>
+    <div id="opt_under_post"></div>
+    <script async="async" src="SpringCloud%E5%AE%9E%E6%88%989-Stream%E6%B6%88%E6%81%AF%E9%A9%B1%E5%8A%A8%20-%20%E5%A6%AE%E8%94%BB%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/gpt.js"></script>
+    <script>
+        var googletag = googletag || {};
+        googletag.cmd = googletag.cmd || [];
+    </script>
+    <script>
+        googletag.cmd.push(function () {
+            googletag.defineSlot("/1090369/C1", [300, 250], "div-gpt-ad-1546353474406-0").addService(googletag.pubads());
+            googletag.defineSlot("/1090369/C2", [468, 60], "div-gpt-ad-1539008685004-0").addService(googletag.pubads());
+            googletag.pubads().enableSingleRequest();
+            googletag.enableServices();
+        });
+    </script>
+    <div id="cnblogs_c1" class="c_ad_block">
+        <div id="div-gpt-ad-1546353474406-0" style="height:250px; width:300px;" data-google-query-id="CKCm9cfks-UCFYGelgodRYEA5w"><div id="google_ads_iframe_/1090369/C1_0__container__" style="border: 0pt none;"><iframe id="google_ads_iframe_/1090369/C1_0" title="3rd party ad content" name="google_ads_iframe_/1090369/C1_0" scrolling="no" marginwidth="0" marginheight="0" style="border: 0px none; vertical-align: bottom;" srcdoc="" data-google-container-id="1" data-load-complete="true" width="300" height="250" frameborder="0"></iframe></div></div>
+    </div>
+    <div id="under_post_news"><div class="recomm-block"><b>相关博文：</b><br>·  <a title="SpringCloudStream(十三)" href="https://www.cnblogs.com/LQBlog/p/10342675.html" target="_blank" onclick="clickRecomItmem(10342675)">SpringCloudStream(十三)</a><br>·  <a title="SpringCloudStream消息总线" href="https://www.cnblogs.com/toov5/p/10293900.html" target="_blank" onclick="clickRecomItmem(10293900)">SpringCloudStream消息总线</a><br>·  <a title="《springcloud五》springcloudstream" href="https://www.cnblogs.com/a1304908180/p/10684818.html" target="_blank" onclick="clickRecomItmem(10684818)">《springcloud五》springcloudstream</a><br>·  <a title="SpringCloud个人笔记-04-Stream初体验" href="https://www.cnblogs.com/youxiu326/p/stream.html" target="_blank" onclick="clickRecomItmem(10464571)">SpringCloud个人笔记-04-Stream初体验</a><br>·  <a title="使用 Spring Cloud Stream 构建消息驱动微服务" href="https://www.cnblogs.com/bigben0123/p/7885975.html" target="_blank" onclick="clickRecomItmem(7885975)">使用 Spring Cloud Stream 构建消息驱动微服务</a><br>»  <a target="_blank" href="https://recomm.cnblogs.com/r?postId=9102843&amp;index=1">更多推荐...</a></div></div>
+    <div id="cnblogs_c2" class="c_ad_block">
+        <div id="div-gpt-ad-1539008685004-0" style="height:60px; width:468px;" data-google-query-id="CKGm9cfks-UCFYGelgodRYEA5w">
+            
+        <div id="google_ads_iframe_/1090369/C2_0__container__" style="border: 0pt none;"><iframe id="google_ads_iframe_/1090369/C2_0" title="3rd party ad content" name="google_ads_iframe_/1090369/C2_0" scrolling="no" marginwidth="0" marginheight="0" style="border: 0px none; vertical-align: bottom;" srcdoc="" data-google-container-id="2" data-load-complete="true" width="468" height="60" frameborder="0"></iframe></div></div>
+    </div>
+    <div id="under_post_kb">
+<div class="itnews c_ad_block">
+    <b>最新 IT 新闻</b>:
+    <br>
+ ·              <a href="https://news.cnblogs.com/n/645595/" target="_blank">IBM 反驳 Google 的“量子霸权”说</a>
+            <br>
+ ·              <a href="https://news.cnblogs.com/n/645594/" target="_blank">双子码农</a>
+            <br>
+ ·              <a href="https://news.cnblogs.com/n/645593/" target="_blank">NASA搜索再次一无所获后 增添了印度月球着陆器的神秘感</a>
+            <br>
+ ·              <a href="https://news.cnblogs.com/n/645592/" target="_blank">报告：JavaScript 成为最受欢迎的开发技术</a>
+            <br>
+ ·              <a href="https://news.cnblogs.com/n/645591/" target="_blank">一文读懂扎克伯格听证会“攻防战”：直面两党批评 承认天秤币有风险</a>
+            <br>
+    » <a href="https://news.cnblogs.com/" title="IT 新闻" target="_blank">更多新闻...</a>
+</div></div>
+    <div id="HistoryToday" class="c_ad_block"></div>
+    <script type="text/javascript">
+        fixPostBody();
+        setTimeout(function () { incrementViewCount(cb_entryId); }, 50);
+        deliverAdT2();
+        deliverAdC1();
+        deliverAdC2();
+        loadNewsAndKb();
+        loadBlogSignature();
+LoadPostCategoriesTags(cb_blogId, cb_entryId);        LoadPostInfoBlock(cb_blogId, cb_entryId, cb_blogApp, cb_blogUserGuid);
+        GetPrevNextPost(cb_entryId, cb_blogId, cb_entryCreatedDate, cb_postType);
+        loadOptUnderPost();
+        GetHistoryToday(cb_blogId, cb_blogApp, cb_entryCreatedDate);
+    </script>
+</div>
+	</div><!--end: forFlow -->
+	</div><!--end: mainContent 主体内容容器-->
+
+	<div id="sideBar">
+		<div id="sideBarMain">
+			
+<div id="sidebar_news" class="newsItem"><!--done-->
+<h3 class="catListTitle">公告</h3>
+
+<div id="blog-news">
+    
+    <div id="profile_block">
+        昵称：
+        <a href="https://home.cnblogs.com/u/huangjuncong/">
+            妮蔻
+        </a>
+        <br>
+        园龄：
+        <a href="https://home.cnblogs.com/u/huangjuncong/" title="入园时间：2017-07-19">
+            2年3个月
+        </a>
+        <br>
+        粉丝：
+        <a href="https://home.cnblogs.com/u/huangjuncong/followers/">
+            216
+        </a>
+        <br>
+        关注：
+        <a href="https://home.cnblogs.com/u/huangjuncong/followees/">
+            19
+        </a>
+        <div id="p_b_follow">
+<a href="javascript:void(0)" onclick="follow('b15a789d-12a3-47d3-2d02-08d49c352df3')">+加关注</a></div>
+        <script>getFollowStatus('b15a789d-12a3-47d3-2d02-08d49c352df3');</script>
+    </div>
+</div>
+
+</div>
+
+			<div id="blog-calendar" style="">
+
+<table id="blogCalendar" class="Cal" title="Calendar" cellspacing="0" cellpadding="0" border="0">
+    <tbody>
+        <tr>
+            <td colspan="7">
+                <table class="CalTitle" cellspacing="0" border="0">
+                    <tbody>
+                        <tr>
+                            <td class="CalNextPrev">
+                                <a href="javascript:void(0);" onclick="loadBlogCalendar('2019/09/24'); return false;">&lt;</a>
+                            </td>
+                            <td align="center">2019年10月</td>
+                            <td class="CalNextPrev" align="right">
+                                <a href="javascript:void(0);" onclick="loadBlogCalendar('2019/11/24'); return false;">&gt;</a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </td>
+        </tr>
+        <tr>
+                    <th class="CalDayHeader" abbr="日" scope="col" align="center">日</th>
+                    <th class="CalDayHeader" abbr="一" scope="col" align="center">一</th>
+                    <th class="CalDayHeader" abbr="二" scope="col" align="center">二</th>
+                    <th class="CalDayHeader" abbr="三" scope="col" align="center">三</th>
+                    <th class="CalDayHeader" abbr="四" scope="col" align="center">四</th>
+                    <th class="CalDayHeader" abbr="五" scope="col" align="center">五</th>
+                    <th class="CalDayHeader" abbr="六" scope="col" align="center">六</th>
+        </tr>
+            <tr>
+                            <td class="CalOtherMonthDay" align="center">29</td>
+                            <td class="CalOtherMonthDay" align="center">30</td>
+                        <td class="" align="center">
+                            1
+                        </td>
+                        <td class="" align="center">
+                            2
+                        </td>
+                        <td class="" align="center">
+                            3
+                        </td>
+                        <td class="" align="center">
+                            4
+                        </td>
+                    <td class="CalWeekendDay" align="center">
+                        5
+                    </td>
+            </tr>
+                <tr>
+                        <td class="CalWeekendDay" align="center">
+                            6
+                        </td>
+                            <td class="" align="center">
+                                7
+                            </td>
+                            <td class="" align="center">
+                                8
+                            </td>
+                            <td class="" align="center">
+                                9
+                            </td>
+                            <td class="" align="center">
+                                10
+                            </td>
+                            <td class="" align="center">
+                                11
+                            </td>
+                        <td class="CalWeekendDay" align="center">
+                            12
+                        </td>
+                </tr>
+                <tr>
+                        <td class="CalWeekendDay" align="center">
+                            13
+                        </td>
+                            <td class="" align="center">
+                                14
+                            </td>
+                            <td class="" align="center">
+                                15
+                            </td>
+                            <td class="" align="center">
+                                16
+                            </td>
+                            <td class="" align="center">
+                                17
+                            </td>
+                            <td class="" align="center">
+                                18
+                            </td>
+                        <td class="CalWeekendDay" align="center">
+                            19
+                        </td>
+                </tr>
+                <tr>
+                        <td class="CalWeekendDay" align="center">
+                            20
+                        </td>
+                            <td class="" align="center">
+                                21
+                            </td>
+                            <td class="" align="center">
+                                22
+                            </td>
+                            <td class="" align="center">
+                                23
+                            </td>
+                            <td class="CalTodayDay" align="center">
+                                24
+                            </td>
+                            <td class="" align="center">
+                                25
+                            </td>
+                        <td class="CalWeekendDay" align="center">
+                            26
+                        </td>
+                </tr>
+                <tr>
+                        <td class="CalWeekendDay" align="center">
+                            27
+                        </td>
+                            <td class="" align="center">
+                                28
+                            </td>
+                            <td class="" align="center">
+                                29
+                            </td>
+                            <td class="" align="center">
+                                30
+                            </td>
+                            <td class="" align="center">
+                                31
+                            </td>
+                            <td class="CalOtherMonthDay" align="center">
+                                1
+                            </td>
+                        <td class="CalOtherMonthDay" align="center">
+                            2
+                        </td>
+                </tr>
+                <tr>
+                        <td class="CalOtherMonthDay" align="center">
+                            3
+                        </td>
+                            <td class="CalOtherMonthDay" align="center">
+                                4
+                            </td>
+                            <td class="CalOtherMonthDay" align="center">
+                                5
+                            </td>
+                            <td class="CalOtherMonthDay" align="center">
+                                6
+                            </td>
+                            <td class="CalOtherMonthDay" align="center">
+                                7
+                            </td>
+                            <td class="CalOtherMonthDay" align="center">
+                                8
+                            </td>
+                        <td class="CalOtherMonthDay" align="center">
+                            9
+                        </td>
+                </tr>
+    </tbody>
+</table></div><script>loadBlogDefaultCalendar();</script>
+			
+			<div id="leftcontentcontainer">
+				<div id="blog-sidecolumn">
+<!-- 搜索 -->
+<div id="sidebar_search" class="sidebar-block">
+    <div id="sidebar_search" class="mySearch">
+        <h3 class="catListTitle">搜索</h3>
+        <div id="sidebar_search_box">
+            <div id="widget_my_zzk" class="div_my_zzk">
+                <input type="text" id="q" onkeydown="return zzk_go_enter(event);" class="input_my_zzk">&nbsp;<input onclick="zzk_go()" type="button" value="找找看" id="btnZzk" class="btn_my_zzk">
+            </div>
+            <div id="widget_my_google" class="div_my_zzk">
+                <input type="text" name="google_q" id="google_q" onkeydown="return google_go_enter(event);" class="input_my_zzk">&nbsp;<input onclick="google_go()" type="button" value="谷歌搜索" class="btn_my_zzk">
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 常用链接 -->
+<div id="sidebar_shortcut" class="sidebar-block">
+    <div class="catListLink">
+<h3 class="catListTitle">
+常用链接
+</h3>
+<ul>
+		<li>
+
+<a href="https://www.cnblogs.com/huangjuncong/p/" title="我的博客的随笔列表">我的随笔</a>
+</li>
+		<li>
+
+<a href="https://www.cnblogs.com/huangjuncong/MyComments.html" title="我的发表过的评论列表">我的评论</a>
+</li>
+		<li>
+
+<a href="https://www.cnblogs.com/huangjuncong/OtherPosts.html" title="我评论过的随笔列表">我的参与</a>
+</li>
+		<li>
+
+<a href="https://www.cnblogs.com/huangjuncong/RecentComments.html" title="我的博客的评论列表">最新评论</a>
+</li>
+		<li>
+
+<a href="https://www.cnblogs.com/huangjuncong/tag/" title="我的博客的标签列表">我的标签</a>
+</li>
+
+</ul>
+<div id="itemListLin_con" style="display:none;">
+<ul>
+
+</ul>
+</div>
+</div>
+
+
+</div>
+
+<!-- 最新随笔 -->
+<div id="sidebar_recentposts" class="sidebar-block">
+    <div class="catListEssay">
+<h3 class="catListTitle">最新随笔</h3>
+<ul>
+                <li>
+                    
+
+<a href="https://www.cnblogs.com/huangjuncong/p/11335365.html">1.高性能MySQL之事务</a>
+
+                </li>
+                <li>
+                    
+
+<a href="https://www.cnblogs.com/huangjuncong/p/11318810.html">2.高性能MySQL之基础架构</a>
+
+                </li>
+                <li>
+                    
+
+<a href="https://www.cnblogs.com/huangjuncong/p/11029893.html">3.线程池之ScheduledThreadPoolExecutor线程池源码分析笔记</a>
+
+                </li>
+                <li>
+                    
+
+<a href="https://www.cnblogs.com/huangjuncong/p/10031525.html">4.线程池之ThreadPoolExecutor线程池源码分析笔记</a>
+
+                </li>
+                <li>
+                    
+
+<a href="https://www.cnblogs.com/huangjuncong/p/9478505.html">5.Java并发编程笔记之ConcurrentHashMap原理探究</a>
+
+                </li>
+                <li>
+                    
+
+<a href="https://www.cnblogs.com/huangjuncong/p/9465414.html">6.JDK源码分析之hashmap就这么简单理解</a>
+
+                </li>
+                <li>
+                    
+
+<a href="https://www.cnblogs.com/huangjuncong/p/9427905.html">7.JVM笔记11-类加载器和OSGI</a>
+
+                </li>
+                <li>
+                    
+
+<a href="https://www.cnblogs.com/huangjuncong/p/9425603.html">8.JVM笔记10-性能优化之高级特性</a>
+
+                </li>
+                <li>
+                    
+
+<a href="https://www.cnblogs.com/huangjuncong/p/9324072.html">9.Java并发编程笔记之基础总结(二)</a>
+
+                </li>
+                <li>
+                    
+
+<a href="https://www.cnblogs.com/huangjuncong/p/9323717.html">10.Java并发编程笔记之基础总结(一)</a>
+
+                </li>
+			
+
+</ul>
+</div>
+
+
+</div>
+
+
+<!-- 我的标签 -->
+<div id="sidebar_toptags" class="sidebar-block">
+    <div class="catListTag">
+<h3 class="catListTitle">我的标签</h3>
+<ul>
+
+        <li>
+            <a href="https://www.cnblogs.com/huangjuncong/tag/Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/">Java并发编程</a>(28)
+        </li>
+        <li>
+            <a href="https://www.cnblogs.com/huangjuncong/tag/JVM/">JVM</a>(12)
+        </li>
+        <li>
+            <a href="https://www.cnblogs.com/huangjuncong/tag/SpringCloud/">SpringCloud</a>(10)
+        </li>
+        <li>
+            <a href="https://www.cnblogs.com/huangjuncong/tag/nignx/">nignx</a>(6)
+        </li>
+        <li>
+            <a href="https://www.cnblogs.com/huangjuncong/tag/redis/">redis</a>(5)
+        </li>
+        <li>
+            <a href="https://www.cnblogs.com/huangjuncong/tag/MySQL%E5%A4%9A%E6%95%B0%E6%8D%AE%E6%BA%90/">MySQL多数据源</a>(5)
+        </li>
+        <li>
+            <a href="https://www.cnblogs.com/huangjuncong/tag/ActiveMq/">ActiveMq</a>(3)
+        </li>
+        <li>
+            <a href="https://www.cnblogs.com/huangjuncong/tag/Zookeeper/">Zookeeper</a>(3)
+        </li>
+        <li>
+            <a href="https://www.cnblogs.com/huangjuncong/tag/%E5%88%86%E5%B8%83%E5%BC%8F%E4%B8%AD%E9%97%B4%E4%BB%B6/">分布式中间件</a>(2)
+        </li>
+        <li>
+            <a href="https://www.cnblogs.com/huangjuncong/tag/%E9%AB%98%E6%80%A7%E8%83%BDMySql/">高性能MySql</a>(2)
+        </li>
+            <li>
+                <a href="https://www.cnblogs.com/huangjuncong/tag/">更多</a>
+            </li>
+
+</ul>
+</div>
+
+
+</div>
+
+<!-- 积分与排名 -->
+<div id="sidebar_scorerank" class="sidebar-block">
+    <div class="catListBlogRank">
+<h3 class="catListTitle">积分与排名</h3>
+<ul>
+	<li class="liScore">
+		积分 -	
+95301
+	</li>
+	<li class="liRank">
+		排名 -	
+6017
+	</li>
+</ul>
+</div>
+
+
+
+
+</div>
+
+<!-- 随笔分类、随笔档案、文章分类、新闻分类、相册、链接 -->
+<div id="sidebar_categories">
+    
+        <div id="sidebar_postcategory" class="catListPostCategory sidebar-block">
+            <h3 class="catListTitle">
+                
+
+随笔分类
+<span style="font-size:11px;font-weight:normal">(0)</span>
+
+
+            </h3>
+
+
+            <ul>
+
+                        <li>
+                            
+<a href="https://www.cnblogs.com/huangjuncong/category/1179982.html" rel="" target="">
+    BF算法
+</a>
+ 
+
+                        </li>
+                        <li>
+                            
+<a href="https://www.cnblogs.com/huangjuncong/category/1179981.html" rel="" target="">
+    KMP算法
+</a>
+ 
+
+                        </li>
+                        <li>
+                            
+<a href="https://www.cnblogs.com/huangjuncong/category/1179980.html" rel="" target="">
+    二叉树的线索化
+</a>
+ 
+
+                        </li>
+
+            </ul>
+
+
+        </div>
+        <div id="sidebar_postarchive" class="catListPostArchive sidebar-block">
+            <h3 class="catListTitle">
+                
+
+随笔档案
+<span style="font-size:11px;font-weight:normal">(89)</span>
+
+
+            </h3>
+
+
+            <ul>
+
+                        <li>
+                            
+<a href="https://www.cnblogs.com/huangjuncong/archive/2019/08.html" rel="" target="">
+    2019年8月(2)
+</a>
+ 
+
+                        </li>
+                        <li>
+                            
+<a href="https://www.cnblogs.com/huangjuncong/archive/2019/06.html" rel="" target="">
+    2019年6月(1)
+</a>
+ 
+
+                        </li>
+                        <li>
+                            
+<a href="https://www.cnblogs.com/huangjuncong/archive/2019/05.html" rel="" target="">
+    2019年5月(1)
+</a>
+ 
+
+                        </li>
+                        <li>
+                            
+<a href="https://www.cnblogs.com/huangjuncong/archive/2018/08.html" rel="" target="">
+    2018年8月(4)
+</a>
+ 
+
+                        </li>
+                        <li>
+                            
+<a href="https://www.cnblogs.com/huangjuncong/archive/2018/07.html" rel="" target="">
+    2018年7月(9)
+</a>
+ 
+
+                        </li>
+                        <li>
+                            
+<a href="https://www.cnblogs.com/huangjuncong/archive/2018/06.html" rel="" target="">
+    2018年6月(13)
+</a>
+ 
+
+                        </li>
+                        <li>
+                            
+<a href="https://www.cnblogs.com/huangjuncong/archive/2018/05.html" rel="" target="">
+    2018年5月(12)
+</a>
+ 
+
+                        </li>
+                        <li>
+                            
+<a href="https://www.cnblogs.com/huangjuncong/archive/2018/04.html" rel="" target="">
+    2018年4月(1)
+</a>
+ 
+
+                        </li>
+                        <li>
+                            
+<a href="https://www.cnblogs.com/huangjuncong/archive/2018/03.html" rel="" target="">
+    2018年3月(15)
+</a>
+ 
+
+                        </li>
+                        <li>
+                            
+<a href="https://www.cnblogs.com/huangjuncong/archive/2018/02.html" rel="" target="">
+    2018年2月(9)
+</a>
+ 
+
+                        </li>
+                        <li>
+                            
+<a href="https://www.cnblogs.com/huangjuncong/archive/2018/01.html" rel="" target="">
+    2018年1月(11)
+</a>
+ 
+
+                        </li>
+                        <li>
+                            
+<a href="https://www.cnblogs.com/huangjuncong/archive/2017/12.html" rel="" target="">
+    2017年12月(7)
+</a>
+ 
+
+                        </li>
+                        <li>
+                            
+<a href="https://www.cnblogs.com/huangjuncong/archive/2017/07.html" rel="" target="">
+    2017年7月(4)
+</a>
+ 
+
+                        </li>
+
+            </ul>
+
+
+        </div>
+        <div id="sidebar_imagecategory" class="catListImageCategory sidebar-block">
+            <h3 class="catListTitle">
+                
+
+相册
+<span style="font-size:11px;font-weight:normal">(2)</span>
+
+
+            </h3>
+
+
+            <ul>
+
+                        <li>
+                            
+<a href="https://www.cnblogs.com/huangjuncong/gallery/1181075.html" rel="nofollow noopener noreferrer" target="">
+    11(2)
+</a>
+ 
+
+                        </li>
+
+            </ul>
+
+
+        </div>
+
+</div>
+
+<!-- 最新评论 -->
+<div id="sidebar_recentcomments" class="sidebar-block">
+    <div class="catListComment">
+<h3 class="catListTitle">最新评论</h3>
+
+	<div class="RecentCommentBlock">
+        <ul>
+                    <li class="recent_comment_title"><a href="https://www.cnblogs.com/huangjuncong/p/9060984.html#4393473">1. Re:SpringCloud实战6-Zuul网关服务</a></li>
+                    <li class="recent_comment_body">@ 王行天下sup...</li>
+                    <li class="recent_comment_author">--妮蔻</li>
+                    <li class="recent_comment_title"><a href="https://www.cnblogs.com/huangjuncong/p/9060984.html#4393454">2. Re:SpringCloud实战6-Zuul网关服务</a></li>
+                    <li class="recent_comment_body">楼主时mid 还是sup</li>
+                    <li class="recent_comment_author">--王行天下</li>
+                    <li class="recent_comment_title"><a href="https://www.cnblogs.com/huangjuncong/p/9160713.html#4348232">3. Re:Java并发编程笔记之CopyOnWriteArrayList源码分析</a></li>
+                    <li class="recent_comment_body">分析的透彻明白，先大致看一遍源码再过来看详细讲解很有收获，nice</li>
+                    <li class="recent_comment_author">--恒星照地球</li>
+                    <li class="recent_comment_title"><a href="https://www.cnblogs.com/huangjuncong/p/9026949.html#4331242">4. Re:SpringCloud实战3-Hystrix请求熔断与服务降级</a></li>
+                    <li class="recent_comment_body">学习。</li>
+                    <li class="recent_comment_author">--NewSea</li>
+                    <li class="recent_comment_title"><a href="https://www.cnblogs.com/huangjuncong/p/11335365.html#4323942">5. Re:高性能MySQL之事务</a></li>
+                    <li class="recent_comment_body">支持支持</li>
+                    <li class="recent_comment_author">--牛腩</li>
+        </ul>
+    </div>
+</div>
+
+
+</div>
+
+
+
+<!-- 阅读排行榜 -->
+<div id="sidebar_topviewedposts" class="sidebar-block">
+    <div class="catListView">
+<h3 class="catListTitle">阅读排行榜</h3>
+	<div id="TopViewPostsBlock">
+        <ul style="word-break:break-all">
+                    <li>
+                        <a href="https://www.cnblogs.com/huangjuncong/p/9053576.html">
+                            1. SpringCloud实战5-Feign声明式服务调用(58668)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/huangjuncong/p/9060984.html">
+                            2. SpringCloud实战6-Zuul网关服务(41396)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/huangjuncong/p/9077099.html">
+                            3. SpringCloud实战8-Bus消息总线(33843)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/huangjuncong/p/9026949.html">
+                            4. SpringCloud实战3-Hystrix请求熔断与服务降级(31867)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/huangjuncong/p/9102843.html">
+                            5. SpringCloud实战9-Stream消息驱动(23007)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/huangjuncong/p/8494295.html">
+                            6. Redis笔记5-redis高可用方案(14114)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/huangjuncong/p/9020474.html">
+                            7. SpringCloud实战1-Eureka(12101)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/huangjuncong/p/9069749.html">
+                            8. SpringCloud实战7-Config分布式配置管理(11232)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/huangjuncong/p/9022055.html">
+                            9. SpringCloud实战2-Ribbon客户端负载均衡(10905)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/huangjuncong/p/9478505.html">
+                            10. Java并发编程笔记之ConcurrentHashMap原理探究(9262)
+                        </a>
+                    </li>
+        </ul>
+    </div>
+</div>
+
+
+</div>
+
+<!-- 评论排行榜 -->
+<div id="sidebar_topcommentedposts" class="sidebar-block">
+    <div class="catListFeedback">
+<h3 class="catListTitle">评论排行榜</h3>
+	<div id="TopFeedbackPostsBlock">
+        <ul style="word-break:break-all">
+                    <li>
+                        <a href="https://www.cnblogs.com/huangjuncong/p/9102843.html">
+                            1. SpringCloud实战9-Stream消息驱动(8)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/huangjuncong/p/9060984.html">
+                            2. SpringCloud实战6-Zuul网关服务(6)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/huangjuncong/p/8596017.html">
+                            3. MySQL多数据源笔记4-Mycat中间件实战(5)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/huangjuncong/p/9300064.html">
+                            4. Java并发编程笔记之SimpleDateFormat源码分析(5)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/huangjuncong/p/11335365.html">
+                            5. 高性能MySQL之事务(4)
+                        </a>
+                    </li>
+        </ul>
+    </div>
+</div>
+
+
+</div>
+
+<!-- 推荐排行榜 -->
+<div id="sidebar_topdiggedposts" class="sidebar-block">
+    
+<div id="topdigg_posts_wrap">
+    <div class="catListView">
+        <h3 class="catListTitle">推荐排行榜</h3>
+        <div id="TopDiggPostsBlock">
+            <ul style="word-break: break-all">
+                        <li>
+                            <a href="https://www.cnblogs.com/huangjuncong/p/9026949.html">
+                                1. SpringCloud实战3-Hystrix请求熔断与服务降级(7)
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://www.cnblogs.com/huangjuncong/p/9060984.html">
+                                2. SpringCloud实战6-Zuul网关服务(6)
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://www.cnblogs.com/huangjuncong/p/9077099.html">
+                                3. SpringCloud实战8-Bus消息总线(4)
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://www.cnblogs.com/huangjuncong/p/9022055.html">
+                                4. SpringCloud实战2-Ribbon客户端负载均衡(3)
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://www.cnblogs.com/huangjuncong/p/9478505.html">
+                                5. Java并发编程笔记之ConcurrentHashMap原理探究(3)
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://www.cnblogs.com/huangjuncong/p/9465414.html">
+                                6. JDK源码分析之hashmap就这么简单理解(3)
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://www.cnblogs.com/huangjuncong/p/9300064.html">
+                                7. Java并发编程笔记之SimpleDateFormat源码分析(3)
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://www.cnblogs.com/huangjuncong/p/9196240.html">
+                                8. Java并发编程笔记之ConcurrentLinkedQueue源码探究(3)
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://www.cnblogs.com/huangjuncong/p/9191760.html">
+                                9. Java并发编程笔记之StampedLock锁源码探究(3)
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://www.cnblogs.com/huangjuncong/p/9160713.html">
+                                10. Java并发编程笔记之CopyOnWriteArrayList源码分析(2)
+                            </a>
+                        </li>
+            </ul>
+        </div>
+    </div>
+</div>
+</div></div>
+                    <script>loadBlogSideColumn();</script>
+			</div>
+			
+		</div><!--end: sideBarMain -->
+	</div><!--end: sideBar 侧边栏容器 -->
+	<div class="clear"></div>
+	</div><!--end: main -->
+	<div class="clear"></div>
+	<div id="footer">
+		<!--done-->
+Copyright © 2019 妮蔻
+<br><span id="poweredby">Powered by .NET Core 3.0.0 on Linux</span>
+
+
+
+	</div><!--end: footer -->
+</div><!--end: home 自定义的最大容器 -->
+
+
+    
+
+
+</body></html>

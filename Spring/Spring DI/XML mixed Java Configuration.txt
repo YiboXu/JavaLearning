@@ -1,0 +1,58 @@
+﻿1. 定义xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd">
+	
+	<bean id="myClass3" class="soundsystem.MyClass3" />
+
+</beans>
+
+2. 定义configuration
+package soundsystem;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.ImportResource;
+
+@Configuration
+@ComponentScan
+@ImportResource("classpath:sample.xml")       ====>导入xml
+public class CDPlayerConfig {
+	
+	@Bean
+	public MyClass1 my1() {
+		return new MyClass1();
+	}
+	
+	@Bean
+	public MyClass2 my2() {
+		return new MyClass2(my1());
+	}
+}
+
+3. 调用
+package soundsystem;
+
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+
+public class Test1 {
+	
+	public static void main(String[] args) {
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(CDPlayerConfig.class);
+		context.getBean(MediaPlayer.class).play();
+		context.getBean(MyClass.class).foo();
+		context.getBean(MyClass.class).foo();
+		context.getBean(MyClass1.class).foo();
+		context.getBean(MyClass2.class).foo();;
+		
+		//获取定义在xml里面的MyClass3.class
+		context.getBean(MyClass3.class).play();
+		
+		context.close();
+	}
+}
+

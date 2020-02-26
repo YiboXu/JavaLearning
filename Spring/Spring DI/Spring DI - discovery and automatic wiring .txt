@@ -1,0 +1,171 @@
+﻿1. 依赖注入的三种方式
+Explicit configuration in XML
+Explicit configuration in Java
+Implicit bean discovery and automatic wiring
+
+
+第三种： Implicit bean discovery and automatic wiring
+
+- 定义接口
+package soundsystem;
+
+public interface CompactDisc {
+	
+	void play();
+}
+
+package soundsystem;
+
+public interface MediaPlayer {
+	
+	void play();
+}
+
+- 定义bean
+package soundsystem;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+@Component
+public class CDPlayer implements MediaPlayer{
+
+	private CompactDisc cd;
+	
+	@Autowired          ====>spring在实例化这个类的时候，会自动从注释了@Component的类里面找CompactDisc来配置给这个CDPlayer构造函数，所以注意同一个包下对于接口CompactDisc实现的类只能有一个，如果需要多个，可以通过spring profile来控制具体用哪一个
+	public CDPlayer(CompactDisc cd) {
+		this.cd = cd;
+	}
+
+	@Override
+	public void play() {
+		// TODO Auto-generated method stub
+		cd.play();
+	}
+}
+
+package soundsystem;
+
+import org.springframework.stereotype.Component;
+
+@Component
+public class SgtPeppers implements CompactDisc {
+	private String title = "Sgt. Pepper's Lonely Hearts Club Band";
+	private String artist = "The Beatles";
+
+	public void play() {
+		System.out.println("Playing " + title + " by " + artist);
+	}
+}
+
+package soundsystem;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+@Component
+public class MyClass {
+	
+	private MediaPlayer player;
+	
+	@Autowired
+	public MyClass(MediaPlayer player) {
+		this.player = player;
+	}
+	
+	public void foo() {
+		player.play();
+	}
+}
+
+@Autowired可以添加到：
+1. 构造函数： 类被实例化的时候，就会注入依赖的Bean来完成实例化
+2. 其他方法： 方法被调用的时候就会注入依赖的Bean来完成方法调用
+
+如果找不到需要的Bean,spring就会报异常，如果想避免spring包这样的异常，可以定义@Autowired(required=false)， 但是这样就需要函数本身对空值得检测，否则会出现NullPointerExceptions
+如果找到多个满足条件的Bean,spring也会报异常。
+
+- 定义Java configuration
+package soundsystem;
+
+import org.springframework.context.annotation.ComponentScan;
+
+@Configuration        =====>表明这是一个configuration的类，用于实例化spring上下文。AnnotationConfigApplicationContext 
+@ComponentScan        =====>用来让spring自动扫描本类所在包(soundsystem)中所有被注释了@Component的类
+public class CDPlayerConfig {    ======>里面也可以添加注解@Bean来通过Explicit configuration in Java(第二种方式）来配置Bean
+}
+
+如果希望扫描这个config class包以外的Bean,有几种方式：
+
+1. 指定ComponentScan的value
+@Configuration
+@ComponentScan("soundsystem")
+public class CDPlayerConfig {}
+
+2. 指定basePackages，这种方式可以指定多个包
+@Configuration
+@ComponentScan(basePackages={"soundsystem", "video"})
+public class CDPlayerConfig {}
+
+3.指定basePackageClasses， 只要是包含CDPlayer.class, DVDPlayer.class的包，都会被扫描。
+@Configuration
+@ComponentScan(basePackageClasses={CDPlayer.class, DVDPlayer.class})
+public class CDPlayerConfig {}
+
+- 如果是通过xml来配置Bean,那么就在xml文件中加上<context:component-scan base-package="soundsystem" />, 这个是和在config class中添加注解@ComponentScan一样的效果。
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+	http://www.springframework.org/schema/beans/spring-beans.xsd
+	http://www.springframework.org/schema/context
+	http://www.springframework.org/schema/context/spring-context.xsd">
+
+<context:component-scan base-package="soundsystem" />
+
+</beans>
+
+- 执行
+package soundsystem;
+
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+
+public class Test1 {
+	
+	public static void main(String[] args) {
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(CDPlayerConfig.class);
+		context.getBean(MediaPlayer.class).play();
+		context.getBean(MyClass.class).foo();
+		context.close();
+	}
+}
+
+
+这里AnnotationConfigApplicationContext 读取了CDPlayerConfig.class的设置
+这种方式和第二种Explicit configuration in Java的区别在于：
+1. 定义的Bean里面添加了@Autowired来自动注入
+2. 定义的config class里面添加了@ComponentScan 来自动扫描本config class所以在包下的所有注解了@Component的Bean
+
+==========================================================================================
+注意一点，通过任何一种方式注入的类，都是同一个实例。比如你获取多个Knight， 其实都是同一个Knight实例。
+==========================================================================================
+
+如果对代码可控，就采用第三种。
+如果用第三方代码，那么需要用第二种，因为你没有办法去修改第三方代码去加上这些需要的注解
+For instance, let’s say that you
+want to wire components from some third-party library into your application.
+Because you don’t have the source code for that library, there’s no opportunity to
+annotate its classes with @Component and @Autowired. Therefore, automatic configuration
+isn’t an option.
+
+JavaConfig is the preferred option for explicit configuration
+because it’s more powerful, type-safe, and refactor-friendly. That’s because it’s just
+Java code, like any other Java code in your application.
+At the same time, it’s important to recognize that JavaConfig code isn’t just any
+other Java code. It’s conceptually set apart from the business logic and domain code
+in your application. Even though it’s expressed in the same language as those components,
+JavaConfig is configuration code. This means it shouldn’t contain any business
+logic, nor should JavaConfig invade any code where business logic resides. In fact,
+although it’s not required, JavaConfig is often set apart in a separate package from
+the rest of an application’s logic so there’s no confusion as to its purpose.

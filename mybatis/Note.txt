@@ -1,0 +1,101 @@
+1. 启动mysql
+docker run --name some-mysql -e MYSQL_ROOT_PASSWORD=123456 -p 3306:3306 -d mysql
+
+2. 进入mysql
+docker exec -it some-mysql bash
+
+mysql -uroot -p123456
+
+use mysql;
+ALTER USER 'root'@'%' IDENTIFIED WITH mysql_native_password BY '123456';
+这一句比较重要，放开root登入权限，如果你要在其他的主机用root用户登入到数据库就需要写入这句话。其他的语句就是建表操作和插入数据的操作了。
+
+3. 创建一个测试DB及表
+create database test;
+use test;
+create table user
+(
+    id int auto_increment primary key,
+    username varchar(64) unique not null,
+    email varchar(120) unique not null,
+    password_hash varchar(128) not null,
+    avatar varchar(128) not null
+);
+insert into user values(1, "zhangsan","test12345@qq.com","passwd","avaterpath");
+insert into user values(2, "lisi","12345test@qq.com","passwd","avaterpath");
+
+4. 创建数据库
+create database mybatis default character set utf8 collate utf8_general_ci; 
+collate 表示数据库验证， utf8_general_ci表示验证规则， 里面的ci表示case insensitive的缩写,意思是大小写不敏感;相对的是cs,即case sensitive,大小写敏感;
+
+5 #{} ${}
+
+动态sql是mybatis的强大特性之一也是这个框架优于其他框架的一个原因，mybatis在对sql进行预编译之前会对sql语句进行动态解析，#{}和${} 则会有不同的表现：
+1.#{}在动态解析的时候回解析成 一个参数的标记符，会将sql中的#{}解析替换成一个？，最后注入的值是带引号的，例如：
+
+解析前：select * from user where name = #{name}
+解析后：select * from user where name = '姓名'
+
+    1
+    2
+
+2.#{}是字符串替换，mybatis在处理${}时就是把它替换成变量的值，例如：
+
+解析前：select * from user where name = ${name}
+解析后：select * from user where name = 姓名
+
+    1
+    2
+
+3.#{}防止sql注入：
+#方式能够很大程度的防止sql注入。而$无法防止sql注入，所以在使用的时候用的比较多的是#{}来传参数
+至于#能够防止sql注入是因为mybatis中的sql语句是预编译机制，预编译是提前对sql语句进行编译，而编译后传入的参数将不会再执行编译，一般的sql注入都是在编译的过程中被恶意注入了某些特殊字符，而预编译机制则可以很好的防止sql注入。
+
+6.使用lazyLoadTriggerMethods
+
+ 
+
+lazyLoadTriggerMethods默认情况下仅仅支持自动将equals,clone,hashCode,toString这几个方法定义为延迟加载的加载触发方法。
+
+如果将Person的doLazyLoadingNow()方法加入这个列表中，则调用doLazyLoadingNow()方法将会导致Person上的所有延迟加载属性的关联对象被执行加载。
+
+ 
+
+ 在SqlMapConfig.xml中配置了doLazyLoadingNow方法。
+
+<setting name="lazyLoadTriggerMethods" value="doLazyLoadingNow,equals,clone,hashCode,toString" />
+
+ 
+
+7 缓存
+<cache eviction="FIFO" flushInterval="60000" size="512" readOnly="false" />
+
+需要注意的是，
+如果配置的是可读写的缓存 (readOnly="false")，MyBatis将使用SerializedCache 
+序列化缓存来实现可读写缓存类，并通过序列化和反序列化来保证通过缓存获取数据时，得到的是一个新的实例。
+如果配置为只读缓存(readOnly="true")， MyBatis 就会使用Map 来存储缓存值， 这种
+情况下，从缓存中获取的对象就是同一个实例。
+
+二级缓存适用场景
+二级缓存虽然好处很多，但并不是什么时候都可以使用。在以下场景中，推荐使用二级缓存。
+以查询为主的应用中，只有尽可能少的增、删、改操作。
+绝大多数以单表操作存在时，由于很少存在互相关联的情况，因此不会出现脏数据。
+可以按业务划分对表进行分组时， 如关联的表比较少，可以通过参照缓存进行配置。
+除了推荐使用的情况，如果脏读对系统没有影响，也可以考虑使用。在无法保证数据不出
+现脏读的情况下， 建议在业务层使用可控制的缓存代替二级缓存。
+
+8 我们都知道数据库会提供一些加锁的语句来人为对数据库表进行加锁，接下来就尝试在Mybatis中动态对数据库的表进行加锁操作。
+
+首先我们需要设置数据库可以同时执行多条语句，即在配置文件中的数据库url的后面加上allowMultiQueries=true，这样我们就可以在Mybatis的mapper.xml的标签中写入多行SQL语句来执行。
+
+"jdbc:mysql://localhost:3306/xxx?allowMultiQueries=true"
+
+
+接着我们随意找一个Mybatis的xml文件，在任意一句标签中的SQL前面多加一句“LOCK TABLE users READ”。
+
+<mapper namespace="hello.UserMapper">
+    <select id="getUser" parameterType="int" resultType="hello.User">
+        LOCK TABLE users READ;
+        select * from users where id=#{id};
+    </select>
+</mapper>

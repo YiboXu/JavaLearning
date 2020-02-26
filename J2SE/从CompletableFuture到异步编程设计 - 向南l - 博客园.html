@@ -1,0 +1,1232 @@
+<!DOCTYPE html>
+<html lang="zh-cn"><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="origin">
+    <meta property="og:description" content="从CompletableFuture到异步编程设计，笔者就分为2部分来分享CompletableFuture异步编程设计，前半部分总结下CompletableFuture使用实践，后半部分分享下Com">
+    <meta http-equiv="Cache-Control" content="no-transform">
+    <meta http-equiv="Cache-Control" content="no-siteapp">
+    <title>从CompletableFuture到异步编程设计 - 向南l - 博客园</title>
+    
+    <link rel="stylesheet" href="%E4%BB%8ECompletableFuture%E5%88%B0%E5%BC%82%E6%AD%A5%E7%BC%96%E7%A8%8B%E8%AE%BE%E8%AE%A1%20-%20%E5%90%91%E5%8D%97l%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/blog-common.css">
+    
+    <link type="text/css" rel="stylesheet" href="%E4%BB%8ECompletableFuture%E5%88%B0%E5%BC%82%E6%AD%A5%E7%BC%96%E7%A8%8B%E8%AE%BE%E8%AE%A1%20-%20%E5%90%91%E5%8D%97l%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/custom.css">
+    <link id="mobile-style" media="only screen and (max-width: 767px)" type="text/css" rel="stylesheet" href="%E4%BB%8ECompletableFuture%E5%88%B0%E5%BC%82%E6%AD%A5%E7%BC%96%E7%A8%8B%E8%AE%BE%E8%AE%A1%20-%20%E5%90%91%E5%8D%97l%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/bundle-moonlightink-mobile.css">
+    
+    <link type="application/rss+xml" rel="alternate" href="https://www.cnblogs.com/xiangnanl/rss">
+    <link type="application/rsd+xml" rel="EditURI" href="https://www.cnblogs.com/xiangnanl/rsd.xml">
+    <link type="application/wlwmanifest+xml" rel="wlwmanifest" href="https://www.cnblogs.com/xiangnanl/wlwmanifest.xml">
+    <script src="%E4%BB%8ECompletableFuture%E5%88%B0%E5%BC%82%E6%AD%A5%E7%BC%96%E7%A8%8B%E8%AE%BE%E8%AE%A1%20-%20%E5%90%91%E5%8D%97l%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/amp4ads-host-v0.js"></script><script src="%E4%BB%8ECompletableFuture%E5%88%B0%E5%BC%82%E6%AD%A5%E7%BC%96%E7%A8%8B%E8%AE%BE%E8%AE%A1%20-%20%E5%90%91%E5%8D%97l%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/pubads_impl_rendering_2019100301.js"></script><script async="" src="%E4%BB%8ECompletableFuture%E5%88%B0%E5%BC%82%E6%AD%A5%E7%BC%96%E7%A8%8B%E8%AE%BE%E8%AE%A1%20-%20%E5%90%91%E5%8D%97l%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/analytics.js"></script><script type="text/javascript" src="%E4%BB%8ECompletableFuture%E5%88%B0%E5%BC%82%E6%AD%A5%E7%BC%96%E7%A8%8B%E8%AE%BE%E8%AE%A1%20-%20%E5%90%91%E5%8D%97l%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/encoder.js"></script><script src="%E4%BB%8ECompletableFuture%E5%88%B0%E5%BC%82%E6%AD%A5%E7%BC%96%E7%A8%8B%E8%AE%BE%E8%AE%A1%20-%20%E5%90%91%E5%8D%97l%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/jquery-2.js"></script>
+    <script src="%E4%BB%8ECompletableFuture%E5%88%B0%E5%BC%82%E6%AD%A5%E7%BC%96%E7%A8%8B%E8%AE%BE%E8%AE%A1%20-%20%E5%90%91%E5%8D%97l%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/blog-common.js"></script>
+    <script>
+        var currentBlogId = 469635;
+        var currentBlogApp = 'xiangnanl';
+        var cb_enable_mathjax = false;
+        var isLogined = false;
+    </script>
+    
+    
+    
+<link rel="preload" href="%E4%BB%8ECompletableFuture%E5%88%B0%E5%BC%82%E6%AD%A5%E7%BC%96%E7%A8%8B%E8%AE%BE%E8%AE%A1%20-%20%E5%90%91%E5%8D%97l%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/integrator.js" as="script"><script type="text/javascript" src="%E4%BB%8ECompletableFuture%E5%88%B0%E5%BC%82%E6%AD%A5%E7%BC%96%E7%A8%8B%E8%AE%BE%E8%AE%A1%20-%20%E5%90%91%E5%8D%97l%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/integrator.js"></script><script src="%E4%BB%8ECompletableFuture%E5%88%B0%E5%BC%82%E6%AD%A5%E7%BC%96%E7%A8%8B%E8%AE%BE%E8%AE%A1%20-%20%E5%90%91%E5%8D%97l%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/pubads_impl_2019100301.js" async=""></script></head>
+<body>
+    <a name="top"></a>
+    <div id="page_begin_html">
+        <a class="git-link" href="https://github.com/luoxn28"></a>
+    </div>
+    
+<!--done-->
+<div id="home">
+<div id="header">
+	<div id="blogTitle">
+        <a id="lnkBlogLogo" href="https://www.cnblogs.com/xiangnanl/"><img id="blogLogo" src="%E4%BB%8ECompletableFuture%E5%88%B0%E5%BC%82%E6%AD%A5%E7%BC%96%E7%A8%8B%E8%AE%BE%E8%AE%A1%20-%20%E5%90%91%E5%8D%97l%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/logo.gif" alt="返回主页"></a>		
+		
+<!--done-->
+<h1><a id="Header1_HeaderTitle" class="headermaintitle HeaderMainTitle" href="https://www.cnblogs.com/xiangnanl/">向南l</a>
+</h1>
+<h2>
+该来的终究会来，而且比想象的更快！
+</h2>
+
+
+
+
+		
+	</div><!--end: blogTitle 博客的标题和副标题 -->
+	<div id="navigator">
+		
+<ul id="navList">
+<li><a id="blog_nav_sitehome" class="menu" href="https://www.cnblogs.com/">
+博客园</a>
+</li>
+<li>
+<a id="blog_nav_myhome" class="menu" href="https://www.cnblogs.com/xiangnanl/">
+首页</a>
+</li>
+<li>
+
+<a id="blog_nav_newpost" class="menu" href="https://i.cnblogs.com/EditPosts.aspx?opt=1">
+新随笔</a>
+</li>
+<li>
+<a id="blog_nav_contact" class="menu" href="https://msg.cnblogs.com/send/%E5%90%91%E5%8D%97l">
+联系</a></li>
+<li>
+<a id="blog_nav_rss" class="menu" href="https://www.cnblogs.com/xiangnanl/rss/">
+订阅</a>
+<!--<partial name="./Shared/_XmlLink.cshtml" model="Model" /></li>--></li>
+<li>
+<a id="blog_nav_admin" class="menu" href="https://i.cnblogs.com/">
+管理</a>
+</li>
+</ul>
+
+
+		<div class="blogStats">
+			
+			<span id="stats_post_count">随笔 - 
+6&nbsp; </span>
+<span id="stats_article_count">文章 - 
+0&nbsp; </span>
+<span id="stats-comment_count">评论 - 
+13</span>
+
+			
+		</div><!--end: blogStats -->
+	</div><!--end: navigator 博客导航栏 -->
+</div><!--end: header 头部 -->
+
+<div id="main">
+	<div id="mainContent">
+	<div class="forFlow">
+		<div id="post_detail">
+    <!--done-->
+    <div id="topics">
+        <div class="post">
+            <h1 class="postTitle">
+                
+<a id="cb_post_title_url" class="postTitle2" href="https://www.cnblogs.com/xiangnanl/p/9939447.html">从CompletableFuture到异步编程设计</a>
+
+            </h1>
+            <div class="clear"></div>
+            <div class="postBody">
+                
+<div id="cnblogs_post_body" class="blogpost-body ">
+    <blockquote>
+<p>从CompletableFuture到异步编程设计，笔者就分为2部分来分享CompletableFuture异步编程设计，前半部分总结下CompletableFuture使用实践，后半部分分享下CompletableFuture实现原理和异步编程设计机制。</p>
+<p>（ps：本文内容较多，请耐心阅读。如果读者了解CompletableFuture使用的话，可以直接看后半部分内容；如果熟悉
+CompletableFuture及异步编程设计的话，可以直接翻到文档末尾点个“推荐”就好了，因为你已经掌握了Java异步设计精髓了 :) 
+，若有不正确地方，感谢评论区指正交流~&nbsp;）</p>
+</blockquote>
+<p>Java8新增了CompletableFuture类，该类实现了CompletionStage和Future接口，简化了Java异步编程能力，该类方法较多，其实套路只有一个，那就是任务执行完成之后执行“回调”。</p>
+<h2>CompletableFuture使用实践</h2>
+<p>Java8新增的CompletableFuture 
+提供对异步计算的支持，可以通过回调的方式处理计算结果。CompletableFuture 
+类实现了CompletionStage和Future接口，所以还可以像之前使用Future那样使用CompletableFuture 
+，尽管已不再推荐这样用了。</p>
+<p><strong>CompletableFuture的创建</strong></p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="%E4%BB%8ECompletableFuture%E5%88%B0%E5%BC%82%E6%AD%A5%E7%BC%96%E7%A8%8B%E8%AE%BE%E8%AE%A1%20-%20%E5%90%91%E5%8D%97l%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre><span style="color: #008000;">//</span><span style="color: #008000;"> 创建一个带result的CompletableFuture</span>
+CompletableFuture&lt;String&gt; future = CompletableFuture.completedFuture("result"<span style="color: #000000;">);
+future.get();
+ 
+</span><span style="color: #008000;">//</span><span style="color: #008000;"> 默认创建的CompletableFuture是没有result的，这时调用future.get()会一直阻塞下去知道有result或者出现异常</span>
+future = <span style="color: #0000ff;">new</span> CompletableFuture&lt;&gt;<span style="color: #000000;">();
+</span><span style="color: #0000ff;">try</span><span style="color: #000000;"> {
+    future.get(</span>1<span style="color: #000000;">, TimeUnit.SECONDS);
+} </span><span style="color: #0000ff;">catch</span><span style="color: #000000;"> (Exception e) {
+    </span><span style="color: #008000;">//</span><span style="color: #008000;"> no care</span>
+<span style="color: #000000;">}
+ 
+</span><span style="color: #008000;">//</span><span style="color: #008000;"> 给future填充一个result</span>
+future.complete("result"<span style="color: #000000;">);
+</span><span style="color: #0000ff;">assert</span> "result"<span style="color: #000000;">.equals(future.get());
+ 
+</span><span style="color: #008000;">//</span><span style="color: #008000;"> 给future填充一个异常</span>
+future = <span style="color: #0000ff;">new</span> CompletableFuture&lt;&gt;<span style="color: #000000;">();
+future.completeExceptionally(</span><span style="color: #0000ff;">new</span> RuntimeException("exception"<span style="color: #000000;">));
+</span><span style="color: #0000ff;">try</span><span style="color: #000000;"> {
+    future.get();
+} </span><span style="color: #0000ff;">catch</span><span style="color: #000000;"> (Exception e) {
+    </span><span style="color: #0000ff;">assert</span> "exception"<span style="color: #000000;">.equals(e.getCause().getMessage());
+}</span></pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="%E4%BB%8ECompletableFuture%E5%88%B0%E5%BC%82%E6%AD%A5%E7%BC%96%E7%A8%8B%E8%AE%BE%E8%AE%A1%20-%20%E5%90%91%E5%8D%97l%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p>上面的示例是自己设置future的result，一般情况下我们都是让其他线程或者线程池来执行future这些异步任务。除了直接创建
+CompletableFuture 对象外（不推荐这样使用），还可以使用如下4个方法创建CompletableFuture 对象：</p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="%E4%BB%8ECompletableFuture%E5%88%B0%E5%BC%82%E6%AD%A5%E7%BC%96%E7%A8%8B%E8%AE%BE%E8%AE%A1%20-%20%E5%90%91%E5%8D%97l%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre><span style="color: #008000;">//</span><span style="color: #008000;"> runAsync是Runnable任务，不带返回值的，如果入参有executor，则使用executor来执行异步任务</span>
+<span style="color: #0000ff;">public</span> <span style="color: #0000ff;">static</span> CompletableFuture&lt;Void&gt;<span style="color: #000000;">  runAsync(Runnable runnable)
+</span><span style="color: #0000ff;">public</span> <span style="color: #0000ff;">static</span> CompletableFuture&lt;Void&gt;<span style="color: #000000;">  runAsync(Runnable runnable, Executor executor)
+</span><span style="color: #008000;">//</span><span style="color: #008000;"> supplyAsync是待返回结果的异步任务</span>
+<span style="color: #0000ff;">public</span> <span style="color: #0000ff;">static</span> &lt;U&gt; CompletableFuture&lt;U&gt;  supplyAsync(Supplier&lt;U&gt;<span style="color: #000000;"> supplier)
+</span><span style="color: #0000ff;">public</span> <span style="color: #0000ff;">static</span> &lt;U&gt; CompletableFuture&lt;U&gt;  supplyAsync(Supplier&lt;U&gt;<span style="color: #000000;"> supplier, Executor executor)
+
+</span><span style="color: #008000;">//</span><span style="color: #008000;"> 使用示例</span>
+CompletableFuture.runAsync(() -&gt;<span style="color: #000000;"> {
+    System.out.println(</span>"hello world"<span style="color: #000000;">);
+}, executor);
+CompletableFuture.supplyAsync(() </span>-&gt;<span style="color: #000000;"> {
+    System.out.println(</span>"hello world"<span style="color: #000000;">);
+    </span><span style="color: #0000ff;">return</span> "result"<span style="color: #000000;">;
+});</span></pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="%E4%BB%8ECompletableFuture%E5%88%B0%E5%BC%82%E6%AD%A5%E7%BC%96%E7%A8%8B%E8%AE%BE%E8%AE%A1%20-%20%E5%90%91%E5%8D%97l%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p>如果入参不带executor，则默认使用ForkJoinPool.commonPool()作为执行异步任务的线程池；否则使用executor执行任务。</p>
+<p><strong>CompletableFuture的完成动作</strong></p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="%E4%BB%8ECompletableFuture%E5%88%B0%E5%BC%82%E6%AD%A5%E7%BC%96%E7%A8%8B%E8%AE%BE%E8%AE%A1%20-%20%E5%90%91%E5%8D%97l%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre><span style="color: #0000ff;">public</span> CompletableFuture&lt;T&gt;     whenComplete(BiConsumer&lt;? <span style="color: #0000ff;">super</span> T,? <span style="color: #0000ff;">super</span> Throwable&gt;<span style="color: #000000;"> action)
+</span><span style="color: #0000ff;">public</span> CompletableFuture&lt;T&gt;     whenCompleteAsync(BiConsumer&lt;? <span style="color: #0000ff;">super</span> T,? <span style="color: #0000ff;">super</span> Throwable&gt;<span style="color: #000000;"> action)
+</span><span style="color: #0000ff;">public</span> CompletableFuture&lt;T&gt;     whenCompleteAsync(BiConsumer&lt;? <span style="color: #0000ff;">super</span> T,? <span style="color: #0000ff;">super</span> Throwable&gt;<span style="color: #000000;"> action, Executor executor)
+</span><span style="color: #0000ff;">public</span> CompletableFuture&lt;T&gt;     exceptionally(Function&lt;Throwable,? <span style="color: #0000ff;">extends</span> T&gt;<span style="color: #000000;"> fn)
+
+</span><span style="color: #008000;">//</span><span style="color: #008000;"> 使用示例</span>
+CompletableFuture.supplyAsync(() -&gt;<span style="color: #000000;"> {
+    System.out.println(</span>"hello world"<span style="color: #000000;">);
+    </span><span style="color: #0000ff;">return</span> "result"<span style="color: #000000;">;
+}).whenCompleteAsync((result, e) </span>-&gt;<span style="color: #000000;"> {
+    System.out.println(result </span>+ " " +<span style="color: #000000;"> e);
+}).exceptionally((e) </span>-&gt;<span style="color: #000000;"> {
+    System.out.println(</span>"exception " +<span style="color: #000000;"> e);
+    </span><span style="color: #0000ff;">return</span> "exception"<span style="color: #000000;">;
+});</span></pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="%E4%BB%8ECompletableFuture%E5%88%B0%E5%BC%82%E6%AD%A5%E7%BC%96%E7%A8%8B%E8%AE%BE%E8%AE%A1%20-%20%E5%90%91%E5%8D%97l%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p>action是Action类型，从上面可以看出它既可以处理正常返回值也可以处理异常，whenComplete会在任务执行完成后直接在当前线
+程内执行action动作，后缀带Async的方法是交给其他线程执行action（如果是线程池，执行action的可能和之前执行异步任务的是同一个
+线程），入参带executor的交给executor线程池来执行action动作，当发生异常时，会在当前线程内执行exceptionally方
+法。</p>
+<p>除了用上面的whenComplete来执行完成动作之外，还可以使用handle方法，该方法可以返回一个新的CompletableFuture的返回类型。</p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="%E4%BB%8ECompletableFuture%E5%88%B0%E5%BC%82%E6%AD%A5%E7%BC%96%E7%A8%8B%E8%AE%BE%E8%AE%A1%20-%20%E5%90%91%E5%8D%97l%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre><span style="color: #0000ff;">public</span> &lt;U&gt; CompletableFuture&lt;U&gt;  handle(BiFunction&lt;? <span style="color: #0000ff;">super</span> T,Throwable,? <span style="color: #0000ff;">extends</span> U&gt;<span style="color: #000000;"> fn)
+</span><span style="color: #0000ff;">public</span> &lt;U&gt; CompletableFuture&lt;U&gt;  handleAsync(BiFunction&lt;? <span style="color: #0000ff;">super</span> T,Throwable,? <span style="color: #0000ff;">extends</span> U&gt;<span style="color: #000000;"> fn)
+</span><span style="color: #0000ff;">public</span> &lt;U&gt; CompletableFuture&lt;U&gt;  handleAsync(BiFunction&lt;? <span style="color: #0000ff;">super</span> T,Throwable,? <span style="color: #0000ff;">extends</span> U&gt;<span style="color: #000000;"> fn, Executor executor)
+
+</span><span style="color: #008000;">//</span><span style="color: #008000;"> handle方法示例：</span>
+CompletableFuture&lt;String&gt; f1 = CompletableFuture.supplyAsync(() -&gt;<span style="color: #000000;"> {
+    System.out.println(</span>"hello world"<span style="color: #000000;">);
+    </span><span style="color: #0000ff;">return</span> "result"<span style="color: #000000;">;
+});
+CompletableFuture</span>&lt;Integer&gt; f2 = f1.handle((r, e) -&gt;<span style="color: #000000;"> {
+    System.out.println(</span>"handle"<span style="color: #000000;">);
+    </span><span style="color: #0000ff;">return</span> 1<span style="color: #000000;">;
+});</span></pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="%E4%BB%8ECompletableFuture%E5%88%B0%E5%BC%82%E6%AD%A5%E7%BC%96%E7%A8%8B%E8%AE%BE%E8%AE%A1%20-%20%E5%90%91%E5%8D%97l%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p>&nbsp;除了使用handle方法来执行CompletableFuture返回类型转换之外，还可以使用thenApply方法，二者不同的是前者会处理正常返回值和异常，因此可以屏蔽异常，避免继续抛出；而后者只能处理正常返回值，一旦有异常就会抛出。</p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="%E4%BB%8ECompletableFuture%E5%88%B0%E5%BC%82%E6%AD%A5%E7%BC%96%E7%A8%8B%E8%AE%BE%E8%AE%A1%20-%20%E5%90%91%E5%8D%97l%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre><span style="color: #0000ff;">public</span> &lt;U&gt; CompletableFuture&lt;U&gt;  thenApply(Function&lt;? <span style="color: #0000ff;">super</span> T,? <span style="color: #0000ff;">extends</span> U&gt;<span style="color: #000000;"> fn)
+</span><span style="color: #0000ff;">public</span> &lt;U&gt; CompletableFuture&lt;U&gt;  thenApplyAsync(Function&lt;? <span style="color: #0000ff;">super</span> T,? <span style="color: #0000ff;">extends</span> U&gt;<span style="color: #000000;"> fn)
+</span><span style="color: #0000ff;">public</span> &lt;U&gt; CompletableFuture&lt;U&gt;  thenApplyAsync(Function&lt;? <span style="color: #0000ff;">super</span> T,? <span style="color: #0000ff;">extends</span> U&gt;<span style="color: #000000;"> fn, Executor executor)
+
+</span><span style="color: #008000;">//</span><span style="color: #008000;"> thenApply方法示例：</span>
+CompletableFuture.supplyAsync(() -&gt;<span style="color: #000000;"> {
+    System.out.println(</span>"hello world"<span style="color: #000000;">);
+    </span><span style="color: #0000ff;">return</span> "result"<span style="color: #000000;">;
+}).thenApply((r) </span>-&gt;<span style="color: #000000;"> {
+    System.out.println(r);
+    </span><span style="color: #0000ff;">return</span> "aaa"<span style="color: #000000;">;
+}).thenApply((r) </span>-&gt;<span style="color: #000000;"> {
+    System.out.println(r);
+    </span><span style="color: #0000ff;">return</span> 1<span style="color: #000000;">;
+});</span></pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="%E4%BB%8ECompletableFuture%E5%88%B0%E5%BC%82%E6%AD%A5%E7%BC%96%E7%A8%8B%E8%AE%BE%E8%AE%A1%20-%20%E5%90%91%E5%8D%97l%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p>注意，上面的handle、thenApply都是返回新的CompletableFuture类型，如果只是为了在
+CompletableFuture完成之后执行某些消费动作，而不返回新的CompletableFuture类型，则可以使用thenAccept方
+法。</p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="%E4%BB%8ECompletableFuture%E5%88%B0%E5%BC%82%E6%AD%A5%E7%BC%96%E7%A8%8B%E8%AE%BE%E8%AE%A1%20-%20%E5%90%91%E5%8D%97l%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre><span style="color: #0000ff;">public</span> CompletableFuture&lt;Void&gt;  thenAccept(Consumer&lt;? <span style="color: #0000ff;">super</span> T&gt;<span style="color: #000000;"> action)
+</span><span style="color: #0000ff;">public</span> CompletableFuture&lt;Void&gt;  thenAcceptAsync(Consumer&lt;? <span style="color: #0000ff;">super</span> T&gt;<span style="color: #000000;"> action)
+</span><span style="color: #0000ff;">public</span> CompletableFuture&lt;Void&gt;  thenAcceptAsync(Consumer&lt;? <span style="color: #0000ff;">super</span> T&gt;<span style="color: #000000;"> action, Executor executor)
+
+</span><span style="color: #008000;">//</span><span style="color: #008000;"> thenAccept方法示例：</span>
+CompletableFuture.supplyAsync(() -&gt;<span style="color: #000000;"> {
+    System.out.println(</span>"hello world"<span style="color: #000000;">);
+    </span><span style="color: #0000ff;">return</span> "result"<span style="color: #000000;">;
+}).thenAccept(r </span>-&gt;<span style="color: #000000;"> {
+    System.out.println(r);
+}).thenAccept(r </span>-&gt;<span style="color: #000000;"> {
+    </span><span style="color: #008000;">//</span><span style="color: #008000;"> 这里的r为Void（null）了</span>
+<span style="color: #000000;">    System.out.println(r);
+});</span></pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="%E4%BB%8ECompletableFuture%E5%88%B0%E5%BC%82%E6%AD%A5%E7%BC%96%E7%A8%8B%E8%AE%BE%E8%AE%A1%20-%20%E5%90%91%E5%8D%97l%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p>上面的handle、thenApply和thenAppept都是对上一个CompletableFuture执行完的结果进行某些操作。那么可
+不可以同时对2个CompletableFuture执行结果执行某些操作呢？其实也是可以的，使用thenAppeptBoth方法即可。注
+意，thenAppeptBoth和handle/thenApply/thenAppep的流程是一样的，只不过thenAppeptBoth中包含了
+另一个CompletableFuture对象（注意，这里另一个CompletableFuture对象的执行可并不是上一个
+CompletableFuture执行结束才开始执行的）。</p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="%E4%BB%8ECompletableFuture%E5%88%B0%E5%BC%82%E6%AD%A5%E7%BC%96%E7%A8%8B%E8%AE%BE%E8%AE%A1%20-%20%E5%90%91%E5%8D%97l%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre><span style="color: #0000ff;">public</span> &lt;U&gt; CompletableFuture&lt;Void&gt;   thenAcceptBoth(CompletionStage&lt;? <span style="color: #0000ff;">extends</span> U&gt; other, BiConsumer&lt;? <span style="color: #0000ff;">super</span> T,? <span style="color: #0000ff;">super</span> U&gt;<span style="color: #000000;"> action)
+</span><span style="color: #0000ff;">public</span> &lt;U&gt; CompletableFuture&lt;Void&gt;   thenAcceptBothAsync(CompletionStage&lt;? <span style="color: #0000ff;">extends</span> U&gt; other, BiConsumer&lt;? <span style="color: #0000ff;">super</span> T,? <span style="color: #0000ff;">super</span> U&gt;<span style="color: #000000;"> action)
+</span><span style="color: #0000ff;">public</span> &lt;U&gt; CompletableFuture&lt;Void&gt;   thenAcceptBothAsync(CompletionStage&lt;? <span style="color: #0000ff;">extends</span> U&gt; other, BiConsumer&lt;? <span style="color: #0000ff;">super</span> T,? <span style="color: #0000ff;">super</span> U&gt;<span style="color: #000000;"> action, Executor executor)
+</span><span style="color: #0000ff;">public</span>     CompletableFuture&lt;Void&gt;  runAfterBoth(CompletionStage&lt;?&gt;<span style="color: #000000;"> other,  Runnable action)
+
+
+</span><span style="color: #008000;">//</span><span style="color: #008000;"> thenAcceptBoth方法示例：</span>
+CompletableFuture.supplyAsync(() -&gt;<span style="color: #000000;"> {
+    System.out.println(</span>"hello world"<span style="color: #000000;">);
+    </span><span style="color: #0000ff;">return</span> "result"<span style="color: #000000;">;
+}).thenAcceptBoth(CompletableFuture.completedFuture(</span>"result2"), (r1, r2) -&gt;<span style="color: #000000;"> {
+    System.out.println(r1 </span>+ "-" +<span style="color: #000000;"> r2);
+});</span></pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="%E4%BB%8ECompletableFuture%E5%88%B0%E5%BC%82%E6%AD%A5%E7%BC%96%E7%A8%8B%E8%AE%BE%E8%AE%A1%20-%20%E5%90%91%E5%8D%97l%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p>注意，thenAcceptBoth方法是没有返回值的（CompletableFuture&lt;Void&gt;），如果想用
+thenAcceptBoth这样的功能并且还带有返回值的CompletableFuture，那么thenCombine方法就该上场了。</p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="%E4%BB%8ECompletableFuture%E5%88%B0%E5%BC%82%E6%AD%A5%E7%BC%96%E7%A8%8B%E8%AE%BE%E8%AE%A1%20-%20%E5%90%91%E5%8D%97l%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre><span style="color: #0000ff;">public</span> &lt;U,V&gt; CompletableFuture&lt;V&gt;    thenCombine(CompletionStage&lt;? <span style="color: #0000ff;">extends</span> U&gt; other, BiFunction&lt;? <span style="color: #0000ff;">super</span> T,? <span style="color: #0000ff;">super</span> U,? <span style="color: #0000ff;">extends</span> V&gt;<span style="color: #000000;"> fn)
+</span><span style="color: #0000ff;">public</span> &lt;U,V&gt; CompletableFuture&lt;V&gt;    thenCombineAsync(CompletionStage&lt;? <span style="color: #0000ff;">extends</span> U&gt; other, BiFunction&lt;? <span style="color: #0000ff;">super</span> T,? <span style="color: #0000ff;">super</span> U,? <span style="color: #0000ff;">extends</span> V&gt;<span style="color: #000000;"> fn)
+</span><span style="color: #0000ff;">public</span> &lt;U,V&gt; CompletableFuture&lt;V&gt;    thenCombineAsync(CompletionStage&lt;? <span style="color: #0000ff;">extends</span> U&gt; other, BiFunction&lt;? <span style="color: #0000ff;">super</span> T,? <span style="color: #0000ff;">super</span> U,? <span style="color: #0000ff;">extends</span> V&gt;<span style="color: #000000;"> fn, Executor executor)
+
+</span><span style="color: #008000;">//</span><span style="color: #008000;"> thenCombine方法示例</span>
+CompletableFuture.supplyAsync(() -&gt;<span style="color: #000000;"> {
+    System.out.println(</span>"hello world"<span style="color: #000000;">);
+    </span><span style="color: #0000ff;">return</span> "result"<span style="color: #000000;">;
+}).thenCombine(CompletableFuture.completedFuture(</span>"result2"), (r1, r2) -&gt;<span style="color: #000000;"> {
+    System.out.println(r1 </span>+ "-" +<span style="color: #000000;"> r2);
+    </span><span style="color: #0000ff;">return</span> r1 + "-" +<span style="color: #000000;"> r2;
+});</span></pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="%E4%BB%8ECompletableFuture%E5%88%B0%E5%BC%82%E6%AD%A5%E7%BC%96%E7%A8%8B%E8%AE%BE%E8%AE%A1%20-%20%E5%90%91%E5%8D%97l%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p>thenAcceptBoth和runAfterBoth是当两个CompletableFuture都计算完成，而下面的方法是当任意一个CompletableFuture计算完成的时候就会执行。</p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="%E4%BB%8ECompletableFuture%E5%88%B0%E5%BC%82%E6%AD%A5%E7%BC%96%E7%A8%8B%E8%AE%BE%E8%AE%A1%20-%20%E5%90%91%E5%8D%97l%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre><span style="color: #0000ff;">public</span> CompletableFuture&lt;Void&gt;  acceptEither(CompletionStage&lt;? <span style="color: #0000ff;">extends</span> T&gt; other, Consumer&lt;? <span style="color: #0000ff;">super</span> T&gt;<span style="color: #000000;"> action)
+</span><span style="color: #0000ff;">public</span> CompletableFuture&lt;Void&gt;  acceptEitherAsync(CompletionStage&lt;? <span style="color: #0000ff;">extends</span> T&gt; other, Consumer&lt;? <span style="color: #0000ff;">super</span> T&gt;<span style="color: #000000;"> action)
+</span><span style="color: #0000ff;">public</span> CompletableFuture&lt;Void&gt;  acceptEitherAsync(CompletionStage&lt;? <span style="color: #0000ff;">extends</span> T&gt; other, Consumer&lt;? <span style="color: #0000ff;">super</span> T&gt;<span style="color: #000000;"> action, Executor executor)
+ 
+</span><span style="color: #0000ff;">public</span> &lt;U&gt; CompletableFuture&lt;U&gt;  applyToEither(CompletionStage&lt;? <span style="color: #0000ff;">extends</span> T&gt; other, Function&lt;? <span style="color: #0000ff;">super</span> T,U&gt;<span style="color: #000000;"> fn)
+</span><span style="color: #0000ff;">public</span> &lt;U&gt; CompletableFuture&lt;U&gt;  applyToEitherAsync(CompletionStage&lt;? <span style="color: #0000ff;">extends</span> T&gt; other, Function&lt;? <span style="color: #0000ff;">super</span> T,U&gt;<span style="color: #000000;"> fn)
+</span><span style="color: #0000ff;">public</span> &lt;U&gt; CompletableFuture&lt;U&gt;  applyToEitherAsync(CompletionStage&lt;? <span style="color: #0000ff;">extends</span> T&gt; other, Function&lt;? <span style="color: #0000ff;">super</span> T,U&gt; fn, Executor executor)</pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="%E4%BB%8ECompletableFuture%E5%88%B0%E5%BC%82%E6%AD%A5%E7%BC%96%E7%A8%8B%E8%AE%BE%E8%AE%A1%20-%20%E5%90%91%E5%8D%97l%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p>如果当想在多个CompletableFuture都计算完成或者多个CompletableFuture中的一个计算完成后执行某个动作，可使用方法 allOf 和 anyOf。</p>
+<div class="cnblogs_code">
+<pre><span style="color: #0000ff;">public</span> <span style="color: #0000ff;">static</span> CompletableFuture&lt;Void&gt;      allOf(CompletableFuture&lt;?&gt;<span style="color: #000000;">... cfs)
+</span><span style="color: #0000ff;">public</span> <span style="color: #0000ff;">static</span> CompletableFuture&lt;Object&gt;    anyOf(CompletableFuture&lt;?&gt;... cfs)</pre>
+</div>
+<p>如果当任务完成时并不想用CompletableFuture的结果，可以使用thenRun方法来执行一个Runnable。</p>
+<div class="cnblogs_code">
+<pre><span style="color: #0000ff;">public</span> CompletableFuture&lt;Void&gt;<span style="color: #000000;">  thenRun(Runnable action)
+</span><span style="color: #0000ff;">public</span> CompletableFuture&lt;Void&gt;<span style="color: #000000;">  thenRunAsync(Runnable action)
+</span><span style="color: #0000ff;">public</span> CompletableFuture&lt;Void&gt;  thenRunAsync(Runnable action, Executor executor)</pre>
+</div>
+<p>以上方法都是在方法中返回一个值（或者不返回值），其实还可以返回一个CompletableFuture，是不是很像类的组合一样。</p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="%E4%BB%8ECompletableFuture%E5%88%B0%E5%BC%82%E6%AD%A5%E7%BC%96%E7%A8%8B%E8%AE%BE%E8%AE%A1%20-%20%E5%90%91%E5%8D%97l%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre><span style="color: #0000ff;">public</span> &lt;U&gt; CompletableFuture&lt;U&gt;  thenCompose(Function&lt;? <span style="color: #0000ff;">super</span> T,? <span style="color: #0000ff;">extends</span> CompletionStage&lt;U&gt;&gt;<span style="color: #000000;"> fn)
+</span><span style="color: #0000ff;">public</span> &lt;U&gt; CompletableFuture&lt;U&gt;  thenComposeAsync(Function&lt;? <span style="color: #0000ff;">super</span> T,? <span style="color: #0000ff;">extends</span> CompletionStage&lt;U&gt;&gt;<span style="color: #000000;"> fn)
+</span><span style="color: #0000ff;">public</span> &lt;U&gt; CompletableFuture&lt;U&gt;  thenComposeAsync(Function&lt;? <span style="color: #0000ff;">super</span> T,? <span style="color: #0000ff;">extends</span> CompletionStage&lt;U&gt;&gt;<span style="color: #000000;"> fn, Executor executor)
+
+</span><span style="color: #008000;">//</span><span style="color: #008000;"> thenCompose方法示例：</span>
+CompletableFuture.supplyAsync(() -&gt;<span style="color: #000000;"> {
+    System.out.println(</span>"hello world"<span style="color: #000000;">);
+    </span><span style="color: #0000ff;">return</span> "result"<span style="color: #000000;">;
+}).thenCompose(r </span>-&gt;<span style="color: #000000;"> {
+    System.out.println(r);
+    </span><span style="color: #0000ff;">return</span> CompletableFuture.supplyAsync(() -&gt;<span style="color: #000000;"> {
+        System.out.println(r </span>+ " result2"<span style="color: #000000;">);
+        </span><span style="color: #0000ff;">return</span> r + " result2"<span style="color: #000000;">;
+    });
+});
+
+</span><span style="color: #008000;">//</span><span style="color: #008000;"> 上面的代码和下面的代码效果是一样的</span>
+CompletableFuture.supplyAsync(() -&gt;<span style="color: #000000;"> {
+    System.out.println(</span>"hello world"<span style="color: #000000;">);
+    </span><span style="color: #0000ff;">return</span> "result"<span style="color: #000000;">;
+}).thenApply(r </span>-&gt;<span style="color: #000000;"> {
+    System.out.println(r);
+    </span><span style="color: #0000ff;">return</span><span style="color: #000000;"> r;
+}).thenApplyAsync(r </span>-&gt;<span style="color: #000000;"> {
+    System.out.println(r </span>+ " result2"<span style="color: #000000;">);
+    </span><span style="color: #0000ff;">return</span> r + " result2"<span style="color: #000000;">;
+});</span></pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="%E4%BB%8ECompletableFuture%E5%88%B0%E5%BC%82%E6%AD%A5%E7%BC%96%E7%A8%8B%E8%AE%BE%E8%AE%A1%20-%20%E5%90%91%E5%8D%97l%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<h2>&nbsp;CompletableFuture实现机制</h2>
+<p>先抛开&nbsp;CompletableFuture 不谈，如果程序中使用了线程池，如何才能在某个任务执行完成之后执行某些动作呢？其实Java线程池本身已经提供了任务执行前后的hook方法（beforeExecute和afterExecute），如下：</p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="%E4%BB%8ECompletableFuture%E5%88%B0%E5%BC%82%E6%AD%A5%E7%BC%96%E7%A8%8B%E8%AE%BE%E8%AE%A1%20-%20%E5%90%91%E5%8D%97l%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre><span style="color: #0000ff;">public</span> <span style="color: #0000ff;">class</span> ThreadPoolExecutor <span style="color: #0000ff;">extends</span><span style="color: #000000;"> AbstractExecutorService {
+    </span><span style="color: #008000;">//</span><span style="color: #008000;"> ...</span>
+    <span style="color: #0000ff;">protected</span> <span style="color: #0000ff;">void</span><span style="color: #000000;"> beforeExecute(Thread t, Runnable r) { }
+    </span><span style="color: #0000ff;">protected</span> <span style="color: #0000ff;">void</span><span style="color: #000000;"> afterExecute(Runnable r, Throwable t) { }
+    </span><span style="color: #008000;">//</span><span style="color: #008000;"> ...</span>
+}</pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="%E4%BB%8ECompletableFuture%E5%88%B0%E5%BC%82%E6%AD%A5%E7%BC%96%E7%A8%8B%E8%AE%BE%E8%AE%A1%20-%20%E5%90%91%E5%8D%97l%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p>我们只需要自定义线程池继承ThreadPoolExecutor ，然后重写beforeExecute和afterExecute方法即可，在afterExecute里可以执行一些动作。关于重写ThreadPoolExecutor&nbsp;的一个示例可点击<a href="https://github.com/luoxn28/freetool/blob/master/src/main/java/com/luo/free/tool/thread/ListenableThreadPoolExecutor.java" target="_blank">ListenableThreadPoolExecutor</a>查看。</p>
+<p>那么CompletableFuture 的实现机制是怎样的呢？其实，和上面的所说的“afterExecute机制”是类似的（本质是一样的，回调机制），也是在任务执行完成后执行某些动作，如下代码：</p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="%E4%BB%8ECompletableFuture%E5%88%B0%E5%BC%82%E6%AD%A5%E7%BC%96%E7%A8%8B%E8%AE%BE%E8%AE%A1%20-%20%E5%90%91%E5%8D%97l%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre>CompletableFuture.supplyAsync(() -&gt;<span style="color: #000000;"> {
+    </span><span style="color: #008000;">//</span><span style="color: #008000;"> callable任务</span>
+    System.out.println("hello world"<span style="color: #000000;">);
+    </span><span style="color: #0000ff;">return</span> "result"<span style="color: #000000;">;
+}).thenApply(r </span>-&gt;<span style="color: #000000;"> {
+    </span><span style="color: #008000;">//</span><span style="color: #008000;"> 任务完成之后的动作（回调方法），类似于ThreadPoolExecutor.afterExecute方法</span>
+<span style="color: #000000;">    System.out.println(r);
+    </span><span style="color: #0000ff;">return</span><span style="color: #000000;"> r;
+});</span></pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="%E4%BB%8ECompletableFuture%E5%88%B0%E5%BC%82%E6%AD%A5%E7%BC%96%E7%A8%8B%E8%AE%BE%E8%AE%A1%20-%20%E5%90%91%E5%8D%97l%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p>上面的示例代码其实主要完成了3个步骤，这3个步骤其实也是CompletableFuture的实现流程：</p>
+<ol>
+<li>执行任务</li>
+<li>添加任务完成之后的动作（回调方法）</li>
+<li>执行回调</li>
+</ol>
+<p>下面笔者就以上面的示例代码，按照这3个步骤依次进行分析，此时建议读者打开idea，写个demo进行debug，这里篇幅有限，笔者就只讲解主要流程代码，其他代码自行阅读即可 :)&nbsp;</p>
+<p><strong>1、执行任务</strong></p>
+<p>&nbsp;执行任务的主要逻辑就是&nbsp;AsyncSupply.run 方法：</p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="%E4%BB%8ECompletableFuture%E5%88%B0%E5%BC%82%E6%AD%A5%E7%BC%96%E7%A8%8B%E8%AE%BE%E8%AE%A1%20-%20%E5%90%91%E5%8D%97l%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre><span style="color: #0000ff;">public</span> <span style="color: #0000ff;">void</span><span style="color: #000000;"> run() {
+    CompletableFuture</span>&lt;T&gt; d; Supplier&lt;T&gt;<span style="color: #000000;"> f;
+    </span><span style="color: #008000;">//</span><span style="color: #008000;"> dep是当前CompletableFuture，fn是任务执行逻辑</span>
+    <span style="color: #0000ff;">if</span> ((d = dep) != <span style="color: #0000ff;">null</span> &amp;&amp; (f = fn) != <span style="color: #0000ff;">null</span><span style="color: #000000;">) {
+        dep </span>= <span style="color: #0000ff;">null</span>; fn = <span style="color: #0000ff;">null</span><span style="color: #000000;">;
+        </span><span style="color: #0000ff;">if</span> (d.result == <span style="color: #0000ff;">null</span><span style="color: #000000;">) {
+            </span><span style="color: #0000ff;">try</span><span style="color: #000000;"> {
+                </span><span style="color: #008000;">//</span><span style="color: #008000;"> 1 任务执行 &amp; result cas设置</span>
+<span style="color: #000000;">                d.completeValue(f.get());
+            } </span><span style="color: #0000ff;">catch</span><span style="color: #000000;"> (Throwable ex) {
+                </span><span style="color: #008000;">//</span><span style="color: #008000;"> 1.1 result cas异常设置</span>
+<span style="color: #000000;">                d.completeThrowable(ex);
+            }
+        }
+        </span><span style="color: #008000;">//</span><span style="color: #008000;"> 2 任务完成，可能涉及到回调的执行</span>
+<span style="color: #000000;">        d.postComplete();
+    }
+}</span></pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="%E4%BB%8ECompletableFuture%E5%88%B0%E5%BC%82%E6%AD%A5%E7%BC%96%E7%A8%8B%E8%AE%BE%E8%AE%A1%20-%20%E5%90%91%E5%8D%97l%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p><strong>2、添加回调</strong></p>
+<p>添加回调方法的流程是从&nbsp;thenApply 开始的：</p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="%E4%BB%8ECompletableFuture%E5%88%B0%E5%BC%82%E6%AD%A5%E7%BC%96%E7%A8%8B%E8%AE%BE%E8%AE%A1%20-%20%E5%90%91%E5%8D%97l%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre><span style="color: #0000ff;">public</span> &lt;U&gt; CompletableFuture&lt;U&gt;<span style="color: #000000;"> thenApply(
+    Function</span>&lt;? <span style="color: #0000ff;">super</span> T,? <span style="color: #0000ff;">extends</span> U&gt;<span style="color: #000000;"> fn) {
+    </span><span style="color: #0000ff;">return</span> uniApplyStage(<span style="color: #0000ff;">null</span><span style="color: #000000;">, fn);
+}
+</span><span style="color: #0000ff;">private</span> &lt;V&gt; CompletableFuture&lt;V&gt;<span style="color: #000000;"> uniApplyStage(
+    Executor e, Function</span>&lt;? <span style="color: #0000ff;">super</span> T,? <span style="color: #0000ff;">extends</span> V&gt;<span style="color: #000000;"> f) {
+    </span><span style="color: #0000ff;">if</span> (f == <span style="color: #0000ff;">null</span>) <span style="color: #0000ff;">throw</span> <span style="color: #0000ff;">new</span><span style="color: #000000;"> NullPointerException();
+    CompletableFuture</span>&lt;V&gt; d =  <span style="color: #0000ff;">new</span> CompletableFuture&lt;V&gt;<span style="color: #000000;">();
+    </span><span style="color: #0000ff;">if</span> (e != <span style="color: #0000ff;">null</span> || !d.uniApply(<span style="color: #0000ff;">this</span>, f, <span style="color: #0000ff;">null</span><span style="color: #000000;">)) {
+        </span><span style="color: #008000;">//</span><span style="color: #008000;"> 当上一个CompletableFuture未完成时，将该CompletableFuture添加
+        </span><span style="color: #008000;">//</span><span style="color: #008000;"> 到上一个CompletableFuture的statck中</span>
+        UniApply&lt;T,V&gt; c = <span style="color: #0000ff;">new</span> UniApply&lt;T,V&gt;(e, d, <span style="color: #0000ff;">this</span><span style="color: #000000;">, f);
+        push(c);
+        c.tryFire(SYNC);
+    }
+    </span><span style="color: #0000ff;">return</span><span style="color: #000000;"> d;
+}</span></pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="%E4%BB%8ECompletableFuture%E5%88%B0%E5%BC%82%E6%AD%A5%E7%BC%96%E7%A8%8B%E8%AE%BE%E8%AE%A1%20-%20%E5%90%91%E5%8D%97l%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p>CompletableFuture.statck 是&nbsp;UniCompletion 类型的，该类型如下：</p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="%E4%BB%8ECompletableFuture%E5%88%B0%E5%BC%82%E6%AD%A5%E7%BC%96%E7%A8%8B%E8%AE%BE%E8%AE%A1%20-%20%E5%90%91%E5%8D%97l%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre>UniCompletion&lt;T,V&gt;<span style="color: #000000;"> {
+    </span><span style="color: #0000ff;">volatile</span> Completion next;      <span style="color: #008000;">//</span><span style="color: #008000;"> Treiber stack link</span>
+    Executor executor;                 <span style="color: #008000;">//</span><span style="color: #008000;"> executor to use (null if none)</span>
+    CompletableFuture&lt;V&gt; dep;          <span style="color: #008000;">//</span><span style="color: #008000;"> the dependent to complete</span>
+    CompletableFuture&lt;T&gt; src;          <span style="color: #008000;">//</span><span style="color: #008000;"> source for action</span>
+}</pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="%E4%BB%8ECompletableFuture%E5%88%B0%E5%BC%82%E6%AD%A5%E7%BC%96%E7%A8%8B%E8%AE%BE%E8%AE%A1%20-%20%E5%90%91%E5%8D%97l%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p>3<strong>、执行回调</strong></p>
+<p>执行回调是从CompletableFuture.postComplete 开始的：</p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="%E4%BB%8ECompletableFuture%E5%88%B0%E5%BC%82%E6%AD%A5%E7%BC%96%E7%A8%8B%E8%AE%BE%E8%AE%A1%20-%20%E5%90%91%E5%8D%97l%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre><span style="color: #0000ff;">final</span> <span style="color: #0000ff;">void</span><span style="color: #000000;"> postComplete() {
+    </span><span style="color: #008000;">/*</span><span style="color: #008000;">
+     * On each step, variable f holds current dependents to pop
+     * and run.  It is extended along only one path at a time,
+     * pushing others to avoid unbounded recursion.
+     </span><span style="color: #008000;">*/</span><span style="color: #000000;">
+    CompletableFuture</span>&lt;?&gt; f = <span style="color: #0000ff;">this</span><span style="color: #000000;">; Completion h;
+    </span><span style="color: #0000ff;">while</span> ((h = f.stack) != <span style="color: #0000ff;">null</span> ||<span style="color: #000000;">
+           (f </span>!= <span style="color: #0000ff;">this</span> &amp;&amp; (h = (f = <span style="color: #0000ff;">this</span>).stack) != <span style="color: #0000ff;">null</span><span style="color: #000000;">)) {
+        CompletableFuture</span>&lt;?&gt;<span style="color: #000000;"> d; Completion t;
+        </span><span style="color: #008000;">//</span><span style="color: #008000;"> cas设置h.next到当前CompletableFuture.statck</span>
+        <span style="color: #0000ff;">if</span> (f.casStack(h, t =<span style="color: #000000;"> h.next)) {
+            </span><span style="color: #0000ff;">if</span> (t != <span style="color: #0000ff;">null</span><span style="color: #000000;">) {
+                </span><span style="color: #0000ff;">if</span> (f != <span style="color: #0000ff;">this</span><span style="color: #000000;">) {
+                    pushStack(h);
+                    </span><span style="color: #0000ff;">continue</span><span style="color: #000000;">;
+                }
+                h.next </span>= <span style="color: #0000ff;">null</span>;    <span style="color: #008000;">//</span><span style="color: #008000;"> detach</span>
+<span style="color: #000000;">            }
+            f </span>= (d = h.tryFire(NESTED)) == <span style="color: #0000ff;">null</span> ? <span style="color: #0000ff;">this</span><span style="color: #000000;"> : d;
+        }
+    }
+}
+
+</span><span style="color: #008000;">//</span><span style="color: #008000;"> UniAccept</span>
+<span style="color: #0000ff;">final</span> CompletableFuture&lt;Void&gt; tryFire(<span style="color: #0000ff;">int</span><span style="color: #000000;"> mode) {
+    CompletableFuture</span>&lt;Void&gt; d; CompletableFuture&lt;T&gt;<span style="color: #000000;"> a;
+    </span><span style="color: #0000ff;">if</span> ((d = dep) == <span style="color: #0000ff;">null</span> ||
+        !d.uniAccept(a = src, fn, mode &gt; 0 ? <span style="color: #0000ff;">null</span> : <span style="color: #0000ff;">this</span>)) <span style="color: #008000;">//</span><span style="color: #008000;"> 执行回调</span>
+        <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">null</span><span style="color: #000000;">;
+    dep </span>= <span style="color: #0000ff;">null</span>; src = <span style="color: #0000ff;">null</span>; fn = <span style="color: #0000ff;">null</span><span style="color: #000000;">;
+    </span><span style="color: #008000;">//</span><span style="color: #008000;"> 返回当前CompletableFuture 或者 递归调用postComplete</span>
+    <span style="color: #0000ff;">return</span><span style="color: #000000;"> d.postFire(a, mode);
+}</span></pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="%E4%BB%8ECompletableFuture%E5%88%B0%E5%BC%82%E6%AD%A5%E7%BC%96%E7%A8%8B%E8%AE%BE%E8%AE%A1%20-%20%E5%90%91%E5%8D%97l%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p>看完上面3个步骤，是不是还不太清楚多个CompletableFuture之间的执行流程呢，说实话笔者第一次看的时候也是这样的 :(，下面我们换个例子并给出图示来看：</p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="%E4%BB%8ECompletableFuture%E5%88%B0%E5%BC%82%E6%AD%A5%E7%BC%96%E7%A8%8B%E8%AE%BE%E8%AE%A1%20-%20%E5%90%91%E5%8D%97l%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre>CompletableFuture&lt;String&gt; f1 = CompletableFuture.supplyAsync(() -&gt;<span style="color: #000000;"> {
+    System.out.println(</span>"hello world f1"<span style="color: #000000;">);
+    sleep(</span>1); <span style="color: #008000;">//</span><span style="color: #008000;"> TimeUnit.SECONDS.sleep(1)</span>
+    <span style="color: #0000ff;">return</span> "result f1"<span style="color: #000000;">;
+});
+CompletableFuture</span>&lt;String&gt; f2 = f1.thenApply(r -&gt;<span style="color: #000000;"> {
+    System.out.println(r);
+    sleep(</span>1<span style="color: #000000;">);
+    </span><span style="color: #0000ff;">return</span> "f2"<span style="color: #000000;">;
+});
+CompletableFuture</span>&lt;String&gt; f3 = f2.thenApply(r -&gt;<span style="color: #000000;"> {
+    System.out.println(r);
+    sleep(</span>1<span style="color: #000000;">);
+    </span><span style="color: #0000ff;">return</span> "f2"<span style="color: #000000;">;
+});
+
+CompletableFuture</span>&lt;String&gt; f4 = f1.thenApply(r -&gt;<span style="color: #000000;"> {
+    System.out.println(r);
+    sleep(</span>1<span style="color: #000000;">);
+    </span><span style="color: #0000ff;">return</span> "f2"<span style="color: #000000;">;
+});
+CompletableFuture</span>&lt;String&gt; f5 = f4.thenApply(r -&gt;<span style="color: #000000;"> {
+    System.out.println(r);
+    sleep(</span>1<span style="color: #000000;">);
+    </span><span style="color: #0000ff;">return</span> "f2"<span style="color: #000000;">;
+});
+CompletableFuture</span>&lt;String&gt; f6 = f5.thenApply(r -&gt;<span style="color: #000000;"> {
+    System.out.println(r);
+    sleep(</span>1<span style="color: #000000;">);
+    </span><span style="color: #0000ff;">return</span> "f2"<span style="color: #000000;">;
+});</span></pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="%E4%BB%8ECompletableFuture%E5%88%B0%E5%BC%82%E6%AD%A5%E7%BC%96%E7%A8%8B%E8%AE%BE%E8%AE%A1%20-%20%E5%90%91%E5%8D%97l%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p>上面代码对应的CompletableFuture及其Completion关系如下图：</p>
+<p><img src="%E4%BB%8ECompletableFuture%E5%88%B0%E5%BC%82%E6%AD%A5%E7%BC%96%E7%A8%8B%E8%AE%BE%E8%AE%A1%20-%20%E5%90%91%E5%8D%97l%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/1518127-20181110191200979-867189297.png" alt=""></p>
+<p>结合上图和postComplete流程，可以看出执行回调的顺序是：f1 -&gt; f4 -&gt; f5 -&gt; f6 -&gt; f2 -&gt; f3。（如果这里没看懂，可以回过头再看下postComplete方法的源码~）</p>
+<h2>异步编程设计</h2>
+<p>分析完了CompletableFuture，相信大家都已经对CompletableFuture的设计与实现有了进一步的理解。那么对于异步编程有哪些实际应用场景，其本质到底是什么呢？</p>
+<p>异步处理的本质其实就是回调（系统层借助于指针来实现，准确来说是函数指针），用户提供一个回调方法，回调函数不是由该函数的实现方直接调用，而是
+在特定的事件或条件发生时由另外的一方调用的，用于对该事件或条件进行响应。从“宏观”来看，CompletableFuture的实现其实很简单，就是
+回调，即在任务执行完成之后进行回调，回调中可能涉及到其他操作，比如下一个回调或者执行下一个任务。</p>
+<p>异步编程在应用场景较多，很多语言，比如Node.js，采用回调的方式实现异步编程。Java的一些框架，比如Netty，自己扩展了Java的&nbsp;<code>Future</code>接口，提供了<code>addListener</code>等多个扩展方法：</p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="%E4%BB%8ECompletableFuture%E5%88%B0%E5%BC%82%E6%AD%A5%E7%BC%96%E7%A8%8B%E8%AE%BE%E8%AE%A1%20-%20%E5%90%91%E5%8D%97l%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre>ServerBootstrap boot = <span style="color: #0000ff;">new</span><span style="color: #000000;"> ServerBootstrap();
+boot.group(bossGroup, workerGroup)
+    .channel(NioServerSocketChannel.</span><span style="color: #0000ff;">class</span><span style="color: #000000;">)
+    .localAddress(</span>8080<span style="color: #000000;">)
+    .childHandler(</span><span style="color: #0000ff;">new</span> ChannelInitializer&lt;SocketChannel&gt;<span style="color: #000000;">() {
+        @Override
+        </span><span style="color: #0000ff;">protected</span> <span style="color: #0000ff;">void</span> initChannel(SocketChannel ch) <span style="color: #0000ff;">throws</span><span style="color: #000000;"> Exception {
+            ch.pipeline().addLast(</span><span style="color: #0000ff;">new</span><span style="color: #000000;"> EchoHandler());
+        }
+    });</span></pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="%E4%BB%8ECompletableFuture%E5%88%B0%E5%BC%82%E6%AD%A5%E7%BC%96%E7%A8%8B%E8%AE%BE%E8%AE%A1%20-%20%E5%90%91%E5%8D%97l%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p>dubbo中consumer对于RPC response的处理是基于回调机制的，Google guava也提供了通用的扩展Future:ListenableFuture、SettableFuture 以及辅助类Futures等,方便异步编程。</p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="%E4%BB%8ECompletableFuture%E5%88%B0%E5%BC%82%E6%AD%A5%E7%BC%96%E7%A8%8B%E8%AE%BE%E8%AE%A1%20-%20%E5%90%91%E5%8D%97l%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre><span style="color: #0000ff;">final</span> String name =<span style="color: #000000;"> ...;
+inFlight.add(name);
+ListenableFuture</span>&lt;Result&gt; future =<span style="color: #000000;"> service.query(name);
+future.addListener(</span><span style="color: #0000ff;">new</span><span style="color: #000000;"> Runnable() {
+  </span><span style="color: #0000ff;">public</span> <span style="color: #0000ff;">void</span><span style="color: #000000;"> run() {
+    processedCount.incrementAndGet();
+    inFlight.remove(name);
+    lastProcessed.set(name);
+    logger.info(</span>"Done with {0}"<span style="color: #000000;">, name);
+  }
+}, executor);</span></pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="%E4%BB%8ECompletableFuture%E5%88%B0%E5%BC%82%E6%AD%A5%E7%BC%96%E7%A8%8B%E8%AE%BE%E8%AE%A1%20-%20%E5%90%91%E5%8D%97l%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p>&nbsp;</p>
+<p>参考资料：</p>
+<p>1、<a href="https://colobu.com/2016/02/29/Java-CompletableFuture/" target="_blank">Java CompletableFuture 详解</a></p>
+<p>2、<a href="https://www.cnblogs.com/aniao/p/aniao_cf.html" target="_blank">https://www.cnblogs.com/aniao/p/aniao_cf.html</a></p>
+<p>3、<a href="https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/CompletableFuture.html" target="_blank">https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/CompletableFuture.html</a></p>
+</div>
+<div id="MySignature" style="display: block;"><div id="AllanboltSignature">
+<p id="PSignature" style="border-top: #e0e0e0 1px dashed; border-right: #e0e0e0 1px dashed; border-bottom: #e0e0e0 1px dashed; border-left: #e0e0e0 1px dashed; padding-top: 10px; padding-right: 10px; padding-bottom: 10px; padding-left: 60px; font-family: 微软雅黑; font-size: 14px; background: url(&quot;https://images.cnblogs.com/cnblogs_com/lloydsheng/239039/o_copyright.gif&quot;) #e5f1f4 no-repeat 1% 50%"><br>
+作者：<a href="https://github.com/luoxn28" target="_blank">向南l</a><br>
+出处：<a href="https://www.cnblogs.com/xiangnanl" target="_blank">https://www.cnblogs.com/xiangnanl</a><br>
+如果您觉得阅读本文对您有帮助，请点击一下“推荐”按钮，您的“推荐”将是我最大的写作动力！<br>
+本文版权归作者和博客园共有，欢迎转载，但未经作者同意必须保留此段声明，且在文章页面明显位置给出原文连接，否则保留追究法律责任的权利。
+</p>
+</div></div>
+<div class="clear"></div>
+<div id="blog_post_info_block"><div id="BlogPostCategory">
+    分类: 
+            <a href="https://www.cnblogs.com/xiangnanl/category/1333539.html" target="_blank">Java</a></div>
+
+
+    <div id="blog_post_info">
+<div id="green_channel">
+        <a href="javascript:void(0);" id="green_channel_digg" onclick="DiggIt(9939447,cb_blogId,1);green_channel_success(this,'谢谢推荐！');">好文要顶</a>
+        <a id="green_channel_follow" onclick="follow('6ac3bc76-b10d-407b-8ce5-08d637f1d4af');" href="javascript:void(0);">关注我</a>
+    <a id="green_channel_favorite" onclick="AddToWz(cb_entryId);return false;" href="javascript:void(0);">收藏该文</a>
+    <a id="green_channel_weibo" href="javascript:void(0);" title="分享至新浪微博" onclick="ShareToTsina()"><img src="%E4%BB%8ECompletableFuture%E5%88%B0%E5%BC%82%E6%AD%A5%E7%BC%96%E7%A8%8B%E8%AE%BE%E8%AE%A1%20-%20%E5%90%91%E5%8D%97l%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/icon_weibo_24.png" alt=""></a>
+    <a id="green_channel_wechat" href="javascript:void(0);" title="分享至微信" onclick="shareOnWechat()"><img src="%E4%BB%8ECompletableFuture%E5%88%B0%E5%BC%82%E6%AD%A5%E7%BC%96%E7%A8%8B%E8%AE%BE%E8%AE%A1%20-%20%E5%90%91%E5%8D%97l%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/wechat.png" alt=""></a>
+</div>
+<div id="author_profile">
+    <div id="author_profile_info" class="author_profile_info">
+            <a href="https://home.cnblogs.com/u/xiangnanl/" target="_blank"><img src="%E4%BB%8ECompletableFuture%E5%88%B0%E5%BC%82%E6%AD%A5%E7%BC%96%E7%A8%8B%E8%AE%BE%E8%AE%A1%20-%20%E5%90%91%E5%8D%97l%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/20181022225112.png" class="author_avatar" alt=""></a>
+        <div id="author_profile_detail" class="author_profile_info">
+            <a href="https://home.cnblogs.com/u/xiangnanl/">向南l</a><br>
+            <a href="https://home.cnblogs.com/u/xiangnanl/followees/">关注 - 7</a><br>
+            <a href="https://home.cnblogs.com/u/xiangnanl/followers/">粉丝 - 10</a>
+        </div>
+    </div>
+    <div class="clear"></div>
+    <div id="author_profile_honor"></div>
+    <div id="author_profile_follow">
+                <a href="javascript:void(0);" onclick="follow('6ac3bc76-b10d-407b-8ce5-08d637f1d4af');return false;">+加关注</a>
+    </div>
+</div>
+<div id="div_digg">
+    <div class="diggit" onclick="votePost(9939447,'Digg')">
+        <span class="diggnum" id="digg_count">4</span>
+    </div>
+    <div class="buryit" onclick="votePost(9939447,'Bury')">
+        <span class="burynum" id="bury_count">0</span>
+    </div>
+    <div class="clear"></div>
+    <div class="diggword" id="digg_tips">
+    </div>
+</div>
+
+<script type="text/javascript">
+    currentDiggType = 0;
+</script></div>
+    <div class="clear"></div>
+    <div id="post_next_prev">
+
+    <a href="https://www.cnblogs.com/xiangnanl/p/9833965.html" class="p_n_p_prefix">« </a> 上一篇：    <a href="https://www.cnblogs.com/xiangnanl/p/9833965.html" title="发布于 2018-11-05 08:45">一文弄懂“分布式锁”</a>
+    <br>
+    <a href="https://www.cnblogs.com/xiangnanl/p/9955714.html" class="p_n_p_prefix">» </a> 下一篇：    <a href="https://www.cnblogs.com/xiangnanl/p/9955714.html" title="发布于 2018-11-15 09:56">disruptor 高性能之道</a>
+
+</div>
+</div>
+            </div>
+            <div class="postDesc">posted @ 
+<span id="post-date">2018-11-11 09:04</span>&nbsp;<a href="https://www.cnblogs.com/xiangnanl/">向南l</a> 阅读(<span id="post_view_count">4235</span>) 评论(<span id="post_comment_count">1</span>) <a href="https://i.cnblogs.com/EditPosts.aspx?postid=9939447" rel="nofollow"> 编辑</a> <a href="javascript:void(0)" onclick="AddToWz(9939447); return false;">收藏</a>
+</div>
+        </div>
+	    
+	    
+    </div><!--end: topics 文章、评论容器-->
+</div>
+<script src="%E4%BB%8ECompletableFuture%E5%88%B0%E5%BC%82%E6%AD%A5%E7%BC%96%E7%A8%8B%E8%AE%BE%E8%AE%A1%20-%20%E5%90%91%E5%8D%97l%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/highlight.js"></script>
+<script>markdown_highlight();</script>
+<script>
+    var allowComments = true, cb_blogId = 469635, cb_blogApp = 'xiangnanl', cb_blogUserGuid = '6ac3bc76-b10d-407b-8ce5-08d637f1d4af';
+    var cb_entryId = 9939447, cb_entryCreatedDate = '2018-11-11 09:04', cb_postType = 1; 
+    loadViewCount(cb_entryId);
+</script><a name="!comments"></a>
+<div id="blog-comments-placeholder">
+
+<div id="comment_pager_top">
+    
+</div>
+
+<br>
+<div class="feedback_area_title">评论列表</div>
+<div class="feedbackNoItems"><div class="feedbackNoItems"></div></div>	
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+				<div class="feedbackManage">
+					&nbsp;&nbsp;
+
+<span class="comment_actions">
+    
+    
+    
+    
+</span>
+
+
+				</div>
+				
+<a href="#4111684" class="layer">#1楼</a>
+<a name="4111684" id="comment_anchor_4111684"></a>
+
+        <span id="comment-maxId" style="display:none">4111684</span>
+        <span id="comment-maxDate" style="display:none">11/11/2018 9:34:23 AM</span>
+ 
+<span class="comment_date">2018-11-11 09:34</span>
+
+ 
+
+            <a id="a_comment_author_4111684" href="https://www.cnblogs.com/scy251147/" target="_blank">程序诗人</a>
+
+			</div>
+			<div class="feedbackCon">
+				
+<div id="comment_body_4111684)" class="blog_comment_body">
+    很不错，正在看这方面内容，没想到你就出来了。
+</div>
+        <div class="comment_vote">
+            <span class="comment_error" style="color: red"></span>
+            <a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(4111684, 'Digg', this.parentElement, false);">
+                支持(1)
+            </a>
+            <a href="javascript:void(0);" class="comment_burry" onclick="return voteComment(4111684, 'Bury', this.parentElement, false);">
+                反对(0)
+            </a>
+        </div>
+        <span id="comment_4111684_avatar" style="display:none">
+            https://pic.cnblogs.com/face/47012/20131031113822.png
+        </span>
+
+			</div>
+		</div>
+
+<div id="comment_pager_bottom">
+    
+</div>
+
+
+</div>
+<script>
+    var commentManager = new blogCommentManager();
+    commentManager.renderComments(0);
+</script>
+
+<div id="comment_form" class="commentform">
+    <a name="commentform"></a>
+    <div id="divCommentShow"></div>
+    <div id="comment_nav"><span id="span_refresh_tips"></span><a href="javascript:void(0);" onclick="return RefreshCommentList();" id="lnk_RefreshComments" runat="server" clientidmode="Static">刷新评论</a><a href="#" onclick="return RefreshPage();">刷新页面</a><a href="#top">返回顶部</a></div>
+    <div id="comment_form_container"><div class="login_tips">
+    注册用户登录后才能发表评论，请 
+    <a rel="nofollow" href="javascript:void(0);" class="underline" onclick="return login('commentform');">登录</a>
+     或 
+    <a rel="nofollow" href="javascript:void(0);" class="underline" onclick="return register();">注册</a>，
+    <a href="https://www.cnblogs.com/">访问</a> 网站首页。
+</div></div>
+    <div class="ad_text_commentbox" id="ad_text_under_commentbox"></div>
+    <div id="ad_t2"><a href="http://www.ucancode.com/index.htm" target="_blank" onclick="ga('send', 'event', 'Link', 'click', 'T2-工控')">【推荐】超50万行VC++源码: 大型组态工控、电力仿真CAD与GIS源码库</a><br><a href="https://www.jdcloud.com/cn/activity/year-end?utm_source=DMT_cnblogs&amp;utm_medium=CH&amp;utm_campaign=q4vm&amp;utm_term=Virtual-Machines" target="_blank" onclick="ga('send', 'event', 'Link', 'click', 'T2-京东云')">【活动】京东云服务器_云主机低于1折，低价高性能产品备战双11</a><br><a href="https://www.ctyun.cn/activity/#/201910/ecs?hmsr=%E7%9C%8B%E7%9C%8B-%E5%8D%9A%E5%AE%A2%E5%9B%AD-10.16-10%E6%9C%88%E7%89%B9%E6%83%A0&amp;hmpl=&amp;hmcu=&amp;hmkw=&amp;hmci=?track=|cp:cz_blog|tgdy:46861|ttjh:shouyedingbuyoucefenlan|key:czkk12|pf:pc" target="_blank">【推荐】天翼云1C1G云主机特惠，3个月仅需43.8元，立即开通</a><br><a href="https://cloud.tencent.com/act/double11/reserve?fromSource=gwzcw.3000742.3000742.3000742&amp;utm_medium=cpc&amp;utm_id=gwzcw.3000742.3000742.3000742" target="_blank" onclick="ga('send', 'event', 'Link', 'click', 'T2-腾讯云')">【优惠】腾讯云 11.1 1智惠上云，爆款提前购与双11活动同价</a><br><a href="https://www.cnblogs.com/cmt/p/11612966.html" target="_blank" onclick="ga('send', 'event', 'Link', 'click', 'T2-华为云-AI有奖训练营')">【福利】学AI有奖：博客园&amp;华为云&nbsp;Modelarts 有奖训练营</a><br><a href="https://www.huodongxing.com/event/1514061072200" target="_blank" onclick="ga('send', 'event', 'Link', 'click', 'T2-魔程')">【活动】魔程社区技术沙龙—移动测试应用专场等你报名</a><br></div>
+    <div id="opt_under_post"></div>
+    <script async="async" src="%E4%BB%8ECompletableFuture%E5%88%B0%E5%BC%82%E6%AD%A5%E7%BC%96%E7%A8%8B%E8%AE%BE%E8%AE%A1%20-%20%E5%90%91%E5%8D%97l%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/gpt.js"></script>
+    <script>
+        var googletag = googletag || {};
+        googletag.cmd = googletag.cmd || [];
+    </script>
+    <script>
+        googletag.cmd.push(function () {
+            googletag.defineSlot("/1090369/C1", [300, 250], "div-gpt-ad-1546353474406-0").addService(googletag.pubads());
+            googletag.defineSlot("/1090369/C2", [468, 60], "div-gpt-ad-1539008685004-0").addService(googletag.pubads());
+            googletag.pubads().enableSingleRequest();
+            googletag.enableServices();
+        });
+    </script>
+    <div id="cnblogs_c1" class="c_ad_block" style="">
+        <div id="div-gpt-ad-1546353474406-0" style="height:250px; width:300px;" data-google-query-id="CJS7792io-UCFQ58iwodh1kAtQ"><div id="google_ads_iframe_/1090369/C1_0__container__" style="border: 0pt none;"><iframe id="google_ads_iframe_/1090369/C1_0" title="3rd party ad content" name="google_ads_iframe_/1090369/C1_0" scrolling="no" marginwidth="0" marginheight="0" style="border: 0px none; vertical-align: bottom;" srcdoc="" data-google-container-id="1" data-load-complete="true" width="300" height="250" frameborder="0"></iframe></div></div>
+    </div>
+    <div id="under_post_news"></div>
+    <div id="cnblogs_c2" class="c_ad_block" style="">
+        <div id="div-gpt-ad-1539008685004-0" style="height:60px; width:468px;" data-google-query-id="CJW7792io-UCFQ58iwodh1kAtQ">
+            
+        <div id="google_ads_iframe_/1090369/C2_0__container__" style="border: 0pt none;"><iframe id="google_ads_iframe_/1090369/C2_0" title="3rd party ad content" name="google_ads_iframe_/1090369/C2_0" scrolling="no" marginwidth="0" marginheight="0" style="border: 0px none; vertical-align: bottom;" srcdoc="" data-google-container-id="2" data-load-complete="true" width="468" height="60" frameborder="0"></iframe></div></div>
+    </div>
+    <div id="under_post_kb"></div>
+    <div id="HistoryToday" class="c_ad_block"></div>
+    <script type="text/javascript">
+        fixPostBody();
+        setTimeout(function () { incrementViewCount(cb_entryId); }, 50);
+        deliverAdT2();
+        deliverAdC1();
+        deliverAdC2();
+        loadNewsAndKb();
+        loadBlogSignature();
+LoadPostCategoriesTags(cb_blogId, cb_entryId);        LoadPostInfoBlock(cb_blogId, cb_entryId, cb_blogApp, cb_blogUserGuid);
+        GetPrevNextPost(cb_entryId, cb_blogId, cb_entryCreatedDate, cb_postType);
+        loadOptUnderPost();
+        GetHistoryToday(cb_blogId, cb_blogApp, cb_entryCreatedDate);
+    </script>
+</div>
+	</div><!--end: forFlow -->
+	</div><!--end: mainContent 主体内容容器-->
+
+	<div id="sideBar">
+		<div id="sideBarMain">
+			
+<div id="sidebar_news" class="newsItem"><!--done-->
+<h3 class="catListTitle">公告</h3>
+
+<div id="blog-news">
+    
+    <div id="profile_block">
+        昵称：
+        <a href="https://home.cnblogs.com/u/xiangnanl/">
+            向南l
+        </a>
+        <br>
+        园龄：
+        <a href="https://home.cnblogs.com/u/xiangnanl/" title="入园时间：2018-10-22">
+            11个月
+        </a>
+        <br>
+        粉丝：
+        <a href="https://home.cnblogs.com/u/xiangnanl/followers/">
+            10
+        </a>
+        <br>
+        关注：
+        <a href="https://home.cnblogs.com/u/xiangnanl/followees/">
+            7
+        </a>
+        <div id="p_b_follow">
+<a href="javascript:void(0)" onclick="follow('6ac3bc76-b10d-407b-8ce5-08d637f1d4af')">+加关注</a></div>
+        <script>getFollowStatus('6ac3bc76-b10d-407b-8ce5-08d637f1d4af');</script>
+    </div>
+</div>
+
+</div>
+
+			<div id="blog-calendar" style="display: block;">
+
+<table id="blogCalendar" class="Cal" title="Calendar" cellspacing="0" cellpadding="0" border="0">
+    <tbody>
+        <tr>
+            <td colspan="7">
+                <table class="CalTitle" cellspacing="0" border="0">
+                    <tbody>
+                        <tr>
+                            <td class="CalNextPrev">
+                                <a href="javascript:void(0);" onclick="loadBlogCalendar('2019/09/17'); return false;">&lt;</a>
+                            </td>
+                            <td align="center">2019年10月</td>
+                            <td class="CalNextPrev" align="right">
+                                <a href="javascript:void(0);" onclick="loadBlogCalendar('2019/11/17'); return false;">&gt;</a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </td>
+        </tr>
+        <tr>
+                    <th class="CalDayHeader" abbr="日" scope="col" align="center">日</th>
+                    <th class="CalDayHeader" abbr="一" scope="col" align="center">一</th>
+                    <th class="CalDayHeader" abbr="二" scope="col" align="center">二</th>
+                    <th class="CalDayHeader" abbr="三" scope="col" align="center">三</th>
+                    <th class="CalDayHeader" abbr="四" scope="col" align="center">四</th>
+                    <th class="CalDayHeader" abbr="五" scope="col" align="center">五</th>
+                    <th class="CalDayHeader" abbr="六" scope="col" align="center">六</th>
+        </tr>
+            <tr>
+                            <td class="CalOtherMonthDay" align="center">29</td>
+                            <td class="CalOtherMonthDay" align="center">30</td>
+                        <td class="" align="center">
+                            1
+                        </td>
+                        <td class="" align="center">
+                            2
+                        </td>
+                        <td class="" align="center">
+                            3
+                        </td>
+                        <td class="" align="center">
+                            4
+                        </td>
+                    <td class="CalWeekendDay" align="center">
+                        5
+                    </td>
+            </tr>
+                <tr>
+                        <td class="CalWeekendDay" align="center">
+                            6
+                        </td>
+                            <td class="" align="center">
+                                7
+                            </td>
+                            <td class="" align="center">
+                                8
+                            </td>
+                            <td class="" align="center">
+                                9
+                            </td>
+                            <td class="" align="center">
+                                10
+                            </td>
+                            <td class="" align="center">
+                                11
+                            </td>
+                        <td class="CalWeekendDay" align="center">
+                            12
+                        </td>
+                </tr>
+                <tr>
+                        <td class="CalWeekendDay" align="center">
+                            13
+                        </td>
+                            <td class="" align="center">
+                                14
+                            </td>
+                            <td class="" align="center">
+                                15
+                            </td>
+                            <td class="" align="center">
+                                16
+                            </td>
+                            <td class="CalTodayDay" align="center">
+                                17
+                            </td>
+                            <td class="" align="center">
+                                18
+                            </td>
+                        <td class="CalWeekendDay" align="center">
+                            19
+                        </td>
+                </tr>
+                <tr>
+                        <td class="CalWeekendDay" align="center">
+                            20
+                        </td>
+                            <td class="" align="center">
+                                21
+                            </td>
+                            <td class="" align="center">
+                                22
+                            </td>
+                            <td class="" align="center">
+                                23
+                            </td>
+                            <td class="" align="center">
+                                24
+                            </td>
+                            <td class="" align="center">
+                                25
+                            </td>
+                        <td class="CalWeekendDay" align="center">
+                            26
+                        </td>
+                </tr>
+                <tr>
+                        <td class="CalWeekendDay" align="center">
+                            27
+                        </td>
+                            <td class="" align="center">
+                                28
+                            </td>
+                            <td class="" align="center">
+                                29
+                            </td>
+                            <td class="" align="center">
+                                30
+                            </td>
+                            <td class="" align="center">
+                                31
+                            </td>
+                            <td class="CalOtherMonthDay" align="center">
+                                1
+                            </td>
+                        <td class="CalOtherMonthDay" align="center">
+                            2
+                        </td>
+                </tr>
+                <tr>
+                        <td class="CalOtherMonthDay" align="center">
+                            3
+                        </td>
+                            <td class="CalOtherMonthDay" align="center">
+                                4
+                            </td>
+                            <td class="CalOtherMonthDay" align="center">
+                                5
+                            </td>
+                            <td class="CalOtherMonthDay" align="center">
+                                6
+                            </td>
+                            <td class="CalOtherMonthDay" align="center">
+                                7
+                            </td>
+                            <td class="CalOtherMonthDay" align="center">
+                                8
+                            </td>
+                        <td class="CalOtherMonthDay" align="center">
+                            9
+                        </td>
+                </tr>
+    </tbody>
+</table></div><script>loadBlogDefaultCalendar();</script>
+			
+			<div id="leftcontentcontainer">
+				<div id="blog-sidecolumn">
+
+<!-- 搜索 -->
+<div id="sidebar_search" class="sidebar-block">
+    <div id="sidebar_search" class="mySearch">
+        <h3 class="catListTitle">搜索</h3>
+        <div id="sidebar_search_box">
+            <div id="widget_my_zzk" class="div_my_zzk">
+                <input type="text" id="q" onkeydown="return zzk_go_enter(event);" class="input_my_zzk">&nbsp;<input onclick="zzk_go()" type="button" value="找找看" id="btnZzk" class="btn_my_zzk">
+            </div>
+            <div id="widget_my_google" class="div_my_zzk">
+                <input type="text" name="google_q" id="google_q" onkeydown="return google_go_enter(event);" class="input_my_zzk">&nbsp;<input onclick="google_go()" type="button" value="谷歌搜索" class="btn_my_zzk">
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 常用链接 -->
+<div id="sidebar_shortcut" class="sidebar-block">
+    <div class="catListLink">
+<h3 class="catListTitle">
+常用链接
+</h3>
+<ul>
+		<li>
+
+<a href="https://www.cnblogs.com/xiangnanl/p/" title="我的博客的随笔列表">我的随笔</a>
+</li>
+		<li>
+
+<a href="https://www.cnblogs.com/xiangnanl/MyComments.html" title="我的发表过的评论列表">我的评论</a>
+</li>
+		<li>
+
+<a href="https://www.cnblogs.com/xiangnanl/OtherPosts.html" title="我评论过的随笔列表">我的参与</a>
+</li>
+		<li>
+
+<a href="https://www.cnblogs.com/xiangnanl/RecentComments.html" title="我的博客的评论列表">最新评论</a>
+</li>
+		<li>
+
+<a href="https://www.cnblogs.com/xiangnanl/tag/" title="我的博客的标签列表">我的标签</a>
+</li>
+
+</ul>
+<div id="itemListLin_con" style="display:none;">
+<ul>
+
+</ul>
+</div>
+</div>
+
+
+</div>
+
+<!-- 最新随笔 -->
+
+
+
+<!-- 我的标签 -->
+<div id="sidebar_toptags" class="sidebar-block">
+    
+</div>
+
+<!-- 积分与排名 -->
+
+
+<!-- 随笔分类、随笔档案、文章分类、新闻分类、相册、链接 -->
+<div id="sidebar_categories">
+    
+        <div id="sidebar_postcategory" class="catListPostCategory sidebar-block">
+            <h3 class="catListTitle">
+                
+
+随笔分类
+
+
+
+            </h3>
+
+
+            <ul>
+
+                        <li>
+                            
+<a href="https://www.cnblogs.com/xiangnanl/category/1333539.html" rel="" target="">
+    Java(3)
+</a>
+ 
+
+                        </li>
+
+            </ul>
+
+
+        </div>
+        <div id="sidebar_postarchive" class="catListPostArchive sidebar-block">
+            <h3 class="catListTitle">
+                
+
+随笔档案
+
+
+
+            </h3>
+
+
+            <ul>
+
+                        <li>
+                            
+<a href="https://www.cnblogs.com/xiangnanl/archive/2018/11.html" rel="" target="">
+    2018年11月(5)
+</a>
+ 
+
+                        </li>
+                        <li>
+                            
+<a href="https://www.cnblogs.com/xiangnanl/archive/2018/10.html" rel="" target="">
+    2018年10月(1)
+</a>
+ 
+
+                        </li>
+
+            </ul>
+
+
+        </div>
+
+</div>
+
+<!-- 最新评论 -->
+<div id="sidebar_recentcomments" class="sidebar-block">
+    <div class="catListComment">
+<h3 class="catListTitle">最新评论</h3>
+
+	<div class="RecentCommentBlock">
+        <ul>
+                    <li class="recent_comment_title"><a href="https://www.cnblogs.com/xiangnanl/p/9957938.html#4124756">1. Re:lambda从入门到精通</a></li>
+                    <li class="recent_comment_body">1</li>
+                    <li class="recent_comment_author">--fly不起来啊！</li>
+                    <li class="recent_comment_title"><a href="https://www.cnblogs.com/xiangnanl/p/9955714.html#4116960">2. Re:disruptor 高性能之道</a></li>
+                    <li class="recent_comment_body">@ lewis09老铁666...</li>
+                    <li class="recent_comment_author">--向南l</li>
+                    <li class="recent_comment_title"><a href="https://www.cnblogs.com/xiangnanl/p/9955714.html#4116907">3. Re:disruptor 高性能之道</a></li>
+                    <li class="recent_comment_body">好文，生产者和消费者讲的很清晰。</li>
+                    <li class="recent_comment_author">--lewis09</li>
+                    <li class="recent_comment_title"><a href="https://www.cnblogs.com/xiangnanl/p/9955714.html#4114850">4. Re:disruptor 高性能之道</a></li>
+                    <li class="recent_comment_body">@ Piero's底层是数组，entries通过(sequence &amp; indexMask)实现循环数组的效果，也可以看成是循环队列...</li>
+                    <li class="recent_comment_author">--向南l</li>
+                    <li class="recent_comment_title"><a href="https://www.cnblogs.com/xiangnanl/p/9955714.html#4114848">5. Re:disruptor 高性能之道</a></li>
+                    <li class="recent_comment_body">是循环队列吗？</li>
+                    <li class="recent_comment_author">--Piero's</li>
+        </ul>
+    </div>
+</div>
+
+
+</div>
+
+
+
+<!-- 阅读排行榜 -->
+<div id="sidebar_topviewedposts" class="sidebar-block">
+    <div class="catListView">
+<h3 class="catListTitle">阅读排行榜</h3>
+	<div id="TopViewPostsBlock">
+        <ul style="word-break:break-all">
+                    <li>
+                        <a href="https://www.cnblogs.com/xiangnanl/p/9939447.html">
+                            1. 从CompletableFuture到异步编程设计(4236)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/xiangnanl/p/9833965.html">
+                            2. 一文弄懂“分布式锁”(3384)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/xiangnanl/p/9957938.html">
+                            3. lambda从入门到精通(917)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/xiangnanl/p/9887983.html">
+                            4. 深入浅出Java反射(765)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/xiangnanl/p/9955714.html">
+                            5. disruptor 高性能之道(624)
+                        </a>
+                    </li>
+        </ul>
+    </div>
+</div>
+
+
+</div>
+
+<!-- 评论排行榜 -->
+<div id="sidebar_topcommentedposts" class="sidebar-block">
+    <div class="catListFeedback">
+<h3 class="catListTitle">评论排行榜</h3>
+	<div id="TopFeedbackPostsBlock">
+        <ul style="word-break:break-all">
+                    <li>
+                        <a href="https://www.cnblogs.com/xiangnanl/p/9833965.html">
+                            1. 一文弄懂“分布式锁”(6)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/xiangnanl/p/9955714.html">
+                            2. disruptor 高性能之道(5)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/xiangnanl/p/9939447.html">
+                            3. 从CompletableFuture到异步编程设计(1)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/xiangnanl/p/9957938.html">
+                            4. lambda从入门到精通(1)
+                        </a>
+                    </li>
+        </ul>
+    </div>
+</div>
+
+
+</div>
+
+<!-- 推荐排行榜 -->
+<div id="sidebar_topdiggedposts" class="sidebar-block">
+    
+<div id="topdigg_posts_wrap">
+    <div class="catListView">
+        <h3 class="catListTitle">推荐排行榜</h3>
+        <div id="TopDiggPostsBlock">
+            <ul style="word-break: break-all">
+                        <li>
+                            <a href="https://www.cnblogs.com/xiangnanl/p/9833965.html">
+                                1. 一文弄懂“分布式锁”(8)
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://www.cnblogs.com/xiangnanl/p/9939447.html">
+                                2. 从CompletableFuture到异步编程设计(4)
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://www.cnblogs.com/xiangnanl/p/9955714.html">
+                                3. disruptor 高性能之道(2)
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://www.cnblogs.com/xiangnanl/p/9865269.html">
+                                4. disconf原理 “入坑”指南(1)
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://www.cnblogs.com/xiangnanl/p/9957938.html">
+                                5. lambda从入门到精通(1)
+                            </a>
+                        </li>
+            </ul>
+        </div>
+    </div>
+</div>
+</div></div>
+                    <script>loadBlogSideColumn();</script>
+			</div>
+			
+		</div><!--end: sideBarMain -->
+	</div><!--end: sideBar 侧边栏容器 -->
+	<div class="clear"></div>
+	</div><!--end: main -->
+	<div class="clear"></div>
+	<div id="footer">
+		<!--done-->
+Copyright © 2019 向南l
+<br><span id="poweredby">Powered by .NET Core 3.0.0 on Linux</span>
+
+
+
+	</div><!--end: footer -->
+</div><!--end: home 自定义的最大容器 -->
+
+
+    
+
+
+</body></html>

@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="7e7030e2-cb7a-46a2-ac3b-1427c309b2b5" name="Default Changelist" comment="" />
+    <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FavoritesManager">
+    <favorites_list name="springlearning" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Interface" />
+        <option value="Class" />
+      </list>
+    </option>
+  </component>
+  <component name="MavenImportPreferences">
+    <option name="importingSettings">
+      <MavenImportingSettings>
+        <option name="importAutomatically" value="true" />
+      </MavenImportingSettings>
+    </option>
+  </component>
+  <component name="ProjectId" id="1Y1Q7xdqSp7IyZ8A8fK962SpOHX" />
+  <component name="PropertiesComponent">
+    <property name="last_directory_selection" value="$PROJECT_DIR$/src/main/java/tk/spring" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="settings.editor.selected.configurable" value="com.poratu.idea.plugins.tomcat.setting.TomcatSettingConfigurable" />
+  </component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\IdeaProjects\springlearning\src\main\resources" />
+      <recent name="C:\IdeaProjects\springlearning\src\main\java\tk\spring\ioc" />
+      <recent name="C:\IdeaProjects\springlearning\src\main\resources\hello\config" />
+    </key>
+    <key name="CopyClassDialog.RECENTS_KEY">
+      <recent name="tk.spring.mybatis.mapper" />
+      <recent name="tk.spring.mybatis.model" />
+    </key>
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\IdeaProjects\springlearning\src\main\resources" />
+      <recent name="C:\IdeaProjects\springlearning\src\main\resources\tk\spring\mybatis\mapper" />
+      <recent name="C:\IdeaProjects\springlearning\src\main\java\tk\spring\mybatis" />
+      <recent name="C:\IdeaProjects\springlearning\src\main\java\tk\spring\ioc\annotation" />
+      <recent name="C:\IdeaProjects\springlearning\src\main\java\tk\spring\aop" />
+    </key>
+  </component>
+  <component name="RunDashboard">
+    <option name="ruleStates">
+      <list>
+        <RuleState>
+          <option name="name" value="ConfigurationTypeDashboardGroupingRule" />
+        </RuleState>
+        <RuleState>
+          <option name="name" value="StatusDashboardGroupingRule" />
+        </RuleState>
+      </list>
+    </option>
+  </component>
+  <component name="RunManager" selected="Application.TestCountry3">
+    <configuration name="TestCountry" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="tk.spring.mybatis.TestCountry" />
+      <module name="springlearning" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="tk.spring.mybatis.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="TestCountry2" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="tk.spring.mybatis.TestCountry2" />
+      <module name="springlearning" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="tk.spring.mybatis.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="TestCountry3" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="tk.spring.mybatis.TestCountry3" />
+      <module name="springlearning" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="tk.spring.mybatis.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="TestCountryService" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="tk.spring.mybatis.TestCountryService" />
+      <module name="springlearning" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="tk.spring.mybatis.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="TestUserService (1)" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="tk.spring.ioc.annotation.test.TestUserService" />
+      <module name="springlearning" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="tk.spring.ioc.annotation.test.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Application.TestCountry3" />
+        <item itemvalue="Application.TestUserService (1)" />
+        <item itemvalue="Application.TestCountryService" />
+        <item itemvalue="Application.TestCountry2" />
+        <item itemvalue="Application.TestCountry" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="7e7030e2-cb7a-46a2-ac3b-1427c309b2b5" name="Default Changelist" comment="" />
+      <created>1582107456728</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1582107456728</updated>
+    </task>
+    <servers />
+  </component>
+</project>

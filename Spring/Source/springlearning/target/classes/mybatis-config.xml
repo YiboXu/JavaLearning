@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+  PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-config.dtd">
+
+<configuration>
+	<settings>
+		<setting name="logImpl" value="LOG4J" />
+		<!-- will run association query only when the related column is accessed -->
+		<setting name="aggressiveLazyLoading" value="false"/>
+		<setting name="lazyLoadTriggerMethods" value="equals,clone,hashCode,toString" />
+		<setting name="cacheEnabled" value="true" />
+	</settings>
+	
+	<typeHandlers>
+		<typeHandler javaType="tk.spring.mybatis.type.Enabled" handler="tk.spring.mybatis.type.EnabledTypeHandler"/>
+	</typeHandlers>
+
+</configuration>

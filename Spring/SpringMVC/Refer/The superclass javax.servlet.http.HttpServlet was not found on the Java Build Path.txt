@@ -1,0 +1,5 @@
+﻿如果遇到错误 The superclass javax.servlet.http.HttpServlet was not found on the Java Build Path
+
+需要在maven project里面添加server runtime
+
+右键project -> Build Path -> Configure Build Path -> Java Build Path -> Libraries -> Add Library -> Server Runtime

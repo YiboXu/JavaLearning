@@ -1,0 +1,365 @@
+一， 在已经创建好的Spring Maven web project中添加security:
+
+0. 添加依赖到pom.xml
+<!--spring security  -->
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-core</artifactId>
+            <version>4.2.2.RELEASE</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-web</artifactId>
+            <version>4.2.2.RELEASE</version>
+        </dependency>
+        
+         <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-config</artifactId>
+            <version>4.2.2.RELEASE</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-taglibs</artifactId>
+            <version>4.2.2.RELEASE</version>
+        </dependency>
+
+1. 创建 AbstractSecurityWebApplicationInitializer
+package example.security;
+
+import org.springframework.security.web.context.AbstractSecurityWebApplicationInitializer;
+
+public class SecurityWebInitializer extends AbstractSecurityWebApplicationInitializer{
+
+}
+
+2 开启spring security
+
+package example.security;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import example.db.UserRepository;
+
+@Configuration
+@EnableWebSecurity
+public class SecurityConfig extends WebSecurityConfigurerAdapter{
+
+	@Autowired
+	private UserRepository userRepository;
+	
+	//设置用户访问权限的验证方式以及需要验证的路径
+	@Override
+	protected void configure(HttpSecurity http) throws Exception {
+		http
+		//comment method userDetailsService to use inMemoryAuthentication set in configure()
+		.userDetailsService(new MyUserService(userRepository))
+		.authorizeRequests()
+		.anyRequest().authenticated()
+		.and()
+		.formLogin().and()
+		.httpBasic();
+	}
+	
+	//添加一些内存中保存的用户名和密码
+	@Override
+	protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+		auth
+		.inMemoryAuthentication()
+		.withUser("user").password("password").roles("USER").and()
+		.withUser("admin").password("password").roles("USER", "ADMIN");
+	}
+}
+
+- 如果不调用.userDetailsService(new MyUserService(userRepository))， 将通过内存中保存的用户名及密码来验证登录
+
+3. 设置用户权限验证 .userDetailsService(new MyUserService(userRepository))
+
+User类
+package example.domain;
+
+import java.util.Arrays;
+import java.util.Collection;
+
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
+public class User implements UserDetails{
+	private String username;
+	private String password;
+	
+	public User() {}
+	
+	public User(String username, String password) {
+		this.username = username;
+		this.password = password;
+	}
+	
+	public String getUsername() {
+		return username;
+	}
+	public void setUsername(String username) {
+		this.username = username;
+	}
+	public String getPassword() {
+		return password;
+	}
+	public void setPassword(String password) {
+		this.password = password;
+	}
+	
+	public String toString() {
+		return username+":"+password;
+	}
+
+	@Override
+	public Collection<? extends GrantedAuthority> getAuthorities() {
+		// TODO Auto-generated method stub
+		return Arrays.asList(new SimpleGrantedAuthority("ROLE_USER"));
+	}
+
+	@Override
+	public boolean isAccountNonExpired() {
+		// TODO Auto-generated method stub
+		return true;
+	}
+
+	@Override
+	public boolean isAccountNonLocked() {
+		// TODO Auto-generated method stub
+		return true;
+	}
+
+	@Override
+	public boolean isCredentialsNonExpired() {
+		// TODO Auto-generated method stub
+		return true;
+	}
+
+	@Override
+	public boolean isEnabled() {
+		// TODO Auto-generated method stub
+		return true;
+	}
+}
+
+定义UserDetailsService
+package example.security;
+
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+
+import example.db.UserRepository;
+
+public class MyUserService implements UserDetailsService{
+
+	private final UserRepository userRepository;
+	
+	public MyUserService(UserRepository userRepository) {
+		this.userRepository = userRepository;
+	}
+	
+	@Override
+	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+		// TODO Auto-generated method stub
+		return userRepository.findByUsername(username);
+	}
+
+}
+
+
+这样在用户登录的时候，用所输入的用户名通过MyUserService.loadUserByUsername来从DB中获取保存的密码，然后和用户输入的密码进行比对，如果一直就通过验证。
+这个比对的过程是spring security提供的，我们只用提供如何通过用户名获取用户的方法实现就可以了。
+
+
+二. 通过spring boot来添加权限验证
+0. 添加依赖
+<dependency>
+	<groupId>org.springframework.boot</groupId>
+	<artifactId>spring-boot-starter-security</artifactId>
+</dependency>
+
+1 define the User object  (it must implement interface UserDetails)
+@Entity
+@Data
+@RequiredArgsConstructor
+@NoArgsConstructor(access=AccessLevel.PRIVATE, force=true)
+public class User implements UserDetails{
+
+	private static final long serialVersionUID = 1L;
+	
+	@Id
+	@GeneratedValue(strategy=GenerationType.AUTO)
+	private Long id;
+	private final String username;
+	private final String password;
+	private final String fullname;
+	private final String street;
+	private final String city;
+	private final String state;
+	private final String zip;
+	private final String phoneNumber;
+	
+	@Override
+	public Collection<? extends GrantedAuthority> getAuthorities() {
+		// TODO Auto-generated method stub
+		return Arrays.asList(new SimpleGrantedAuthority("ROLE_USER"));
+	}
+
+	@Override
+	public String getPassword() {
+		// TODO Auto-generated method stub
+		return password;
+	}
+
+	@Override
+	public String getUsername() {
+		// TODO Auto-generated method stub
+		return username;
+	}
+
+	@Override
+	public boolean isAccountNonExpired() {
+		// TODO Auto-generated method stub
+		return true;
+	}
+
+	@Override
+	public boolean isAccountNonLocked() {
+		// TODO Auto-generated method stub
+		return true;
+	}
+
+	@Override
+	public boolean isCredentialsNonExpired() {
+		// TODO Auto-generated method stub
+		return true;
+	}
+
+	@Override
+	public boolean isEnabled() {
+		// TODO Auto-generated method stub
+		return true;
+	}
+}
+
+2 Implement JPA (data repository)
+public interface UserRepository extends CrudRepository<User, Long>{
+	User findByUsername(String username);
+}
+
+3 enable spring security
+@Configuration
+@EnableWebSecurity               =====>tell spring to use following class to do authorization control
+public class SecurityConfig extends WebSecurityConfigurerAdapter{	
+	@Bean
+	public PasswordEncoder encoder() {
+	    return new BCryptPasswordEncoder();
+	}
+	
+	@Autowired
+	private UserDetailsService userDetailsService;                         ===>define how to get user details
+	
+	protected void configure(AuthenticationManagerBuilder auth)            ===>set the way to get user details, it will use the user details fetched to match with the username and password typed in web page.
+			throws Exception {
+		auth.userDetailsService(userDetailsService).passwordEncoder(encoder());
+	}
+	
+	@Override
+	protected void configure(HttpSecurity http) throws Exception {        =========>configure the access needed of each path
+	    http
+	      .authorizeRequests()
+	        .antMatchers("/design", "/orders")
+	          .access("hasRole('ROLE_USER')")
+	        .antMatchers("/", "/**").access("permitAll")
+	        
+	      //set the login page when it needs authorization and the page when it's authorized  
+	      .and()
+	        .formLogin()
+	          .loginPage("/login")
+	          .defaultSuccessUrl("/design", true)
+	      
+	      //set the page when it's logout    
+	      .and()
+	        .logout()
+	          .logoutSuccessUrl("/")
+	          
+	      // Make H2-Console non-secured; for debug purposes
+	      .and()
+	        .csrf()
+	          .ignoringAntMatchers("/h2-console/**")
+
+	      // Allow pages to be loaded in frames from the same origin; needed for H2-Console
+	      .and()  
+	        .headers()
+	          .frameOptions()
+	            .sameOrigin()
+	      ;
+	    
+	    //disable csrf
+	    http.csrf().disable();
+	}
+}
+
+4 define how to fetch user information         ==== the class will be used in  SecurityConfig (see previous step)
+@Service
+public class UserRepositoryUserDetailsService implements UserDetailsService{
+
+	private UserRepository userRepo;
+	
+	@Autowired
+	public UserRepositoryUserDetailsService(UserRepository userRepo) {
+		this.userRepo = userRepo;
+	}
+	
+	@Override
+	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+		// TODO Auto-generated method stub
+		UserDetails user = userRepo.findByUsername(username);
+		
+		if(user != null) {
+			return user;
+		}else {
+			throw new UsernameNotFoundException(
+					"User '" + username + "' not found");
+		}
+	}
+}
+
+
+5 you get get the user object in the controller method by the way below
+
+way 1:
+  @GetMapping
+  public String showDesignForm(Model model, Principal principal) {	
+	  
+	  String username = principal.getName();
+	  User user = userRepo.findByUsername(username);
+	  model.addAttribute("user", user);
+	  
+      return "design";
+  }
+
+way 2:
+	@PostMapping
+	public String processOrder(@Valid Order order, Errors errors, SessionStatus sessionStatus,
+							   @AuthenticationPrincipal User user) {
+	  if (errors.hasErrors()) {
+		  return "orderForm";
+	  }
+	    
+	  order.setUser(user);
+	  orderRepositroy.save(order);
+	  sessionStatus.setComplete();
+	  
+	  log.info("Order submitted: " + order);
+	  
+	  return "redirect:/";
+	}

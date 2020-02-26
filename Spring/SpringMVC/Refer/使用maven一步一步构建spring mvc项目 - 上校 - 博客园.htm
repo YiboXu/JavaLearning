@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="zh-cn"><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="referrer" content="never">
+    <meta http-equiv="Cache-Control" content="no-transform">
+    <meta http-equiv="Cache-Control" content="no-siteapp">
+    <title>使用maven一步一步构建spring mvc项目 - 上校 - 博客园</title>
+    <meta property="og:description" content="1      使用eclipse构建maven web项目
+
+1.1新建Maven的web项目
+
+打开菜单File –New-MavenProject。">
+    <link type="text/css" rel="stylesheet" href="%E4%BD%BF%E7%94%A8maven%E4%B8%80%E6%AD%A5%E4%B8%80%E6%AD%A5%E6%9E%84%E5%BB%BAspring%20mvc%E9%A1%B9%E7%9B%AE%20-%20%E4%B8%8A%E6%A0%A1%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/blog-common.css">
+<link id="MainCss" type="text/css" rel="stylesheet" href="%E4%BD%BF%E7%94%A8maven%E4%B8%80%E6%AD%A5%E4%B8%80%E6%AD%A5%E6%9E%84%E5%BB%BAspring%20mvc%E9%A1%B9%E7%9B%AE%20-%20%E4%B8%8A%E6%A0%A1%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/bundle-sea.css">
+<link id="mobile-style" media="only screen and (max-width: 767px)" type="text/css" rel="stylesheet" href="%E4%BD%BF%E7%94%A8maven%E4%B8%80%E6%AD%A5%E4%B8%80%E6%AD%A5%E6%9E%84%E5%BB%BAspring%20mvc%E9%A1%B9%E7%9B%AE%20-%20%E4%B8%8A%E6%A0%A1%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/bundle-sea-mobile.css">
+    <link title="RSS" type="application/rss+xml" rel="alternate" href="https://www.cnblogs.com/zhuawang/rss">
+    <link title="RSD" type="application/rsd+xml" rel="EditURI" href="https://www.cnblogs.com/zhuawang/rsd.xml">
+<link type="application/wlwmanifest+xml" rel="wlwmanifest" href="https://www.cnblogs.com/zhuawang/wlwmanifest.xml">
+    <script src="%E4%BD%BF%E7%94%A8maven%E4%B8%80%E6%AD%A5%E4%B8%80%E6%AD%A5%E6%9E%84%E5%BB%BAspring%20mvc%E9%A1%B9%E7%9B%AE%20-%20%E4%B8%8A%E6%A0%A1%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/amp4ads-host-v0.js"></script><script src="%E4%BD%BF%E7%94%A8maven%E4%B8%80%E6%AD%A5%E4%B8%80%E6%AD%A5%E6%9E%84%E5%BB%BAspring%20mvc%E9%A1%B9%E7%9B%AE%20-%20%E4%B8%8A%E6%A0%A1%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/pubads_impl_rendering_2019070801.js"></script><script async="" src="%E4%BD%BF%E7%94%A8maven%E4%B8%80%E6%AD%A5%E4%B8%80%E6%AD%A5%E6%9E%84%E5%BB%BAspring%20mvc%E9%A1%B9%E7%9B%AE%20-%20%E4%B8%8A%E6%A0%A1%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/analytics.js"></script><script src="%E4%BD%BF%E7%94%A8maven%E4%B8%80%E6%AD%A5%E4%B8%80%E6%AD%A5%E6%9E%84%E5%BB%BAspring%20mvc%E9%A1%B9%E7%9B%AE%20-%20%E4%B8%8A%E6%A0%A1%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/jquery-2.js"></script>
+    <script>var currentBlogId=25488;var currentBlogApp='zhuawang',cb_enable_mathjax=false;var isLogined=false;</script>
+    <script src="%E4%BD%BF%E7%94%A8maven%E4%B8%80%E6%AD%A5%E4%B8%80%E6%AD%A5%E6%9E%84%E5%BB%BAspring%20mvc%E9%A1%B9%E7%9B%AE%20-%20%E4%B8%8A%E6%A0%A1%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/blog-common.js" type="text/javascript"></script>
+<link rel="preload" href="%E4%BD%BF%E7%94%A8maven%E4%B8%80%E6%AD%A5%E4%B8%80%E6%AD%A5%E6%9E%84%E5%BB%BAspring%20mvc%E9%A1%B9%E7%9B%AE%20-%20%E4%B8%8A%E6%A0%A1%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/integrator.js" as="script"><script type="text/javascript" src="%E4%BD%BF%E7%94%A8maven%E4%B8%80%E6%AD%A5%E4%B8%80%E6%AD%A5%E6%9E%84%E5%BB%BAspring%20mvc%E9%A1%B9%E7%9B%AE%20-%20%E4%B8%8A%E6%A0%A1%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/integrator.js"></script><script src="%E4%BD%BF%E7%94%A8maven%E4%B8%80%E6%AD%A5%E4%B8%80%E6%AD%A5%E6%9E%84%E5%BB%BAspring%20mvc%E9%A1%B9%E7%9B%AE%20-%20%E4%B8%8A%E6%A0%A1%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/pubads_impl_2019070801.js" async=""></script></head>
+<body>
+<a name="top"></a>
+
+
+<!--done-->
+<div id="header">
+	
+<!--done-->
+<div class="header">
+	<div class="headerText">
+		<a id="Header1_HeaderTitle" class="headermaintitle" href="https://www.cnblogs.com/zhuawang/">zhuawang's blog</a><br>
+		<br><h1>淡泊以明志,宁静以致远</h1>
+	</div>
+</div>
+
+</div>
+
+<div id="mytopmenu">
+	
+		<div id="mylinks"><a id="blog_nav_sitehome" class="menu" href="https://www.cnblogs.com/">博客园</a> &nbsp;
+<a id="blog_nav_myhome" class="menu" href="https://www.cnblogs.com/zhuawang/">首页</a> &nbsp;
+<a id="blog_nav_newpost" class="menu" rel="nofollow" href="https://i.cnblogs.com/EditPosts.aspx?opt=1">新随笔</a> &nbsp;
+<a id="blog_nav_contact" class="menu" rel="nofollow" href="https://msg.cnblogs.com/send/%E4%B8%8A%E6%A0%A1">联系</a> &nbsp;
+<a id="blog_nav_rss" class="menu" href="https://www.cnblogs.com/zhuawang/rss">订阅</a><a id="blog_nav_rss_image" href="https://www.cnblogs.com/zhuawang/rss"><img src="%E4%BD%BF%E7%94%A8maven%E4%B8%80%E6%AD%A5%E4%B8%80%E6%AD%A5%E6%9E%84%E5%BB%BAspring%20mvc%E9%A1%B9%E7%9B%AE%20-%20%E4%B8%8A%E6%A0%A1%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/xml.gif" alt="订阅"></a>&nbsp;
+<a id="blog_nav_admin" class="menu" rel="nofollow" href="https://i.cnblogs.com/">管理</a>
+</div>
+		<div id="mystats"><div id="blog_stats">
+随笔-751&nbsp;
+评论-188&nbsp;
+文章-0&nbsp;
+<!--trackbacks-4-->
+</div></div>
+	
+</div>
+<div id="centercontent">
+	
+        <div id="post_detail">
+<div class="post">
+	<h1 class="postTitle"><a id="cb_post_title_url" class="postTitle2" href="https://www.cnblogs.com/zhuawang/p/5651896.html">使用maven一步一步构建spring mvc项目</a></h1>
+	<div id="cnblogs_post_body" class="blogpost-body"><h1>1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;使用eclipse构建maven web项目</h1>
+<h1><a name="t1"></a>1.1新建Maven的web项目</h1>
+<p>打开菜单File –New-MavenProject。</p>
+<p><img src="http://img.blog.csdn.net/20131125222135578?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvZm94X2xodA==/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt="maven_web_spring_mvc_new" width="864" vspace="5" hspace="5" height="624" border="0"></p>
+<p>点击Next</p>
+<p><img src="http://img.blog.csdn.net/20131125224036953?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvZm94X2xodA==/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt="" width="800" height="600"></p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>选择模板类型archtype——maven-archtype-webapp。然后点击Next。</p>
+<p><img src="http://img.blog.csdn.net/20131125224120562?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvZm94X2xodA==/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt="" width="800" height="600"></p>
+<p>&nbsp;</p>
+<p>输入Group Id和artifact Id。Group Id一般填入项目名称，Artifact Id一般填入子项目的名称。</p>
+<p><img src="http://img.blog.csdn.net/20131125224156312?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvZm94X2xodA==/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt=""></p>
+<p>&nbsp;</p>
+<p>生成的项目文件结构如下所示：</p>
+<p><img src="http://img.blog.csdn.net/20131125224229328?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvZm94X2xodA==/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt=""></p>
+<p>&nbsp;</p>
+<p>选择pom.xml文件，并打开，界面如下所示：</p>
+<p><img src="http://img.blog.csdn.net/20131125224325218?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvZm94X2xodA==/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt=""></p>
+<p>&nbsp;</p>
+<p>增加Properties：展开Properties选项，然后点击Create…按钮，如下所示：然后Name字段填入
+springVersion，Value字段填入3.2.5.RELEASE。即在pom.xml中增加了一个属性springVersion，属性值为
+3.2.5.RELEASE。</p>
+<p><img src="http://img.blog.csdn.net/20131125224356078?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvZm94X2xodA==/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt=""></p>
+<p>&nbsp;</p>
+<p>选择Dependencies标签，打开Dependencies选项卡，并增加一个新的Dependency。</p>
+<p><img src="http://img.blog.csdn.net/20131125224437359?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvZm94X2xodA==/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt=""></p>
+<p><img src="http://img.blog.csdn.net/20131125224516296?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvZm94X2xodA==/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt=""></p>
+<p>&nbsp;</p>
+<p>&nbsp;<img src="http://img.blog.csdn.net/20131125225847437?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvZm94X2xodA==/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt=""></p>
+<p>Group Id：org.springframework</p>
+<p>Artifact Id：<a class="replace_word" title="Java EE知识库" href="http://lib.csdn.net/base/17" target="_blank">spring</a>-web</p>
+<p>Version：${springVersion}</p>
+<p>点击ok按钮。</p>
+<p>说明：该过程是加入springframe的spring-web依赖库，${springVersion}是之前设置的属性。</p>
+<p><img src="http://img.blog.csdn.net/20131125224557703?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvZm94X2xodA==/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt=""></p>
+<p>新建Dependency：</p>
+<p>Group Id：org.springframework</p>
+<p>Artifact Id：spring-webmvc</p>
+<p>Version：${springVersion}</p>
+<p>点击ok按钮。</p>
+<p>说明：该过程是加入springframe的spring-webmvc依赖库，${springVersion}是之前设置的属性。</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>依赖库设定完之后，如果本地不存在还需要从网络上下载相应的依赖库，选中pom.xml文件，右击鼠标选中Run AS – maven install，然后系统自动从网络上下载相应的依赖库。</p>
+<p><img src="http://img.blog.csdn.net/20131125224702531?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvZm94X2xodA==/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt=""></p>
+<p>&nbsp;</p>
+<p>依赖库下载完之后，可以在目录JavaResources – Liraries – Maven Dependencies中看到相应的库文件，如下图所示：</p>
+<p><img src="http://img.blog.csdn.net/20131125225008859?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvZm94X2xodA==/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt=""></p>
+<p>&nbsp;</p>
+<p>在src – main目录下新建文件夹<a class="replace_word" title="Java EE知识库" href="http://lib.csdn.net/base/17" target="_blank">Java</a>。</p>
+<p><img src="http://img.blog.csdn.net/20131125225035781?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvZm94X2xodA==/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt=""></p>
+<p>&nbsp;</p>
+<p>在java中新建类Hello.java。包名为com.springmvc.controller。</p>
+<p><img src="http://img.blog.csdn.net/20131125225103546?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvZm94X2xodA==/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt=""></p>
+<p>&nbsp;</p>
+<p>Hello.java中的内容如下：</p>
+<p>&nbsp;</p>
+<div class="dp-highlighter bg_java">
+<div class="bar">
+<div class="tools"><strong>[java]</strong>&nbsp;<a class="ViewSource" title="view plain" href="http://blog.csdn.net/fox_lht/article/details/16952683">view plain</a><span data-mod="popu_168"><span data-mod="popu_168">&nbsp;<a class="CopyToClipboard" title="copy" href="http://blog.csdn.net/fox_lht/article/details/16952683">copy</a></span></span>
+<div>&nbsp;</div>
+<span data-mod="popu_168"><span data-mod="popu_169">&nbsp;<span class="tracking-ad" data-mod="popu_167"><a title="在CODE上查看代码片" href="https://code.csdn.net/snippets/81797" target="_blank"><img src="%E4%BD%BF%E7%94%A8maven%E4%B8%80%E6%AD%A5%E4%B8%80%E6%AD%A5%E6%9E%84%E5%BB%BAspring%20mvc%E9%A1%B9%E7%9B%AE%20-%20%E4%B8%8A%E6%A0%A1%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/CODE_ico.htm" alt="在CODE上查看代码片" width="12" height="12"></a><span class="tracking-ad" data-mod="popu_170"><a title="派生到我的代码片" href="https://code.csdn.net/snippets/81797/fork" target="_blank"><img src="%E4%BD%BF%E7%94%A8maven%E4%B8%80%E6%AD%A5%E4%B8%80%E6%AD%A5%E6%9E%84%E5%BB%BAspring%20mvc%E9%A1%B9%E7%9B%AE%20-%20%E4%B8%8A%E6%A0%A1%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/ico_fork.htm" alt="派生到我的代码片" width="12" height="12"></a></span></span></span></span></div>
+</div>
+<ol class="dp-j" start="1">
+<li class="alt"><span class="keyword">package&nbsp;com.springmvc.controller;&nbsp;&nbsp;</span></li>
+<li>&nbsp;&nbsp;</li>
+<li class="alt">&nbsp;&nbsp;</li>
+<li><span class="keyword">import&nbsp;org.springframework.stereotype.Controller;&nbsp;&nbsp;</span></li>
+<li class="alt"><span class="keyword">import&nbsp;org.springframework.ui.Model;&nbsp;&nbsp;</span></li>
+<li><span class="keyword">import&nbsp;org.springframework.web.bind.annotation.RequestMapping;&nbsp;&nbsp;</span></li>
+<li class="alt">&nbsp;&nbsp;</li>
+<li><span class="annotation">@Controller&nbsp;&nbsp;</span></li>
+<li class="alt"><span class="keyword">public&nbsp;<span class="keyword">class&nbsp;Hello&nbsp;{&nbsp;&nbsp;</span></span></li>
+<li>&nbsp;&nbsp;&nbsp;&nbsp;<span class="annotation">@RequestMapping(value=<span class="string">"/Hello")&nbsp;&nbsp;</span></span></li>
+<li class="alt">&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">public&nbsp;String&nbsp;HelloWorld(Model&nbsp;model){&nbsp;&nbsp;</span></li>
+<li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;model.addAttribute(<span class="string">"message",<span class="string">"Hello&nbsp;World!!!");&nbsp;&nbsp;</span></span></li>
+<li class="alt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">return&nbsp;<span class="string">"HelloWorld";&nbsp;&nbsp;</span></span></li>
+<li>&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;&nbsp;</li>
+<li class="alt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</li>
+<li>}&nbsp;&nbsp;</li>
+</ol></div>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>在src – main –webapp – WEB-INF目录下新建文件夹view，并新建文件HelloWorld.jsp。</p>
+<p><img src="http://img.blog.csdn.net/20131125225157843?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvZm94X2xodA==/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt=""></p>
+<p>Helloworld.jsp文件内容如下所示：</p>
+<div class="dp-highlighter bg_html">
+<div class="bar">
+<div class="tools"><strong>[html]</strong>&nbsp;<a class="ViewSource" title="view plain" href="http://blog.csdn.net/fox_lht/article/details/16952683">view plain</a><span data-mod="popu_168"><span data-mod="popu_168">&nbsp;<a class="CopyToClipboard" title="copy" href="http://blog.csdn.net/fox_lht/article/details/16952683">copy</a></span></span>
+<div>&nbsp;</div>
+<span data-mod="popu_168"><span data-mod="popu_169">&nbsp;<span class="tracking-ad" data-mod="popu_167"><a title="在CODE上查看代码片" href="https://code.csdn.net/snippets/81797" target="_blank"><img src="%E4%BD%BF%E7%94%A8maven%E4%B8%80%E6%AD%A5%E4%B8%80%E6%AD%A5%E6%9E%84%E5%BB%BAspring%20mvc%E9%A1%B9%E7%9B%AE%20-%20%E4%B8%8A%E6%A0%A1%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/CODE_ico.htm" alt="在CODE上查看代码片" width="12" height="12"></a><span class="tracking-ad" data-mod="popu_170"><a title="派生到我的代码片" href="https://code.csdn.net/snippets/81797/fork" target="_blank"><img src="%E4%BD%BF%E7%94%A8maven%E4%B8%80%E6%AD%A5%E4%B8%80%E6%AD%A5%E6%9E%84%E5%BB%BAspring%20mvc%E9%A1%B9%E7%9B%AE%20-%20%E4%B8%8A%E6%A0%A1%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/ico_fork.htm" alt="派生到我的代码片" width="12" height="12"></a></span></span></span></span></div>
+</div>
+<ol class="dp-xml" start="1">
+<li class="alt"><span class="tag">&lt;%@&nbsp;page&nbsp;<span class="attribute">language=<span class="attribute-value">"java"&nbsp;<span class="attribute">contentType=<span class="attribute-value">"text/html;&nbsp;charset=ISO-8859-1"&nbsp;&nbsp;</span></span></span></span></span></li>
+<li>&nbsp;&nbsp;&nbsp;&nbsp;<span class="attribute">pageEncoding=<span class="attribute-value">"ISO-8859-1"%<span class="tag">&gt;&nbsp;&nbsp;</span></span></span></li>
+<li class="alt">&lt;!DOCTYPE&nbsp;html&nbsp;PUBLIC&nbsp;"-//W3C//DTD&nbsp;HTML&nbsp;4.01&nbsp;Transitional//EN"&nbsp;"http://www.w3.org/TR/html4/loose.dtd"<span class="tag">&gt;&nbsp;&nbsp;</span></li>
+<li><span class="tag">&lt;<span class="tag-name">html<span class="tag">&gt;&nbsp;&nbsp;</span></span></span></li>
+<li class="alt"><span class="tag">&lt;<span class="tag-name">head<span class="tag">&gt;&nbsp;&nbsp;</span></span></span></li>
+<li><span class="tag">&lt;<span class="tag-name">meta&nbsp;<span class="attribute">http-equiv=<span class="attribute-value">"Content-Type"&nbsp;<span class="attribute">content=<span class="attribute-value">"text/html;&nbsp;charset=ISO-8859-1"<span class="tag">&gt;&nbsp;&nbsp;</span></span></span></span></span></span></span></li>
+<li class="alt"><span class="tag">&lt;<span class="tag-name">title<span class="tag">&gt;Insert&nbsp;title&nbsp;here<span class="tag">&lt;/<span class="tag-name">title<span class="tag">&gt;&nbsp;&nbsp;</span></span></span></span></span></span></li>
+<li><span class="tag">&lt;/<span class="tag-name">head<span class="tag">&gt;&nbsp;&nbsp;</span></span></span></li>
+<li class="alt"><span class="tag">&lt;<span class="tag-name">body<span class="tag">&gt;&nbsp;&nbsp;</span></span></span></li>
+<li><span class="tag">&lt;<span class="tag-name">h1<span class="tag">&gt;message:${message}<span class="tag">&lt;/<span class="tag-name">h1<span class="tag">&gt;&nbsp;&nbsp;</span></span></span></span></span></span></li>
+<li class="alt"><span class="tag">&lt;/<span class="tag-name">body<span class="tag">&gt;&nbsp;&nbsp;</span></span></span></li>
+<li><span class="tag">&lt;/<span class="tag-name">html<span class="tag">&gt;&nbsp;&nbsp;</span></span></span></li>
+</ol></div>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>选中web.xml文件，双击打开该文件，修改该文件使其如下所示：</p>
+<div class="dp-highlighter bg_html">
+<div class="bar">
+<div class="tools"><strong>[html]</strong>&nbsp;<a class="ViewSource" title="view plain" href="http://blog.csdn.net/fox_lht/article/details/16952683">view plain</a><span data-mod="popu_168"><span data-mod="popu_168">&nbsp;<a class="CopyToClipboard" title="copy" href="http://blog.csdn.net/fox_lht/article/details/16952683">copy</a></span></span>
+<div>&nbsp;</div>
+<span data-mod="popu_168"><span data-mod="popu_169">&nbsp;<span class="tracking-ad" data-mod="popu_167"><a title="在CODE上查看代码片" href="https://code.csdn.net/snippets/81797" target="_blank"><img src="%E4%BD%BF%E7%94%A8maven%E4%B8%80%E6%AD%A5%E4%B8%80%E6%AD%A5%E6%9E%84%E5%BB%BAspring%20mvc%E9%A1%B9%E7%9B%AE%20-%20%E4%B8%8A%E6%A0%A1%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/CODE_ico.htm" alt="在CODE上查看代码片" width="12" height="12"></a><span class="tracking-ad" data-mod="popu_170"><a title="派生到我的代码片" href="https://code.csdn.net/snippets/81797/fork" target="_blank"><img src="%E4%BD%BF%E7%94%A8maven%E4%B8%80%E6%AD%A5%E4%B8%80%E6%AD%A5%E6%9E%84%E5%BB%BAspring%20mvc%E9%A1%B9%E7%9B%AE%20-%20%E4%B8%8A%E6%A0%A1%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/ico_fork.htm" alt="派生到我的代码片" width="12" height="12"></a></span></span></span></span></div>
+</div>
+<ol class="dp-xml" start="1">
+<li class="alt"><span class="tag">&lt;<span class="tag-name">web-app&nbsp;<span class="attribute">xmlns=<span class="attribute-value">"http://java.sun.com/xml/ns/javaee"&nbsp;&nbsp;</span></span></span></span></li>
+<li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="attribute">xmlns:xsi=<span class="attribute-value">"http://www.w3.org/2001/XMLSchema-instance"&nbsp;&nbsp;</span></span></li>
+<li class="alt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="attribute">xsi:schemaLocation=<span class="attribute-value">"http://java.sun.com/xml/ns/javaee&nbsp;http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"&nbsp;&nbsp;</span></span></li>
+<li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="attribute">version=<span class="attribute-value">"3.0"<span class="tag">&gt;&nbsp;&nbsp;</span></span></span></li>
+<li class="alt">&nbsp;&nbsp;&nbsp;&nbsp;<span class="tag">&lt;<span class="tag-name">servlet<span class="tag">&gt;&nbsp;&nbsp;</span></span></span></li>
+<li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="tag">&lt;<span class="tag-name">servlet-name<span class="tag">&gt;spring-mvc<span class="tag">&lt;/<span class="tag-name">servlet-name<span class="tag">&gt;&nbsp;&nbsp;</span></span></span></span></span></span></li>
+<li class="alt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="tag">&lt;<span class="tag-name">servlet-class<span class="tag">&gt;org.springframework.web.servlet.DispatcherServlet<span class="tag">&lt;/<span class="tag-name">servlet-class<span class="tag">&gt;&nbsp;&nbsp;</span></span></span></span></span></span></li>
+<li>&nbsp;&nbsp;&nbsp;&nbsp;<span class="tag">&lt;/<span class="tag-name">servlet<span class="tag">&gt;&nbsp;&nbsp;</span></span></span></li>
+<li class="alt">&nbsp;&nbsp;</li>
+<li>&nbsp;&nbsp;&nbsp;&nbsp;<span class="tag">&lt;<span class="tag-name">servlet-mapping<span class="tag">&gt;&nbsp;&nbsp;</span></span></span></li>
+<li class="alt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="tag">&lt;<span class="tag-name">servlet-name<span class="tag">&gt;spring-mvc<span class="tag">&lt;/<span class="tag-name">servlet-name<span class="tag">&gt;&nbsp;&nbsp;</span></span></span></span></span></span></li>
+<li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="tag">&lt;<span class="tag-name">url-pattern<span class="tag">&gt;/<span class="tag">&lt;/<span class="tag-name">url-pattern<span class="tag">&gt;&nbsp;&nbsp;</span></span></span></span></span></span></li>
+<li class="alt">&nbsp;&nbsp;&nbsp;&nbsp;<span class="tag">&lt;/<span class="tag-name">servlet-mapping<span class="tag">&gt;&nbsp;&nbsp;</span></span></span></li>
+<li><span class="tag">&lt;/<span class="tag-name">web-app<span class="tag">&gt;&nbsp;&nbsp;</span></span></span></li>
+</ol></div>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>在src – main –webapp – WEB-INF目录下新建文件spring-mvc-servlet.xml，文件内容如下所示：</p>
+<p>&nbsp;</p>
+<div class="dp-highlighter bg_html">
+<div class="bar">
+<div class="tools"><strong>[html]</strong>&nbsp;<a class="ViewSource" title="view plain" href="http://blog.csdn.net/fox_lht/article/details/16952683">view plain</a><span data-mod="popu_168"><span data-mod="popu_168">&nbsp;<a class="CopyToClipboard" title="copy" href="http://blog.csdn.net/fox_lht/article/details/16952683">copy</a></span></span>
+<div>&nbsp;</div>
+<span data-mod="popu_168"><span data-mod="popu_169">&nbsp;<span class="tracking-ad" data-mod="popu_167"><a title="在CODE上查看代码片" href="https://code.csdn.net/snippets/81797" target="_blank"><img src="%E4%BD%BF%E7%94%A8maven%E4%B8%80%E6%AD%A5%E4%B8%80%E6%AD%A5%E6%9E%84%E5%BB%BAspring%20mvc%E9%A1%B9%E7%9B%AE%20-%20%E4%B8%8A%E6%A0%A1%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/CODE_ico.htm" alt="在CODE上查看代码片" width="12" height="12"></a><span class="tracking-ad" data-mod="popu_170"><a title="派生到我的代码片" href="https://code.csdn.net/snippets/81797/fork" target="_blank"><img src="%E4%BD%BF%E7%94%A8maven%E4%B8%80%E6%AD%A5%E4%B8%80%E6%AD%A5%E6%9E%84%E5%BB%BAspring%20mvc%E9%A1%B9%E7%9B%AE%20-%20%E4%B8%8A%E6%A0%A1%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/ico_fork.htm" alt="派生到我的代码片" width="12" height="12"></a></span></span></span></span></div>
+</div>
+<ol class="dp-xml" start="1">
+<li class="alt"><span class="tag">&lt;<span class="tag-name">beans&nbsp;<span class="attribute">xmlns=<span class="attribute-value">"http://www.springframework.org/schema/beans"&nbsp;&nbsp;</span></span></span></span></li>
+<li>&nbsp;&nbsp;&nbsp;&nbsp;<span class="attribute">xmlns:context=<span class="attribute-value">"http://www.springframework.org/schema/context"&nbsp;&nbsp;</span></span></li>
+<li class="alt">&nbsp;&nbsp;&nbsp;&nbsp;<span class="attribute">xmlns:mvc=<span class="attribute-value">"http://www.springframework.org/schema/mvc"&nbsp;<span class="attribute">xmlns:xsi=<span class="attribute-value">"http://www.w3.org/2001/XMLSchema-instance"&nbsp;&nbsp;</span></span></span></span></li>
+<li>&nbsp;&nbsp;&nbsp;&nbsp;<span class="attribute">xsi:schemaLocation="&nbsp;&nbsp;</span></li>
+<li class="alt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;http://www.springframework.org/schema/beans&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</li>
+<li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;http://www.springframework.org/schema/beans/spring-beans-3.0.xsd&nbsp;&nbsp;</li>
+<li class="alt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;http://www.springframework.org/schema/context&nbsp;&nbsp;&nbsp;</li>
+<li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;http://www.springframework.org/schema/context/spring-context-3.0.xsd&nbsp;&nbsp;</li>
+<li class="alt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;http://www.springframework.org/schema/mvc&nbsp;&nbsp;</li>
+<li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd"<span class="tag">&gt;&nbsp;&nbsp;</span></li>
+<li class="alt">&nbsp;&nbsp;</li>
+<li>&nbsp;&nbsp;&nbsp;&nbsp;<span class="tag">&lt;<span class="tag-name">context:component-scan&nbsp;<span class="attribute">base-package=<span class="attribute-value">"com.springmvc.controller"&nbsp;<span class="tag">/&gt;&nbsp;&nbsp;</span></span></span></span></span></li>
+<li class="alt">&nbsp;&nbsp;&nbsp;&nbsp;<span class="tag">&lt;<span class="tag-name">bean&nbsp;<span class="attribute">id=<span class="attribute-value">"viewResolver"&nbsp;&nbsp;</span></span></span></span></li>
+<li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="attribute">class=<span class="attribute-value">"org.springframework.web.servlet.view.InternalResourceViewResolver"<span class="tag">&gt;&nbsp;&nbsp;</span></span></span></li>
+<li class="alt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="tag">&lt;<span class="tag-name">property&nbsp;<span class="attribute">name=<span class="attribute-value">"prefix"&nbsp;<span class="attribute">value=<span class="attribute-value">"/WEB-INF/view/"&nbsp;<span class="tag">/&gt;&nbsp;&nbsp;</span></span></span></span></span></span></span></li>
+<li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="tag">&lt;<span class="tag-name">property&nbsp;<span class="attribute">name=<span class="attribute-value">"suffix"&nbsp;<span class="attribute">value=<span class="attribute-value">".jsp"&nbsp;<span class="tag">/&gt;&nbsp;&nbsp;</span></span></span></span></span></span></span></li>
+<li class="alt">&nbsp;&nbsp;&nbsp;&nbsp;<span class="tag">&lt;/<span class="tag-name">bean<span class="tag">&gt;&nbsp;&nbsp;</span></span></span></li>
+<li><span class="tag">&lt;/<span class="tag-name">beans<span class="tag">&gt;&nbsp;&nbsp;</span></span></span></li>
+</ol></div>
+<p> <br><br></p>
+<p>&nbsp;</p>
+<p>Ok，所有文件已经建立完毕，现在可以运行该项目，看一下效果如何了，选中该项目（点击com.liuht.springmvc，即该项目的最顶层），点击Run As – Run on Server。</p>
+<p><img src="http://img.blog.csdn.net/20131125225345781?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvZm94X2xodA==/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt=""></p>
+<p>&nbsp;</p>
+<p>出现一个界面，让你选中要使用的Web服务器，有两个选项，一个是已存在的服务器，另一个是重新定一个新的服务器，我选择已存在服务器，如果你没有，可以重新建立一个web服务器。</p>
+<p><img src="http://img.blog.csdn.net/20131125225418609?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvZm94X2xodA==/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt=""></p>
+<p>&nbsp;</p>
+<p>选中要运行的项目，点击Add&gt;按钮，添加到右边的选择框中，如果右边有其他不需要的项目，可以选中，并点击&lt; Remove按钮删除。配置完成之后，点击Finish按钮。</p>
+<p>&nbsp;</p>
+<p><img src="http://img.blog.csdn.net/20131125225447484?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvZm94X2xodA==/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt=""></p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>在Console窗口看到如下内容，说明项目启动成功：</p>
+<p><img src="http://img.blog.csdn.net/20131125225600187?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvZm94X2xodA==/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt=""></p>
+<p>&nbsp;</p>
+<p>Eclipse自动打开自己的浏览器，并显示如下内容：</p>
+<p><img src="http://img.blog.csdn.net/20131125225623640?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvZm94X2xodA==/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt=""></p>
+<p>&nbsp;</p>
+<p>你也可以打开浏览器输入<a href="http://localhost:8080/com.liuht.springmvc/" target="_blank">http://localhost:8080/com.liuht.springmvc/</a></p>
+<p><a href="http://localhost:8080/com.liuht.springmvc/" target="_blank"><img src="http://img.blog.csdn.net/20131125225646234?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvZm94X2xodA==/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt=""><br></a></p>
+<p>&nbsp;</p>
+<p>出现这个界面说明项目已经成功了，Hello World！这串字符来自控制器Hello.java文件。</p></div><div id="MySignature"></div>
+<div class="clear"></div>
+<div id="blog_post_info_block">
+<div id="BlogPostCategory">分类: <a href="https://www.cnblogs.com/zhuawang/category/850306.html" target="_blank">SpringMVC</a></div>
+<div id="EntryTag"></div>
+<div id="blog_post_info"><div id="green_channel">
+        <a href="javascript:void(0);" id="green_channel_digg" onclick="DiggIt(5651896,cb_blogId,1);green_channel_success(this,'谢谢推荐！');">好文要顶</a>
+            <a id="green_channel_follow" onclick="follow('b46f3d0b-63cf-dd11-9e4d-001cf0cd104b');" href="javascript:void(0);">关注我</a>
+    <a id="green_channel_favorite" onclick="AddToWz(cb_entryId);return false;" href="javascript:void(0);">收藏该文</a>
+    <a id="green_channel_weibo" href="javascript:void(0);" title="分享至新浪微博" onclick="ShareToTsina()"><img src="%E4%BD%BF%E7%94%A8maven%E4%B8%80%E6%AD%A5%E4%B8%80%E6%AD%A5%E6%9E%84%E5%BB%BAspring%20mvc%E9%A1%B9%E7%9B%AE%20-%20%E4%B8%8A%E6%A0%A1%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/icon_weibo_24.png" alt=""></a>
+    <a id="green_channel_wechat" href="javascript:void(0);" title="分享至微信" onclick="shareOnWechat()"><img src="%E4%BD%BF%E7%94%A8maven%E4%B8%80%E6%AD%A5%E4%B8%80%E6%AD%A5%E6%9E%84%E5%BB%BAspring%20mvc%E9%A1%B9%E7%9B%AE%20-%20%E4%B8%8A%E6%A0%A1%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/wechat.png" alt=""></a>
+</div>
+<div id="author_profile">
+    <div id="author_profile_info" class="author_profile_info">
+            <a href="https://home.cnblogs.com/u/zhuawang/" target="_blank"><img src="%E4%BD%BF%E7%94%A8maven%E4%B8%80%E6%AD%A5%E4%B8%80%E6%AD%A5%E6%9E%84%E5%BB%BAspring%20mvc%E9%A1%B9%E7%9B%AE%20-%20%E4%B8%8A%E6%A0%A1%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/sample_face.gif" class="author_avatar" alt=""></a>
+        <div id="author_profile_detail" class="author_profile_info">
+            <a href="https://home.cnblogs.com/u/zhuawang/">上校</a><br>
+            <a href="https://home.cnblogs.com/u/zhuawang/followees">关注 - 2</a><br>
+            <a href="https://home.cnblogs.com/u/zhuawang/followers">粉丝 - 354</a>
+        </div>
+    </div>
+    <div class="clear"></div>
+    <div id="author_profile_honor"></div>
+    <div id="author_profile_follow">
+                <a href="javascript:void(0);" onclick="follow('b46f3d0b-63cf-dd11-9e4d-001cf0cd104b');return false;">+加关注</a>
+    </div>
+</div>
+<div id="div_digg">
+    <div class="diggit" onclick="votePost(5651896,'Digg')">
+        <span class="diggnum" id="digg_count">0</span>
+    </div>
+    <div class="buryit" onclick="votePost(5651896,'Bury')">
+        <span class="burynum" id="bury_count">1</span>
+    </div>
+    <div class="clear"></div>
+    <div class="diggword" id="digg_tips">
+    </div>
+</div>
+<script type="text/javascript">
+    currentDiggType = 0;
+</script></div>
+<div class="clear"></div>
+<div id="post_next_prev"><a href="https://www.cnblogs.com/zhuawang/p/5642044.html" class="p_n_p_prefix">« </a> 上一篇：<a href="https://www.cnblogs.com/zhuawang/p/5642044.html" title="发布于2016-07-04 23:22">maven配置多模块项目事例</a><br><a href="https://www.cnblogs.com/zhuawang/p/5655461.html" class="p_n_p_prefix">» </a> 下一篇：<a href="https://www.cnblogs.com/zhuawang/p/5655461.html" title="发布于2016-07-09 11:02">JSTL 核心标签库 使用</a><br></div>
+</div>
+
+
+	<div class="postDesc">posted on <span id="post-date">2016-07-07 23:09</span> <a href="https://www.cnblogs.com/zhuawang/">上校</a> 阅读(<span id="post_view_count">31724</span>) 评论(<span id="post_comment_count">2</span>)  <a href="https://i.cnblogs.com/EditPosts.aspx?postid=5651896" rel="nofollow">编辑</a> <a href="#" onclick="AddToWz(5651896);return false;">收藏</a></div>
+</div>
+<script type="text/javascript">var allowComments=true,cb_blogId=25488,cb_entryId=5651896,cb_blogApp=currentBlogApp,cb_blogUserGuid='b46f3d0b-63cf-dd11-9e4d-001cf0cd104b',cb_entryCreatedDate='2016/7/7 23:09:00';loadViewCount(cb_entryId);var cb_postType=1;var isMarkdown=false;</script>
+
+</div><a name="!comments"></a><div id="blog-comments-placeholder"><div id="comments_pager_top"></div>
+<!--done-->
+<br>
+<b>评论:</b>
+<div class="feedbackNoItems"></div>
+	
+
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+			<a href="#3704865" class="layer">#1楼</a><a name="3704865" id="comment_anchor_3704865"></a>
+				 <span class="comment_date">2017-06-01 14:47</span> | <a id="a_comment_author_3704865" href="https://www.cnblogs.com/ericli-ericli/" target="_blank">Eric-Lee</a> <a href="http://msg.cnblogs.com/send/Eric-Lee" title="发送站内短消息" class="sendMsg2This">&nbsp;</a><br>
+				<div align="left"><div id="comment_body_3704865" class="blog_comment_body">你这个“Hello World”并非来自你的控制器，而是新建项目时的index.jsp文件</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(3704865,'Digg',this)">支持(6)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(3704865,'Bury',this)">反对(0)</a></div><span id="comment_3704865_avatar" style="display:none;">http://pic.cnblogs.com/face/784082/20170913105109.png</span>&nbsp;&nbsp;<span class="comment_actions"></span></div>
+			</div>
+			
+			
+		</div>
+	
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+			<a href="#3892825" class="layer">#2楼</a><a name="3892825" id="comment_anchor_3892825"></a><span id="comment-maxId" style="display:none;">3892825</span><span id="comment-maxDate" style="display:none;">2018/1/18 15:52:49</span>
+				 <span class="comment_date">2018-01-18 15:52</span> | <a id="a_comment_author_3892825" href="https://www.cnblogs.com/tiandixuanwu/" target="_blank">天地炫舞</a> <a href="http://msg.cnblogs.com/send/%E5%A4%A9%E5%9C%B0%E7%82%AB%E8%88%9E" title="发送站内短消息" class="sendMsg2This">&nbsp;</a><br>
+				<div align="left"><div id="comment_body_3892825" class="blog_comment_body">转载的文章为何不注明？</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(3892825,'Digg',this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(3892825,'Bury',this)">反对(0)</a></div><span id="comment_3892825_avatar" style="display:none;">http://pic.cnblogs.com/face/1179356/20180118154536.png</span>&nbsp;&nbsp;<span class="comment_actions"></span></div>
+			</div>
+			
+			
+		</div>
+	
+
+
+
+<div id="comments_pager_bottom"></div></div><script type="text/javascript">var commentManager = new blogCommentManager();commentManager.renderComments(0);</script>
+<div id="comment_form" class="commentform">
+<a name="commentform"></a>
+<div id="divCommentShow"></div>
+<div id="comment_nav"><span id="span_refresh_tips"></span><a href="javascript:void(0);" onclick="return RefreshCommentList();" id="lnk_RefreshComments" runat="server" clientidmode="Static">刷新评论</a><a href="#" onclick="return RefreshPage();">刷新页面</a><a href="#top">返回顶部</a></div>
+<div id="comment_form_container"><div class="login_tips">注册用户登录后才能发表评论，请 <a rel="nofollow" href="javascript:void(0);" class="underline" onclick="return login('commentform');">登录</a> 或 <a rel="nofollow" href="javascript:void(0);" class="underline" onclick="return register();">注册</a>，<a href="http://www.cnblogs.com/">访问</a>网站首页。</div></div>
+<div class="ad_text_commentbox" id="ad_text_under_commentbox"></div>
+<div id="ad_t2"><a href="http://www.ucancode.com/index.htm" target="_blank" onclick="ga('send', 'event', 'Link', 'click', 'T2-工控')">【推荐】超50万C++/C#源码: 大型实时仿真组态图形源码</a><br><a href="https://www.grapecity.com.cn/developer/spreadjs?utm_source=cnblogs&amp;utm_medium=blogpage&amp;utm_term=bottom&amp;utm_content=SpreadJS&amp;utm_campaign=community" target="_blank" onclick="ga('send', 'event', 'Link', 'click', 'T2-SpreadJS')">【前端】SpreadJS表格控件，可嵌入系统开发的在线Excel</a><br><a href="https://www.huodongxing.com/event/6501634834100" target="_blank" onclick="ga('send', 'event', 'Link', 'click', 'T2-魔程')">【活动】“魔程”社区训练营技术沙龙——React 前端开发专场</a><br><a href="https://q.cnblogs.com/" target="_blank" onclick="ga('send', 'event', 'Link', 'click', 'T2-博问')">【推荐】程序员问答平台，解决您开发中遇到的技术难题</a><br></div>
+<div id="opt_under_post"></div>
+<script async="async" src="%E4%BD%BF%E7%94%A8maven%E4%B8%80%E6%AD%A5%E4%B8%80%E6%AD%A5%E6%9E%84%E5%BB%BAspring%20mvc%E9%A1%B9%E7%9B%AE%20-%20%E4%B8%8A%E6%A0%A1%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/gpt.js"></script>
+<script>
+  var googletag = googletag || {};
+  googletag.cmd = googletag.cmd || [];
+</script>
+<script>
+  googletag.cmd.push(function() {
+        googletag.defineSlot('/1090369/C1', [300, 250], 'div-gpt-ad-1546353474406-0').addService(googletag.pubads());
+        googletag.defineSlot('/1090369/C2', [468, 60], 'div-gpt-ad-1539008685004-0').addService(googletag.pubads());
+        googletag.pubads().enableSingleRequest();
+        googletag.enableServices();
+  });
+</script>
+<div id="cnblogs_c1" class="c_ad_block">
+    <div id="div-gpt-ad-1546353474406-0" style="height:250px; width:300px;" data-google-query-id="CLDh952bveMCFYyxlgoddFsOqw"><div id="google_ads_iframe_/1090369/C1_0__container__" style="border: 0pt none;"><iframe id="google_ads_iframe_/1090369/C1_0" title="3rd party ad content" name="google_ads_iframe_/1090369/C1_0" scrolling="no" marginwidth="0" marginheight="0" style="border: 0px none; vertical-align: bottom;" srcdoc="" data-google-container-id="1" data-load-complete="true" width="300" height="250" frameborder="0"></iframe></div></div>
+</div>
+<div id="under_post_news"><div class="recomm-block"><b>相关博文：</b><br>·  <a href="https://www.cnblogs.com/kaifamengmeng/archive/2013/03/13/2957863.html" target="_blank" onclick="clickRecomItmem(2957863)">Spring MVC 例子</a><br>·  <a href="https://www.cnblogs.com/LionheartCGJ/p/6759772.html" target="_blank" onclick="clickRecomItmem(6759772)">spring MVC （学习笔记）</a><br>·  <a href="https://www.cnblogs.com/xiashiwendao/p/5677262.html" target="_blank" onclick="clickRecomItmem(5677262)">从头搭建Spring MVC</a><br>·  <a href="https://www.cnblogs.com/forestwolf/p/5050067.html" target="_blank" onclick="clickRecomItmem(5050067)">Spring-MVC环境搭建</a><br>·  <a href="https://www.cnblogs.com/chenying99/archive/2012/11/23/2783718.html" target="_blank" onclick="clickRecomItmem(2783718)">Spring 3 MVC And XML Example</a><br></div></div>
+<div id="cnblogs_c2" class="c_ad_block">
+    <div id="div-gpt-ad-1539008685004-0" style="height:60px; width:468px;" data-google-query-id="CLHh952bveMCFYyxlgoddFsOqw"><div id="google_ads_iframe_/1090369/C2_0__container__" style="border: 0pt none;"><iframe id="google_ads_iframe_/1090369/C2_0" title="3rd party ad content" name="google_ads_iframe_/1090369/C2_0" scrolling="no" marginwidth="0" marginheight="0" style="border: 0px none; vertical-align: bottom;" srcdoc="" data-google-container-id="2" data-load-complete="true" width="468" height="60" frameborder="0"></iframe></div></div>
+</div>
+<div id="under_post_kb"><div class="itnews c_ad_block"><b>最新新闻</b>：<br> ·  <a href="https://news.cnblogs.com/n/628402/" target="_blank">内部员工窃取iPhone零部件事件频发 苹果组建安全团队严防</a><br> ·  <a href="https://news.cnblogs.com/n/628401/" target="_blank">致敬肿瘤免疫40年！免疫细胞与癌细胞融合，让小鼠表达人的抗体</a><br> ·  <a href="https://news.cnblogs.com/n/628400/" target="_blank">Intel CEO承诺7nm两年内推出：10nm延期原因是技术目标太激进</a><br> ·  <a href="https://news.cnblogs.com/n/628399/" target="_blank">是时候将面容识别带到 MacBook 上了</a><br> ·  <a href="https://news.cnblogs.com/n/628398/" target="_blank">光催化剂能用可见光分解水</a><br>» <a href="http://news.cnblogs.com/" title="IT新闻" target="_blank">更多新闻...</a></div></div>
+<div id="HistoryToday" class="c_ad_block"></div>
+<script type="text/javascript">
+ if(enablePostBottom()) {
+    codeHighlight();
+    fixPostBody();
+    setTimeout(function () { incrementViewCount(cb_entryId); }, 50);
+    deliverT2();
+    deliverC1();
+    deliverC2();    
+    loadNewsAndKb();
+    loadBlogSignature();
+    LoadPostInfoBlock(cb_blogId, cb_entryId, cb_blogApp, cb_blogUserGuid);
+    GetPrevNextPost(cb_entryId, cb_blogId, cb_entryCreatedDate, cb_postType);
+    loadOptUnderPost();
+    GetHistoryToday(cb_blogId, cb_blogApp, cb_entryCreatedDate);  
+}
+</script>
+</div>
+
+    
+</div>
+<div id="leftcontent">
+	
+		<div id="leftcontentcontainer">
+			
+<!--done-->
+<div class="newsItem">
+	<div id="blog-news"><div id="profile_block">昵称：<a href="https://home.cnblogs.com/u/zhuawang/">上校</a><br>园龄：<a href="https://home.cnblogs.com/u/zhuawang/" title="入园时间：2007-03-30">12年3个月</a><br>粉丝：<a href="https://home.cnblogs.com/u/zhuawang/followers/">354</a><br>关注：<a href="https://home.cnblogs.com/u/zhuawang/followees/">2</a><div id="p_b_follow"><a href="javascript:void(0);" onclick="follow('b46f3d0b-63cf-dd11-9e4d-001cf0cd104b')">+加关注</a></div><script>getFollowStatus('b46f3d0b-63cf-dd11-9e4d-001cf0cd104b')</script></div></div><script type="text/javascript">loadBlogNews();</script>
+</div>
+
+			<div id="blog-calendar" style=""><table id="blogCalendar" class="Cal" title="Calendar" cellspacing="0" cellpadding="0">
+	<tbody><tr><td colspan="7"><table class="CalTitle" cellspacing="0">
+		<tbody><tr><td class="CalNextPrev"><a href="javascript:void(0);" onclick="loadBlogCalendar('2019/06/01');return false;">&lt;</a></td><td align="center">2019年7月</td><td class="CalNextPrev" align="right"><a href="javascript:void(0);" onclick="loadBlogCalendar('2019/08/01');return false;">&gt;</a></td></tr>
+	</tbody></table></td></tr><tr><th class="CalDayHeader" abbr="日" scope="col" align="center">日</th><th class="CalDayHeader" abbr="一" scope="col" align="center">一</th><th class="CalDayHeader" abbr="二" scope="col" align="center">二</th><th class="CalDayHeader" abbr="三" scope="col" align="center">三</th><th class="CalDayHeader" abbr="四" scope="col" align="center">四</th><th class="CalDayHeader" abbr="五" scope="col" align="center">五</th><th class="CalDayHeader" abbr="六" scope="col" align="center">六</th></tr><tr><td class="CalOtherMonthDay" align="center">30</td><td align="center">1</td><td align="center">2</td><td align="center">3</td><td align="center">4</td><td align="center">5</td><td class="CalWeekendDay" align="center">6</td></tr><tr><td class="CalWeekendDay" align="center">7</td><td align="center">8</td><td align="center">9</td><td align="center">10</td><td align="center">11</td><td align="center">12</td><td class="CalWeekendDay" align="center">13</td></tr><tr><td class="CalWeekendDay" align="center">14</td><td align="center">15</td><td align="center">16</td><td align="center">17</td><td class="CalTodayDay" align="center">18</td><td align="center">19</td><td class="CalWeekendDay" align="center">20</td></tr><tr><td class="CalWeekendDay" align="center">21</td><td align="center">22</td><td align="center">23</td><td align="center">24</td><td align="center">25</td><td align="center">26</td><td class="CalWeekendDay" align="center">27</td></tr><tr><td class="CalWeekendDay" align="center">28</td><td align="center">29</td><td align="center">30</td><td align="center">31</td><td class="CalOtherMonthDay" align="center">1</td><td class="CalOtherMonthDay" align="center">2</td><td class="CalOtherMonthDay" align="center">3</td></tr><tr><td class="CalOtherMonthDay" align="center">4</td><td class="CalOtherMonthDay" align="center">5</td><td class="CalOtherMonthDay" align="center">6</td><td class="CalOtherMonthDay" align="center">7</td><td class="CalOtherMonthDay" align="center">8</td><td class="CalOtherMonthDay" align="center">9</td><td class="CalOtherMonthDay" align="center">10</td></tr>
+</tbody></table></div><script type="text/javascript">loadBlogDefaultCalendar();</script><br>
+			<div id="blog-sidecolumn"><div id="sidebar_search" class="sidebar-block">
+<div id="sidebar_search" class="mySearch">
+<h3 class="catListTitle">搜索</h3>
+<div id="sidebar_search_box">
+<div id="widget_my_zzk" class="div_my_zzk"><input type="text" id="q" onkeydown="return zzk_go_enter(event);" class="input_my_zzk">&nbsp;<input onclick="zzk_go()" type="button" value="找找看" id="btnZzk" class="btn_my_zzk"></div>
+<div id="widget_my_google" class="div_my_zzk"><input type="text" name="google_q" id="google_q" onkeydown="return google_go_enter(event)" class="input_my_zzk">&nbsp;<input onclick="google_go()" type="button" value="谷歌搜索" class="btn_my_zzk"></div>
+</div>
+</div>
+
+</div><div id="sidebar_shortcut" class="sidebar-block">
+<h3 class="catListTitle">常用链接</h3>
+<ul>
+<li><a href="https://www.cnblogs.com/zhuawang/p/" title="我的博客的随笔列表">我的随笔</a></li><li><a href="https://www.cnblogs.com/zhuawang/MyComments.html" title="我发表过的评论列表">我的评论</a></li><li><a href="https://www.cnblogs.com/zhuawang/OtherPosts.html" title="我评论过的随笔列表">我的参与</a></li><li><a href="https://www.cnblogs.com/zhuawang/RecentComments.html" title="我的博客的评论列表">最新评论</a></li><li><a href="https://www.cnblogs.com/zhuawang/tag/" title="我的博客的标签列表">我的标签</a></li>
+</ul>
+<div id="itemListLin_con" style="display:none;">
+
+</div></div><div id="sidebar_toptags" class="sidebar-block"></div><div id="sidebar_categories">
+		<h3 class="catListTitle">随笔分类</h3>
+		
+				<ul class="catList">
+			
+				<li class="catListItem"> <a id="CatList_LinkList_0_Link_0" class="listitem" href="https://www.cnblogs.com/zhuawang/category/89877.html">Ajax(23)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_0_Link_1" class="listitem" href="https://www.cnblogs.com/zhuawang/category/563371.html">Android(27)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_0_Link_2" class="listitem" href="https://www.cnblogs.com/zhuawang/category/89874.html">ASP.NET(136)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_0_Link_3" class="listitem" href="https://www.cnblogs.com/zhuawang/category/326279.html">ASP.NET MVC(12)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_0_Link_4" class="listitem" href="https://www.cnblogs.com/zhuawang/category/89875.html">C#(111)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_0_Link_5" class="listitem" href="https://www.cnblogs.com/zhuawang/category/985561.html">C++(1)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_0_Link_6" class="listitem" href="https://www.cnblogs.com/zhuawang/category/1004843.html">Cocos Creator(5)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_0_Link_7" class="listitem" href="https://www.cnblogs.com/zhuawang/category/955019.html">Cocos2d-x(8)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_0_Link_8" class="listitem" href="https://www.cnblogs.com/zhuawang/category/104810.html">CSS(3)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_0_Link_9" class="listitem" href="https://www.cnblogs.com/zhuawang/category/882605.html">EasyUI(1)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_0_Link_10" class="listitem" href="https://www.cnblogs.com/zhuawang/category/754365.html">Eclipse(8)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_0_Link_11" class="listitem" href="https://www.cnblogs.com/zhuawang/category/705217.html">Financial</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_0_Link_12" class="listitem" href="https://www.cnblogs.com/zhuawang/category/89878.html">Flash(1)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_0_Link_13" class="listitem" href="https://www.cnblogs.com/zhuawang/category/434294.html">Java(145)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_0_Link_14" class="listitem" href="https://www.cnblogs.com/zhuawang/category/745505.html">javaEE(13)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_0_Link_15" class="listitem" href="https://www.cnblogs.com/zhuawang/category/89876.html">JavaScript(43)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_0_Link_16" class="listitem" href="https://www.cnblogs.com/zhuawang/category/745506.html">javaSE</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_0_Link_17" class="listitem" href="https://www.cnblogs.com/zhuawang/category/582459.html">Java并发(33)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_0_Link_18" class="listitem" href="https://www.cnblogs.com/zhuawang/category/587833.html">Java网络编程(4)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_0_Link_19" class="listitem" href="https://www.cnblogs.com/zhuawang/category/1022618.html">LayUI(1)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_0_Link_20" class="listitem" href="https://www.cnblogs.com/zhuawang/category/556905.html">Linux(32)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_0_Link_21" class="listitem" href="https://www.cnblogs.com/zhuawang/category/991354.html">Lua(1)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_0_Link_22" class="listitem" href="https://www.cnblogs.com/zhuawang/category/1117270.html">Mac(2)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_0_Link_23" class="listitem" href="https://www.cnblogs.com/zhuawang/category/848909.html">Maven(7)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_0_Link_24" class="listitem" href="https://www.cnblogs.com/zhuawang/category/966191.html">Mongodb(2)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_0_Link_25" class="listitem" href="https://www.cnblogs.com/zhuawang/category/890084.html">MyBatis(3)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_0_Link_26" class="listitem" href="https://www.cnblogs.com/zhuawang/category/518262.html">MySql(21)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_0_Link_27" class="listitem" href="https://www.cnblogs.com/zhuawang/category/1025801.html">nginx(4)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_0_Link_28" class="listitem" href="https://www.cnblogs.com/zhuawang/category/1040941.html">Node.js(3)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_0_Link_29" class="listitem" href="https://www.cnblogs.com/zhuawang/category/150997.html">Remoting</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_0_Link_30" class="listitem" href="https://www.cnblogs.com/zhuawang/category/347248.html">Silverlight(2)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_0_Link_31" class="listitem" href="https://www.cnblogs.com/zhuawang/category/1448470.html">SpringBoot(1)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_0_Link_32" class="listitem" href="https://www.cnblogs.com/zhuawang/category/850306.html">SpringMVC(4)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_0_Link_33" class="listitem" href="https://www.cnblogs.com/zhuawang/category/1414732.html">thymeleaf(1)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_0_Link_34" class="listitem" href="https://www.cnblogs.com/zhuawang/category/310625.html">WCF(4)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_0_Link_35" class="listitem" href="https://www.cnblogs.com/zhuawang/category/150996.html">WebService(6)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_0_Link_36" class="listitem" href="https://www.cnblogs.com/zhuawang/category/365316.html">WPF</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_0_Link_37" class="listitem" href="https://www.cnblogs.com/zhuawang/category/526332.html">大数据(1)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_0_Link_38" class="listitem" href="https://www.cnblogs.com/zhuawang/category/1026793.html">架构与负载均衡</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_0_Link_39" class="listitem" href="https://www.cnblogs.com/zhuawang/category/297473.html">控件开发(1)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_0_Link_40" class="listitem" href="https://www.cnblogs.com/zhuawang/category/89887.html">其它(21)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_0_Link_41" class="listitem" href="https://www.cnblogs.com/zhuawang/category/1239609.html">区块链(1)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_0_Link_42" class="listitem" href="https://www.cnblogs.com/zhuawang/category/90346.html">设计模式(35)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_0_Link_43" class="listitem" href="https://www.cnblogs.com/zhuawang/category/89934.html">数据库(90)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_0_Link_44" class="listitem" href="https://www.cnblogs.com/zhuawang/category/196800.html">网络安全(4)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_0_Link_45" class="listitem" href="https://www.cnblogs.com/zhuawang/category/334922.html">网络编程(2)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_0_Link_46" class="listitem" href="https://www.cnblogs.com/zhuawang/category/1029728.html">压力测试(1)</a></li>
+			
+				</ul>
+			
+	
+		<h3 class="catListTitle">随笔档案</h3>
+		
+				<ul class="catList">
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_0" class="listitem" href="https://www.cnblogs.com/zhuawang/archive/2019/04.html">2019年4月 (1)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_1" class="listitem" href="https://www.cnblogs.com/zhuawang/archive/2019/03.html">2019年3月 (1)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_2" class="listitem" href="https://www.cnblogs.com/zhuawang/archive/2018/12.html">2018年12月 (1)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_3" class="listitem" href="https://www.cnblogs.com/zhuawang/archive/2018/06.html">2018年6月 (1)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_4" class="listitem" href="https://www.cnblogs.com/zhuawang/archive/2018/03.html">2018年3月 (1)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_5" class="listitem" href="https://www.cnblogs.com/zhuawang/archive/2018/02.html">2018年2月 (1)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_6" class="listitem" href="https://www.cnblogs.com/zhuawang/archive/2017/12.html">2017年12月 (2)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_7" class="listitem" href="https://www.cnblogs.com/zhuawang/archive/2017/11.html">2017年11月 (2)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_8" class="listitem" href="https://www.cnblogs.com/zhuawang/archive/2017/10.html">2017年10月 (1)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_9" class="listitem" href="https://www.cnblogs.com/zhuawang/archive/2017/09.html">2017年9月 (1)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_10" class="listitem" href="https://www.cnblogs.com/zhuawang/archive/2017/07.html">2017年7月 (6)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_11" class="listitem" href="https://www.cnblogs.com/zhuawang/archive/2017/06.html">2017年6月 (3)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_12" class="listitem" href="https://www.cnblogs.com/zhuawang/archive/2017/05.html">2017年5月 (4)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_13" class="listitem" href="https://www.cnblogs.com/zhuawang/archive/2017/04.html">2017年4月 (4)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_14" class="listitem" href="https://www.cnblogs.com/zhuawang/archive/2017/03.html">2017年3月 (18)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_15" class="listitem" href="https://www.cnblogs.com/zhuawang/archive/2017/02.html">2017年2月 (1)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_16" class="listitem" href="https://www.cnblogs.com/zhuawang/archive/2017/01.html">2017年1月 (1)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_17" class="listitem" href="https://www.cnblogs.com/zhuawang/archive/2016/12.html">2016年12月 (2)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_18" class="listitem" href="https://www.cnblogs.com/zhuawang/archive/2016/10.html">2016年10月 (4)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_19" class="listitem" href="https://www.cnblogs.com/zhuawang/archive/2016/09.html">2016年9月 (3)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_20" class="listitem" href="https://www.cnblogs.com/zhuawang/archive/2016/07.html">2016年7月 (9)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_21" class="listitem" href="https://www.cnblogs.com/zhuawang/archive/2016/06.html">2016年6月 (6)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_22" class="listitem" href="https://www.cnblogs.com/zhuawang/archive/2016/05.html">2016年5月 (2)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_23" class="listitem" href="https://www.cnblogs.com/zhuawang/archive/2016/04.html">2016年4月 (1)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_24" class="listitem" href="https://www.cnblogs.com/zhuawang/archive/2016/02.html">2016年2月 (7)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_25" class="listitem" href="https://www.cnblogs.com/zhuawang/archive/2016/01.html">2016年1月 (4)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_26" class="listitem" href="https://www.cnblogs.com/zhuawang/archive/2015/12.html">2015年12月 (9)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_27" class="listitem" href="https://www.cnblogs.com/zhuawang/archive/2015/11.html">2015年11月 (12)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_28" class="listitem" href="https://www.cnblogs.com/zhuawang/archive/2015/10.html">2015年10月 (4)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_29" class="listitem" href="https://www.cnblogs.com/zhuawang/archive/2015/09.html">2015年9月 (1)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_30" class="listitem" href="https://www.cnblogs.com/zhuawang/archive/2015/08.html">2015年8月 (2)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_31" class="listitem" href="https://www.cnblogs.com/zhuawang/archive/2015/07.html">2015年7月 (1)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_32" class="listitem" href="https://www.cnblogs.com/zhuawang/archive/2015/06.html">2015年6月 (5)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_33" class="listitem" href="https://www.cnblogs.com/zhuawang/archive/2015/05.html">2015年5月 (2)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_34" class="listitem" href="https://www.cnblogs.com/zhuawang/archive/2015/03.html">2015年3月 (2)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_35" class="listitem" href="https://www.cnblogs.com/zhuawang/archive/2015/01.html">2015年1月 (9)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_36" class="listitem" href="https://www.cnblogs.com/zhuawang/archive/2014/12.html">2014年12月 (12)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_37" class="listitem" href="https://www.cnblogs.com/zhuawang/archive/2014/11.html">2014年11月 (8)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_38" class="listitem" href="https://www.cnblogs.com/zhuawang/archive/2014/10.html">2014年10月 (11)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_39" class="listitem" href="https://www.cnblogs.com/zhuawang/archive/2014/09.html">2014年9月 (12)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_40" class="listitem" href="https://www.cnblogs.com/zhuawang/archive/2014/08.html">2014年8月 (10)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_41" class="listitem" href="https://www.cnblogs.com/zhuawang/archive/2014/07.html">2014年7月 (3)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_42" class="listitem" href="https://www.cnblogs.com/zhuawang/archive/2014/06.html">2014年6月 (13)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_43" class="listitem" href="https://www.cnblogs.com/zhuawang/archive/2014/05.html">2014年5月 (38)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_44" class="listitem" href="https://www.cnblogs.com/zhuawang/archive/2014/04.html">2014年4月 (27)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_45" class="listitem" href="https://www.cnblogs.com/zhuawang/archive/2014/03.html">2014年3月 (5)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_46" class="listitem" href="https://www.cnblogs.com/zhuawang/archive/2014/02.html">2014年2月 (4)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_47" class="listitem" href="https://www.cnblogs.com/zhuawang/archive/2014/01.html">2014年1月 (2)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_48" class="listitem" href="https://www.cnblogs.com/zhuawang/archive/2013/12.html">2013年12月 (2)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_49" class="listitem" href="https://www.cnblogs.com/zhuawang/archive/2013/11.html">2013年11月 (15)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_50" class="listitem" href="https://www.cnblogs.com/zhuawang/archive/2013/10.html">2013年10月 (15)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_51" class="listitem" href="https://www.cnblogs.com/zhuawang/archive/2013/09.html">2013年9月 (7)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_52" class="listitem" href="https://www.cnblogs.com/zhuawang/archive/2013/08.html">2013年8月 (3)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_53" class="listitem" href="https://www.cnblogs.com/zhuawang/archive/2013/07.html">2013年7月 (1)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_54" class="listitem" href="https://www.cnblogs.com/zhuawang/archive/2013/06.html">2013年6月 (2)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_55" class="listitem" href="https://www.cnblogs.com/zhuawang/archive/2013/05.html">2013年5月 (9)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_56" class="listitem" href="https://www.cnblogs.com/zhuawang/archive/2013/04.html">2013年4月 (1)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_57" class="listitem" href="https://www.cnblogs.com/zhuawang/archive/2013/02.html">2013年2月 (2)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_58" class="listitem" href="https://www.cnblogs.com/zhuawang/archive/2013/01.html">2013年1月 (6)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_59" class="listitem" href="https://www.cnblogs.com/zhuawang/archive/2012/12.html">2012年12月 (8)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_60" class="listitem" href="https://www.cnblogs.com/zhuawang/archive/2012/11.html">2012年11月 (1)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_61" class="listitem" href="https://www.cnblogs.com/zhuawang/archive/2012/10.html">2012年10月 (1)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_62" class="listitem" href="https://www.cnblogs.com/zhuawang/archive/2012/09.html">2012年9月 (3)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_63" class="listitem" href="https://www.cnblogs.com/zhuawang/archive/2012/08.html">2012年8月 (3)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_64" class="listitem" href="https://www.cnblogs.com/zhuawang/archive/2012/07.html">2012年7月 (7)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_65" class="listitem" href="https://www.cnblogs.com/zhuawang/archive/2012/05.html">2012年5月 (2)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_66" class="listitem" href="https://www.cnblogs.com/zhuawang/archive/2012/04.html">2012年4月 (2)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_67" class="listitem" href="https://www.cnblogs.com/zhuawang/archive/2012/03.html">2012年3月 (5)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_68" class="listitem" href="https://www.cnblogs.com/zhuawang/archive/2012/02.html">2012年2月 (6)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_69" class="listitem" href="https://www.cnblogs.com/zhuawang/archive/2012/01.html">2012年1月 (1)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_70" class="listitem" href="https://www.cnblogs.com/zhuawang/archive/2011/12.html">2011年12月 (5)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_71" class="listitem" href="https://www.cnblogs.com/zhuawang/archive/2011/11.html">2011年11月 (11)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_72" class="listitem" href="https://www.cnblogs.com/zhuawang/archive/2011/10.html">2011年10月 (8)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_73" class="listitem" href="https://www.cnblogs.com/zhuawang/archive/2011/09.html">2011年9月 (34)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_74" class="listitem" href="https://www.cnblogs.com/zhuawang/archive/2011/08.html">2011年8月 (21)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_75" class="listitem" href="https://www.cnblogs.com/zhuawang/archive/2011/07.html">2011年7月 (17)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_76" class="listitem" href="https://www.cnblogs.com/zhuawang/archive/2011/06.html">2011年6月 (16)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_77" class="listitem" href="https://www.cnblogs.com/zhuawang/archive/2011/05.html">2011年5月 (18)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_78" class="listitem" href="https://www.cnblogs.com/zhuawang/archive/2011/04.html">2011年4月 (24)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_79" class="listitem" href="https://www.cnblogs.com/zhuawang/archive/2011/03.html">2011年3月 (3)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_80" class="listitem" href="https://www.cnblogs.com/zhuawang/archive/2010/10.html">2010年10月 (2)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_81" class="listitem" href="https://www.cnblogs.com/zhuawang/archive/2010/08.html">2010年8月 (1)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_82" class="listitem" href="https://www.cnblogs.com/zhuawang/archive/2010/07.html">2010年7月 (1)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_83" class="listitem" href="https://www.cnblogs.com/zhuawang/archive/2010/04.html">2010年4月 (1)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_84" class="listitem" href="https://www.cnblogs.com/zhuawang/archive/2010/03.html">2010年3月 (1)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_85" class="listitem" href="https://www.cnblogs.com/zhuawang/archive/2010/01.html">2010年1月 (1)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_86" class="listitem" href="https://www.cnblogs.com/zhuawang/archive/2009/07.html">2009年7月 (1)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_87" class="listitem" href="https://www.cnblogs.com/zhuawang/archive/2009/06.html">2009年6月 (2)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_88" class="listitem" href="https://www.cnblogs.com/zhuawang/archive/2009/05.html">2009年5月 (1)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_89" class="listitem" href="https://www.cnblogs.com/zhuawang/archive/2008/09.html">2008年9月 (1)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_90" class="listitem" href="https://www.cnblogs.com/zhuawang/archive/2008/08.html">2008年8月 (16)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_91" class="listitem" href="https://www.cnblogs.com/zhuawang/archive/2008/07.html">2008年7月 (25)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_92" class="listitem" href="https://www.cnblogs.com/zhuawang/archive/2008/06.html">2008年6月 (6)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_93" class="listitem" href="https://www.cnblogs.com/zhuawang/archive/2008/05.html">2008年5月 (7)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_94" class="listitem" href="https://www.cnblogs.com/zhuawang/archive/2008/04.html">2008年4月 (14)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_95" class="listitem" href="https://www.cnblogs.com/zhuawang/archive/2007/10.html">2007年10月 (1)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_96" class="listitem" href="https://www.cnblogs.com/zhuawang/archive/2007/09.html">2007年9月 (11)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_97" class="listitem" href="https://www.cnblogs.com/zhuawang/archive/2007/08.html">2007年8月 (3)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_98" class="listitem" href="https://www.cnblogs.com/zhuawang/archive/2007/07.html">2007年7月 (18)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_99" class="listitem" href="https://www.cnblogs.com/zhuawang/archive/2007/06.html">2007年6月 (21)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_100" class="listitem" href="https://www.cnblogs.com/zhuawang/archive/2007/05.html">2007年5月 (17)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_101" class="listitem" href="https://www.cnblogs.com/zhuawang/archive/2007/04.html">2007年4月 (62)</a></li>
+			
+				</ul>
+			
+	
+		<h3 class="catListTitle">相册</h3>
+		
+				<ul class="catList">
+			
+				<li class="catListItem"> <a id="CatList_LinkList_2_Link_0" class="listitem" href="https://www.cnblogs.com/zhuawang/gallery/357361.html" rel="nofollow">123(1)</a></li>
+			
+				</ul>
+			
+	
+</div><div id="sidebar_recentcomments" class="sidebar-block"><div id="recent_comments_wrap">
+<h3 class="catListTitle">最新评论</h3>
+<div class="RecentComment" id="RecentComments">
+	<div id="RecentCommentsBlock"><ul>
+        <li class="recent_comment_title"><a href="https://www.cnblogs.com/zhuawang/p/5596455.html#4292146">1. Re:使Eclipse下支持编写HTML/JS/CSS/JSP页面的自动提示。</a></li>
+        <li class="recent_comment_body">支持html页面的自动提示吗？</li>
+        <li class="recent_comment_author">--朋哥哥</li>
+        <li class="recent_comment_title"><a href="https://www.cnblogs.com/zhuawang/p/5213192.html#4179718">2. Re:闲谈Tomcat性能优化</a></li>
+        <li class="recent_comment_body">嗯，感觉不错呀</li>
+        <li class="recent_comment_author">--不想被吃的虫子</li>
+        <li class="recent_comment_title"><a href="https://www.cnblogs.com/zhuawang/p/5053240.html#4153371">3. Re:linux查看磁盘io的几种方法</a></li>
+        <li class="recent_comment_body">666</li>
+        <li class="recent_comment_author">--starRTC免费IM直播</li>
+        <li class="recent_comment_title"><a href="https://www.cnblogs.com/zhuawang/p/3849742.html#4083931">4. Re:netty入门实例</a></li>
+        <li class="recent_comment_body">何必呢  又不是自己敲出来的,都没有验证...草草了事,态度不端正</li>
+        <li class="recent_comment_author">--zackoliy</li>
+        <li class="recent_comment_title"><a href="https://www.cnblogs.com/zhuawang/p/3672228.html#4082052">5. Re:Android学习路线</a></li>
+        <li class="recent_comment_body">我有bat的Android源码，经过这个项目，面试了美团和知乎，在Android方面的知识过关很容易。拿到offer很轻松。我就是凭借着这个项目成为了猎头之间抢手的一员。如果你想提升自己，想面试轻松的......</li>
+        <li class="recent_comment_author">--太书红叶</li>
+</ul>
+</div>
+</div>
+</div></div><div id="sidebar_topviewedposts" class="sidebar-block"><div id="topview_posts_wrap">
+<h3 class="catListTitle">阅读排行榜</h3>
+<div class="RecentComment" id="TopViewPosts"> 
+	<div id="TopViewPostsBlock"><ul><li><a href="https://www.cnblogs.com/zhuawang/archive/2012/12/08/2809380.html">1. java发送http的get、post请求(588738)</a></li><li><a href="https://www.cnblogs.com/zhuawang/archive/2011/08/08/2130989.html">2. jQuery.parseJSON(json)方法将字符串转换成js对象(85589)</a></li><li><a href="https://www.cnblogs.com/zhuawang/p/5213192.html">3. 闲谈Tomcat性能优化(66056)</a></li><li><a href="https://www.cnblogs.com/zhuawang/p/4185302.html">4. MySql 存储过程实例(附完整注释)(51783)</a></li><li><a href="https://www.cnblogs.com/zhuawang/archive/2012/02/26/2369201.html">5. Html.DropDownList()的用法(44506)</a></li></ul></div>
+</div>
+</div></div><div id="sidebar_topcommentedposts" class="sidebar-block"><div id="topfeedback_posts_wrap">
+<h3 class="catListTitle">评论排行榜</h3>
+<div class="RecentComment" id="TopCommentsPosts">
+	<div id="TopFeedbackPostsBlock"><ul><li><a href="https://www.cnblogs.com/zhuawang/archive/2012/12/08/2809380.html">1. java发送http的get、post请求(25)</a></li><li><a href="https://www.cnblogs.com/zhuawang/archive/2007/04/29/732035.html">2. JS日期和时间选择控件(15)</a></li><li><a href="https://www.cnblogs.com/zhuawang/archive/2007/04/21/722482.html">3. ajaxPro.dll基础教程(11)</a></li><li><a href="https://www.cnblogs.com/zhuawang/archive/2007/04/07/704258.html">4. FLASH广告轮播器(10)</a></li><li><a href="https://www.cnblogs.com/zhuawang/p/3849742.html">5. netty入门实例(10)</a></li></ul></div>
+</div></div></div><div id="sidebar_topdiggedposts" class="sidebar-block"><div id="topdigg_posts_wrap">
+<h3 class="catListTitle">推荐排行榜</h3>
+<div class="RecentComment">
+	<div id="TopDiggPostsBlock"><ul><li><a href="https://www.cnblogs.com/zhuawang/archive/2012/12/08/2809380.html">1. java发送http的get、post请求(42)</a></li><li><a href="https://www.cnblogs.com/zhuawang/p/4204366.html">2. Netty系列之Netty百万级推送服务设计要点(9)</a></li><li><a href="https://www.cnblogs.com/zhuawang/p/3672228.html">3. Android学习路线(6)</a></li><li><a href="https://www.cnblogs.com/zhuawang/p/5213192.html">4. 闲谈Tomcat性能优化(5)</a></li><li><a href="https://www.cnblogs.com/zhuawang/p/4779649.html">5. ConcurrentHashMap使用要点(5)</a></li></ul></div>
+</div></div></div></div><script type="text/javascript">loadBlogSideColumn();</script></div>
+	
+</div>
+
+<!--done-->
+<div class="footer">
+	Powered by: <a href="http://www.cnblogs.com/">博客园</a>	模板提供：<a href="http://blog.hjenglish.com/">沪江博客</a>
+	Copyright ©2019 上校
+</div>
+
+
+
+
+
+
+</body></html>

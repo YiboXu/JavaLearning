@@ -1,0 +1,155 @@
+﻿1. 创建interface
+package concert;
+
+public interface Performance {
+	public void perform();
+}
+
+2. 创建类 Movie 
+package concert;
+
+import java.io.PrintStream;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+@Component
+public class Movie implements Performance{
+
+	private PrintStream out;
+	
+	@Autowired
+	public Movie(PrintStream out) {
+		this.out = out;
+	}
+	
+	@Override
+	public void perform() {
+		// TODO Auto-generated method stub
+		out.println("Movie is performing!");
+	}
+
+}
+
+3. 创建类 Audience
+package concert;
+
+import java.io.PrintStream;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+@Component
+public class Audience {
+	private PrintStream out;
+	
+	@Autowired
+	public Audience(PrintStream out) {
+		this.out = out;
+	}
+	
+	public void handClap() {
+		out.println("Audience is handclapping!");
+	}
+	
+}
+
+4 创建 META-INF/spring/sample.xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:aop="http://www.springframework.org/schema/aop"
+  xsi:schemaLocation="http://www.springframework.org/schema/aop 
+      http://www.springframework.org/schema/aop/spring-aop.xsd
+		http://www.springframework.org/schema/beans 
+      http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+  <bean id="movie" class="concert.Movie">
+    <constructor-arg value="#{T(System).out}" />
+  </bean>
+
+  <bean id="audience" class="concert.Audience">
+    <constructor-arg value="#{T(System).out}" />
+  </bean>
+
+  <aop:config>
+    <aop:aspect ref="audience">
+      <aop:pointcut id="thanks"
+          expression="execution(* *.perform(..))"/>
+        
+      <aop:before pointcut-ref="thanks" 
+          method="handClap"/>
+
+      <aop:after pointcut-ref="thanks" 
+          method="handClap"/>
+    </aop:aspect>
+  </aop:config>
+  
+</beans>
+
+5. 创建config
+package concert;
+
+import java.io.PrintStream;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.ImportResource;
+
+@Configuration
+@ComponentScan
+@ImportResource("classpath:META-INF/spring/sample.xml")      ===>添加xml
+public class ConcertConfig {
+	
+	@Bean
+	public PrintStream out() {
+		return System.out;
+	}
+}
+
+
+6 测试1
+package concert;
+
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+
+import concert.ConcertConfig;
+import concert.Movie;
+
+public class Test1 {
+	
+	public static void main(String[] args) {
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(ConcertConfig.class);
+		
+		context.getBean(Movie.class).perform();
+		
+		context.close();
+	}
+}
+
+7 测试2
+package concert;
+
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+
+import concert.Movie;
+
+public class Test2 {
+
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("META-INF/spring/sample.xml");
+		
+		Performance movie = context.getBean(Performance.class);
+		movie.perform();
+		
+		context.close();
+	}
+
+}
+
+对于测试2,这里是通过XML来进行Bean的注入，注意这里movie的实例化，用的是其interface Performance， 这里不能直接用Movie来代替，比如下面这样：
+Movie movie = context.getBean(Movie.class);
+
+如果这样的话，会导致无法注入。 目前还不明白为什么，但是如果不用aop，是可以这样实例化的。用config (测试1)，也是可以直接用Movie的。

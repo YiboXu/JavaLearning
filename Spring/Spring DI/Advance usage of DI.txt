@@ -1,0 +1,274 @@
+﻿1. 通过@Profile来指定Bean是否实例化
+
+@Component
+@Profile("prod")
+public class MyClass {
+..............
+}
+
+只有在spring.profiles.active=prod 的时候这个MyClass才会被实例化
+spring.profiles.active可以通过xml，或application.yml, application.properties来指定
+
+2.当被@Autowired注解的方法，注入的时候有多个满足条件的时候，可以通过@Primary来指定注入哪一个
+
+- class 1
+@Component
+public class CDPlayer implements MediaPlayer{
+	
+	private CompactDisc cd;
+	private Dessert dst;
+	
+	@Autowired
+	public CDPlayer(CompactDisc cd) {
+		this.cd = cd;
+		System.out.println("Initialized with "+cd.toString());
+	}
+	
+	@Autowired
+	@Qualifier("sgtPeppers")
+	public void setCompactDisc(CompactDisc cd) {
+		this.cd = cd;
+		System.out.println("Setter with "+cd.toString());
+	}
+	
+	@Autowired
+	@Cold
+	@Eat
+	public void setDessert(Dessert dst) {
+		this.dst = dst;
+		System.out.println("Setter with dessert "+dst.toString());
+	}
+	
+	@Override
+	public void play() {
+		// TODO Auto-generated method stub
+		cd.play();
+	}
+}
+
+- interface 1
+package soundsystem;
+
+public interface CompactDisc {
+	
+	void play();
+}
+
+- interface 2
+package soundsystem;
+
+public interface Dessert {
+
+}
+
+- class MyPrimaryCD 
+package soundsystem;
+
+import org.springframework.context.annotation.Primary;
+import org.springframework.stereotype.Component;
+
+@Component
+@Primary        ====>指定了Primary， 所以当需要注入CompactDisc 的时候，就会用到这个，而不会用到SgtPeppers 
+public class MyPrimaryCD implements CompactDisc {
+	private String title = "Title of my primary CD";
+	private String artist = "The Bill Hu";
+
+	public void play() {
+		System.out.println("Playing " + title + " by " + artist);
+	}
+	
+	public String toString() {
+		return "MyPrimaryCD";
+	}
+}
+
+- class SgtPeppers 
+
+package soundsystem;
+
+import org.springframework.stereotype.Component;
+
+@Component
+public class SgtPeppers implements CompactDisc {
+	private String title = "Sgt. Pepper's Lonely Hearts Club Band";
+	private String artist = "The Beatles";
+
+	public void play() {
+		System.out.println("Playing " + title + " by " + artist);
+	}
+	
+	public String toString() {
+		return "SgtPeppers";
+	}
+}
+
+- 注解 @Cold
+package soundsystem;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.RetentionPolicy;
+
+import org.springframework.beans.factory.annotation.Qualifier;
+
+@Target({ElementType.CONSTRUCTOR, ElementType.FIELD,ElementType.METHOD, ElementType.TYPE})
+@Retention(RetentionPolicy.RUNTIME)
+@Qualifier
+public @interface Cold { }
+
+- 注解 @Eat
+package soundsystem;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.RetentionPolicy;
+
+import org.springframework.beans.factory.annotation.Qualifier;
+
+@Target({ElementType.CONSTRUCTOR, ElementType.FIELD,ElementType.METHOD, ElementType.TYPE})
+@Retention(RetentionPolicy.RUNTIME)
+@Qualifier
+public @interface Eat { }
+
+- Class ReaTea 
+package soundsystem;
+
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Component;
+
+@Component
+//@Qualifier("drink")
+@Cold
+@Drink
+public class ReaTea implements Dessert{
+	public String toString() {
+		return "ReaTea";
+	}
+}
+
+- class IceCream
+package soundsystem;
+
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Component;
+
+@Component
+//@Qualifier("eat")
+@Cold
+@Eat
+public class IceCream implements Dessert{
+	public String toString() {return "IceCream";}
+}
+
+
+这里IceCream和ReaTea 都被注解为@Cold,然后分别又被注解为@Eat和@Drink, 同时在CDPlayer 里面的setDesser方法上注解了@Cold和@Eat，所以IceCream会被注入到setDesser。
+注意，所有被@Autowired注解的方法都会在构造函数执行完后进行执行。 (注意顺序并不是跟类中定义的方法顺序一致)
+
+- Scoping Beans
+默认情况下，注入的类都是同一个实例，但是对于一些有状态的Bean,需要在不同的时候注入新的实例，对于这样的情况，可以这样:
+- @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+加在@Component下面或者config里面@Bean下面，这样，每次注入的都是一个新的实例。
+或者添加到xml如下:
+<bean id="notepad" class="com.myapp.Notepad" scope="prototype" />
+
+- 使用会话和请求作用域 @Scope(value=WebApplicationContext.SCOPE_SESSION,proxyMode=ScopedProxyMode.INTERFACES)
+在实际企业级开发过程中，我们常用@Scope来定义Bean的作用域。如用户的购物车信息，如果将购物车类声明为单例（Singleton），那么每个用户都向同一个购物车中添加商品，这样势必会造成混乱；
+你也许会想到使用原型模式声明购物车，但这样同一用户在不同请求时，所获得的购物车信息是不同的，这也是一种混乱。
+这时候将购物车作用域设置为会话（Session）就再适合不过了：
+@Component
+@Scope(value=WebApplicationContext.SCOPE_SESSION, proxyMode=ScopedProxyMode.INTERFACES)
+public class MyShoppingCart implements ShoppingCart{
+
+	private static int count=1;
+	private final int id=count++;
+	
+	public String toString() {
+		return "ShoppingCart "+id;
+	}
+}
+
+这里，我们将value的值设置为WebApplicationContext中的SCOPE_SESSION常量（他的值是session）。这样就会告诉Spring每个会话创建一个Cart。
+细心的朋友可能已经发现了，@Scope的里面还有一个属性proxyMode，他被设置成了ScopeProxyMode.INTERFACES。这个属性解决了将会话或请求的bean注入到单例bean中所遇到的问题。在此之前我们先看看这个问题是什么。
+假如我们将Cart bean注入到单例StoreService bean的setter方法中，如下所示：
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+@Component
+public class StoreService {
+
+	private ShoppingCart shoppingCart;
+	
+	@Autowired
+	public void setShoppingCart(ShoppingCart shoppingCart) {
+		this.shoppingCart = shoppingCart;
+	}
+	
+	public void display() {
+		System.out.println(shoppingCart);
+	}
+}
+
+
+因为SroreService是一个单例的bean，会在Spring应用上下文加载的时候创建。当他创建的时候，Spring会试图将Cartbean注入到它的属性中。但是cart bean是会话作用域的，此时并不存在。直到某个用户进入系统之后，才会创建Cart实例。
+另外，系统中将会有多个Cart 实例：每个会话一个。我们不想让Spring注入某个固定的Cart，我们希望Spring注入的是本次会话的Cart bean。
+其实，Spring这时并不会将实际的Cart bean注入到StoreService中，Spring 会注入一个Cart bean 的代理。这个代理会暴露与Cart相同的方法，所以认为他就是一个购物车。
+当StoreService调用Cart方法时，代理会对其进行赖解析，并调用委托给会话作用域内真正的Cart bean。
+现在，我们带着对这个作用域的理解，讨论一下proxyMode属性，proxyMode属性被设置成了ScopeProxyMode.INTERFACES，这表明这个代理要实现Cart接口，并调用委托给实现bean。
+如果Cart是接口而不是类也是可以的（最理想的代理模式就是实现接口）。但如果Cart是一个具体类的话，他必须使用CGLib来生成基于类的代理，此时必须要将proxyMode属性设置为ScopeProxyMode.TAGER_CLASS,以此看来要以生成目标类扩展的方式创建代理。
+请求（Request）作用域的装配机制也是这样的。
+
+这样我们就可以在controller里面引用这个StoreService
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+@Controller
+@RequestMapping("/hello")
+public class HelloController {
+
+	 private StoreService storeService;
+	 
+	 @Autowired
+	 public HelloController(StoreService storeService) {
+		 this.storeService = storeService;
+	 }
+	 
+	 @GetMapping
+	 public String showHelloForm(Model model) {	
+		 storeService.display();
+	      return "hello";
+	  }
+}
+
+- 在XML中声明作用域代理
+在xml中声明代理模式，要使用到<bean>的一个 属性scope；设置代理模式要使用Spring AOP命名空间中的一个新元素：
+<bean id="card" class="com.scope.service.Cart" scope="session"
+    <aop:scoped-proxy />
+</bean>
+
+<aop:scope-proxy />是与@scope注解的proxyMode属性功能相同Spring XML配置元素。他会告诉Spring为bean创建一个作用域代理。默认情况下他创建的是CGLib模式的代理。我们也可以指定他创建代理的模式：
+<bean id="card" class="com.scope.service.Cart" scope="session"
+    <aop:scoped-proxy proxy-target-class="false"/>
+</bean>
+
+为了使用<aop:scope-proxy>元素，我们必须在XML中配置声明Spring AOP的命名空间：
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:task="http://www.springframework.org/schema/task"
+    xmlns:aop="http://www.springframework.org/schema/aop"
+    xmlns:cache="http://www.springframework.org/schema/cache"
+    xsi:schemaLocation="http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+        http://www.springframework.org/schema/cache
+        http://www.springframework.org/schema/cache/spring-cache.xsd
+        http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd
+        http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-4.0.xsd">
+...
+</beans>

@@ -1,0 +1,84 @@
+自定义异常
+
+如果要自定义异常类，则扩展Exception类即可，因此这样的自定义异常都属于检查异常（checked exception）。如果要自定义非检查异常，则扩展自RuntimeException。
+
+按照国际惯例，自定义的异常应该总是包含如下的构造函数：
+
+一个无参构造函数 一个带有String参数的构造函数，并传递给父类的构造函数。 一个带有String参数和Throwable参数，并都传递给父类构造函数 一个带有Throwable 参数的构造函数，并传递给父类的构造函数。 下面是IOException类的完整源代码，可以借鉴。
+
+public class IOException extends Exception
+{
+    static final long serialVersionUID = 7818375828146090155L;
+ 
+    public IOException()
+    {
+        super();
+    }
+ 
+    public IOException(String message)
+    {
+        super(message);
+    }
+ 
+    public IOException(String message, Throwable cause)
+    {
+        super(message, cause);
+    }
+ 
+    public IOException(Throwable cause)
+    {
+        super(cause);
+    }
+}
+
+
+异常的注意事项
+
+异常的注意事项
+
+    当子类重写父类的带有 throws声明的函数时，其throws声明的异常必须在父类异常的可控范围内——用于处理父类的throws方法的异常处理器，必须也适用于子类的这个带throws方法 。这是为了支持多态。
+
+    例如，父类方法throws 的是2个异常，子类就不能throws 3个及以上的异常。父类throws IOException，子类就必须throws IOException或者IOException的子类。
+
+至于为什么？我想，也许下面的例子可以说明。
+
+class Father
+{
+    public void start() throws IOException
+    {
+        throw new IOException();
+    }
+}
+ 
+class Son extends Father
+{
+    public void start() throws Exception
+    {
+        throw new SQLException();
+    }
+}
+
+/**********************假设上面的代码是允许的（实质是错误的）***********************/
+
+class Test
+{
+    public static void main(String[] args)
+    {
+        Father[] objs = new Father[2];
+        objs[0] = new Father();
+        objs[1] = new Son();
+ 
+        for(Father obj:objs)
+        {
+        //因为Son类抛出的实质是SQLException，而IOException无法处理它。
+        //那么这里的try。。catch就不能处理Son中的异常。
+        //多态就不能实现了。
+            try {
+                 obj.start();
+            }catch(IOException)
+            {
+                 //处理IOException
+            }
+         }
+   }
+}

@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        https://www.springframework.org/schema/beans/spring-beans.xsd">
+    <!--id是bean的唯一标识符，如果没有指定id，那么name的值就是id; 如果指定了id，也指定了name，那么name就是id的别名
+        如果id和name都没有指定，可以通过对象类型<ApplicationContext.getBean(Class)>来获取对象，但是注意如果这个对象类型定义
+        了多个，那么就报报错，因为spring无法知道获取哪一个-->
+    <!--bean的作用域:
+     singleton: 单例模式，每次请求获得的都是同一个对象
+     prototype:原型模式，每次请求获得的都是一个新的对象
+     request:一个http request中使用同一个实例 Only valid in the context of a web-aware Spring ApplicationContext.
+     session:一个http session中使用同一个实例 Only valid in the context of a web-aware Spring ApplicationContext.
+     application:一个应用中使用同一个实例 Only valid in the context of a web-aware Spring ApplicationContext.-->
+    <bean id="hello" name="alias-hello" class="tk.spring.ioc.Hello" scope="singleton">
+        <property name="name" value="BillHu"></property>
+    </bean>
+
+    <bean name="mysqlDao" class="tk.spring.ioc.dao.MySqlUserDao">
+        <property name="username" value="BillHu"></property>
+    </bean>
+    <bean name="mysqlUserService" class="tk.spring.ioc.service.UserService">
+        <property name="userDao" ref="mysqlDao"></property>
+    </bean>
+
+    <bean name="oracleDao" class="tk.spring.ioc.dao.OracleUserDao">
+        <!--根据构造函数参数下标来配置参数 -->
+        <constructor-arg index="0" value="Bill"></constructor-arg>
+        <!--根据构造函数参数名称来配置参数 -->
+        <constructor-arg name="lastName" value="Hu"></constructor-arg>
+        <!--根据构造函数参数类型来配置参数, 如果有重复类型，就按定义的顺序来配置-->
+        <constructor-arg type="java.lang.Integer" value="420"></constructor-arg>
+        <constructor-arg type="java.lang.Integer" value="1041"></constructor-arg>
+        <constructor-arg type="int" value="2710"></constructor-arg>
+    </bean>
+    <bean name="oracleUserService" class="tk.spring.ioc.service.UserService">
+        <property name="userDao" ref="oracleDao"></property>
+    </bean>
+
+    <!--通过静态工厂方法来创建对象 -->
+    <bean name="staticUser" class="tk.spring.ioc.model.UserStaticFactory" factory-method="getUser">
+        <constructor-arg name="username" value="BillHu-static"></constructor-arg>
+    </bean>
+
+    <!--通过动态工厂方法来创建对象 -->
+    <bean name="userFactory" class="tk.spring.ioc.model.UserDynamicFactory"></bean>
+    <bean name="dynamicUser" factory-bean="userFactory" factory-method="getUser">
+        <constructor-arg name="username" value="BillHu-dynamic"></constructor-arg>
+    </bean>
+
+    <!--导入其他配置 -->
+    <import resource="sub.xml"></import>
+
+    <bean id="user" class="tk.spring.ioc.model.User">
+        <constructor-arg name="username" value="sofica-Yang"></constructor-arg>
+        <constructor-arg name="roles">
+            <array>
+                <value>user</value>
+                <value>admin</value>
+                <value>operator</value>
+            </array>
+        </constructor-arg>
+        <constructor-arg name="hobbies">
+            <list>
+                <value>eat</value>
+                <value>sleep</value>
+                <value>shopping</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="cards">
+            <map>
+                <entry key="icbc" value="12345"></entry>
+                <entry key="cmb" value="56789"></entry>
+                <entry key="abc" value="00001"></entry>
+            </map>
+        </constructor-arg>
+        <constructor-arg name="games">
+            <set>
+                <value>football</value>
+                <value>sanguo</value>
+                <value>dafuweng</value>
+            </set>
+        </constructor-arg>
+        <constructor-arg name="wife">
+            <null></null>
+        </constructor-arg>
+        <constructor-arg name="properties">
+            <props>
+                <prop key="personid">123456</prop>
+                <prop key="sex">female</prop>
+                <prop key="city">wuhan</prop>
+            </props>
+        </constructor-arg>
+    </bean>
+
+    <!--自动装配 byname: 根据setxxxxx()方法里面的xxxx来匹配bean进行装配-->
+    <bean name="userDao" class="tk.spring.ioc.dao.MySqlUserDao">
+        <property name="username" value="Hu Tao"></property>
+    </bean>
+    <bean name="mysqlAutoWiredUserService" class="tk.spring.ioc.service.UserService" autowire="byName"></bean>
+
+    <!--自动装配 bytype: 根据依赖的属性类型来装配 同一种类型的Bean只能有一个-->
+    <bean class="tk.spring.ioc.dao.Db2UserDao"></bean>
+    <bean name="db2AutoWiredUserService" class="tk.spring.ioc.service.UserService2" autowire="byType"></bean>
+
+    <!--自动装配 constructor: 通过构造函数里面的参数类型来装配-->
+    <bean name="db2AutoWiredUserService2" class="tk.spring.ioc.service.UserService2" autowire="constructor"></bean>
+</beans>

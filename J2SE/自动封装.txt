@@ -1,0 +1,334 @@
+内置数据类型
+
+Java语言提供了八种基本类型。六种数字类型（四个整数型，两个浮点型），一种字符类型，还有一种布尔型。
+
+byte：
+
+    byte 数据类型是8位、有符号的，以二进制补码表示的整数；
+    最小值是 -128（-2^7）；
+    最大值是 127（2^7-1）；
+    默认值是 0；
+    byte 类型用在大型数组中节约空间，主要代替整数，因为 byte 变量占用的空间只有 int 类型的四分之一；
+    例子：byte a = 100，byte b = -50。
+
+short：
+
+    short 数据类型是 16 位、有符号的以二进制补码表示的整数
+    最小值是 -32768（-2^15）；
+    最大值是 32767（2^15 - 1）；
+    Short 数据类型也可以像 byte 那样节省空间。一个short变量是int型变量所占空间的二分之一；
+    默认值是 0；
+    例子：short s = 1000，short r = -20000。
+
+int：
+
+    int 数据类型是32位、有符号的以二进制补码表示的整数；
+    最小值是 -2,147,483,648（-2^31）；
+    最大值是 2,147,483,647（2^31 - 1）；
+    一般地整型变量默认为 int 类型；
+    默认值是 0 ；
+    例子：int a = 100000, int b = -200000。
+
+long：
+
+    long 数据类型是 64 位、有符号的以二进制补码表示的整数；
+    最小值是 -9,223,372,036,854,775,808（-2^63）；
+    最大值是 9,223,372,036,854,775,807（2^63 -1）；
+    这种类型主要使用在需要比较大整数的系统上；
+    默认值是 0L；
+    例子： long a = 100000L，Long b = -200000L。 "L"理论上不分大小写，但是若写成"l"容易与数字"1"混淆，不容易分辩。所以最好大写。
+
+float：
+
+    float 数据类型是单精度、32位、符合IEEE 754标准的浮点数；
+    float 在储存大型浮点数组的时候可节省内存空间；
+    默认值是 0.0f；
+    浮点数不能用来表示精确的值，如货币；
+    例子：float f1 = 234.5f。
+
+double：
+
+    double 数据类型是双精度、64 位、符合IEEE 754标准的浮点数；
+    浮点数的默认类型为double类型；
+    double类型同样不能表示精确的值，如货币；
+    默认值是 0.0d；
+    例子：double d1 = 123.4。
+
+boolean：
+
+    boolean数据类型表示一位的信息；
+    只有两个取值：true 和 false；
+    这种类型只作为一种标志来记录 true/false 情况；
+    默认值是 false；
+    例子：boolean one = true。
+
+char：
+
+    char类型是一个单一的 16 位 Unicode 字符；
+    最小值是 \u0000（即为0）；
+    最大值是 \uffff（即为65,535）；
+    char 数据类型可以储存任何字符；
+    例子：char letter = 'A';。
+
+
+class Auto //code1
+{
+	public static void main(String[] args) 
+	{
+		//自动装箱
+		Integer inte = 10;
+		//自动拆箱
+		int i = inte;
+
+	//再double和Double来验证一下
+	Double doub = 12.40;
+	double d = doub;
+	
+    }
+
+}
+
+上面的代码先将int型转为Integer对象，再讲Integer对象转换为int型，毫无疑问，这是可以正确运行的。可是，这种转换是怎么进行的呢？使用反编译工具，将生成的Class文件在反编译为Java文件，让我们看看发生了什么：
+
+class Auto//code2
+{
+  public static void main(String[] paramArrayOfString)
+  {
+    Integer localInteger = Integer.valueOf(10);
+
+​
+​ int i = localInteger.intValue();
+
+​
+​
+​ Double localDouble = Double.valueOf(12.4D); ​ double d = localDouble.doubleValue(); ​
+​ } ​ }
+
+其实自动装箱和自动封箱是编译器为我们提供的一颗语法糖。
+在自动装箱时，编译器调用包装类型的valueOf()方法；在自动拆箱时，编译器调用了相应的xxxValue()方法。
+
+
+自动装箱与拆箱中的“坑”
+
+在使用自动装箱与自动拆箱时，要注意一些陷阱，为了避免这些陷阱，我们有必要去看一下各种包装类型的源码。
+
+Integer源码
+
+public final class Integer extends Number implements Comparable<Integer> {
+	private final int value;
+	
+
+/*Integer的构造方法，接受一个整型参数,Integer对象表示的int值，保存在value中*/
+ public Integer(int value) {
+        this.value = value;
+ }
+ 
+/*equals()方法判断的是:所代表的int型的值是否相等*/
+ public boolean equals(Object obj) {
+        if (obj instanceof Integer) {
+            return value == ((Integer)obj).intValue();
+        }
+        return false;
+}
+ 
+/*返回这个Integer对象代表的int值，也就是保存在value中的值*/
+ public int intValue() {
+        return value;
+ }
+ 
+ /**
+  * 首先会判断i是否在[IntegerCache.low,Integer.high]之间
+  * 如果是，直接返回Integer.cache中相应的元素
+  * 否则，调用构造方法，创建一个新的Integer对象
+  */
+ public static Integer valueOf(int i) {
+    assert IntegerCache.high >= 127;
+    if (i >= IntegerCache.low && i <= IntegerCache.high)
+        return IntegerCache.cache[i + (-IntegerCache.low)];
+    return new Integer(i);
+ }
+
+/**
+  * 静态内部类，缓存了从[low,high]对应的Integer对象
+  * low -128这个值不会被改变
+  * high 默认是127，可以改变，最大不超过：Integer.MAX_VALUE - (-low) -1
+  * cache 保存从[low,high]对象的Integer对象
+ */
+ private static class IntegerCache {
+    static final int low = -128;
+    static final int high;
+    static final Integer cache[];
+ 
+    static {
+        // high value may be configured by property
+        int h = 127;
+        String integerCacheHighPropValue =
+            sun.misc.VM.getSavedProperty("java.lang.Integer.IntegerCache.high");
+        if (integerCacheHighPropValue != null) {
+            int i = parseInt(integerCacheHighPropValue);
+            i = Math.max(i, 127);
+            // Maximum array size is Integer.MAX_VALUE
+            h = Math.min(i, Integer.MAX_VALUE - (-low) -1);
+        }
+        high = h;
+ 
+        cache = new Integer[(high - low) + 1];
+        int j = low;
+        for(int k = 0; k < cache.length; k++)
+            cache[k] = new Integer(j++);
+    }
+ 
+    private IntegerCache() {}
+}
+
+以上是Oracle(Sun)公司JDK 1.7中Integer源码的一部分，通过分析上面的代码，得到：
+
+1）Integer有一个实例域value，它保存了这个Integer所代表的int型的值，且它是final的，也就是说这个Integer对象一经构造完成，它所代表的值就不能再被改变。
+
+2）Integer重写了equals()方法，它通过比较两个Integer对象的value，来判断是否相等。
+
+3）重点是静态内部类IntegerCache，通过类名就可以发现：它是用来缓存数据的。它有一个数组，里面保存的是连续的Integer对象。 (a) low：代表缓存数据中最小的值，固定是-128。
+
+(b) high：代表缓存数据中最大的值，它可以被该改变，默认是127。high最小是127，最大是Integer.MAX_VALUE-(-low)-1，如果high超过了这个值，那么cache[ ]的长度就超过Integer.MAX_VALUE了，也就溢出了。
+
+(c) cache[]：里面保存着从[low,high]所对应的Integer对象，长度是high-low+1(因为有元素0，所以要加1)。
+
+4）调用valueOf(inti)方法时，首先判断i是否在[low,high]之间，如果是，则复用Integer.cache[i-low]。比如，如果Integer.valueOf(3)，直接返回Integer.cache[131]；如果i不在这个范围，则调用构造方法，构造出一个新的Integer对象。
+
+5）调用intValue()，直接返回value的值。 通过3）和4）可以发现，默认情况下，在使用自动装箱时，VM会复用[-128,127]之间的Integer对象。
+
+Integer  a1 = 1;
+Integer  a2 = 1;
+Integer  a3 = new Integer(1);
+//会打印true，因为a1和a2是同一个对象,都是Integer.cache[129]
+System.out.println(a1 == a2);
+//false，a3构造了一个新的对象，不同于a1,a2
+System.out.println(a1 == a3);
+
+了解基本类型缓存（常量池）的最佳实践
+
+//基本数据类型的常量池是-128到127之间。
+// 在这个范围中的基本数据类的包装类可以自动拆箱，比较时直接比较数值大小。
+public static void main(String[] args) {
+    //int的自动拆箱和装箱只在-128到127范围中进行，超过该范围的两个integer的 == 判断是会返回false的。
+    Integer a1 = 128;
+    Integer a2 = -128;
+    Integer a3 = -128;
+    Integer a4 = 128;
+    System.out.println(a1 == a4);
+    System.out.println(a2 == a3);
+
+    Byte b1 = 127;
+    Byte b2 = 127;
+    Byte b3 = -128;
+    Byte b4 = -128;
+    //byte都是相等的，因为范围就在-128到127之间
+    System.out.println(b1 == b2);
+    System.out.println(b3 == b4);
+
+    //
+    Long c1 = 128L;
+    Long c2 = 128L;
+    Long c3 = -128L;
+    Long c4 = -128L;
+    System.out.println(c1 == c2);
+    System.out.println(c3 == c4);
+
+    //char没有负值
+    //发现char也是在0到127之间自动拆箱
+    Character d1 = 128;
+    Character d2 = 128;
+    Character d3 = 127;
+    Character d4 = 127;
+    System.out.println(d1 == d2);
+    System.out.println(d3 == d4);
+
+
+    `结果`
+    
+    `false`
+    `true`
+    `true`
+    `true`
+    `false`
+    `true`
+    `false`
+    `true`
+    
+    
+
+    Integer i = 10;
+    Byte b = 10;
+    //比较Byte和Integer.两个对象无法直接比较，报错
+    //System.out.println(i == b);
+    System.out.println("i == b " + i.equals(b));
+    //答案是false,因为包装类的比较时先比较是否是同一个类，不是的话直接返回false.
+    int ii = 128;
+    short ss = 128;
+    long ll = 128;
+    char cc = 128;
+    System.out.println("ii == bb " + (ii == ss));
+    System.out.println("ii == ll " + (ii == ll));
+    System.out.println("ii == cc " + (ii == cc));
+    
+    结果
+    i == b false
+    ii == bb true
+    ii == ll true
+    ii == cc true
+    
+    //这时候都是true，因为基本数据类型直接比较值，值一样就可以。
+
+总结：
+
+通过上面的代码，我们分析一下自动装箱与拆箱发生的时机：
+
+（1）当需要一个对象的时候会自动装箱，比如Integer a = 10;equals(Object o)方法的参数是Object对象，所以需要装箱。
+
+（2）当需要一个基本类型时会自动拆箱，比如int a = new Integer(10);算术运算是在基本类型间进行的，所以当遇到算术运算时会自动拆箱，比如代码中的 c == (a + b);
+
+（3） 包装类型 == 基本类型时，包装类型自动拆箱；
+
+需要注意的是：“==”在没遇到算术运算时，不会自动拆箱；基本类型只会自动装箱为对应的包装类型，代码中最后一条说明的内容。
+
+public class Test3 {
+    public static void main(String[] args){
+        Integer x = 10;
+        Integer y = 4;
+        Integer z = 6;
+        Integer b = 321;
+        Integer c = 321;
+        Integer d = 642;
+
+        int a = 10;
+
+        System.out.println(x == a);
+        System.out.println(x.equals(a));
+        System.out.println(x==y+z);
+        System.out.println(b==c);
+        System.out.println(d==b+c);
+    }
+}
+
+输出：
+true
+true
+true
+false
+true
+
+在JDK 1.5中提供了自动装箱与自动拆箱，这其实是Java 编译器的语法糖，编译器通过调用包装类型的valueOf()方法实现自动装箱，调用xxxValue()方法自动拆箱。自动装箱和拆箱会有一些陷阱，那就是包装类型复用了某些对象。
+
+（1）Integer默认复用了[-128,127]这些对象，其中高位置可以修改；
+
+（2）Byte复用了全部256个对象[-128,127]；
+
+（3）Short服用了[-128,127]这些对象；
+
+（4）Long服用了[-128,127];
+
+（5）Character复用了[0,127],Charater不能表示负数;
+
+Double和Float是连续不可数的，所以没法复用对象，也就不存在自动装箱复用陷阱。
+
+Boolean没有自动装箱与拆箱，它也复用了Boolean.TRUE和Boolean.FALSE，通过Boolean.valueOf(boolean b)返回的Blooean对象要么是TRUE，要么是FALSE，这点也要注意。

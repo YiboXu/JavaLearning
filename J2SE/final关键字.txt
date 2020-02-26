@@ -1,0 +1,62 @@
+final关键字的知识点
+
+    final成员变量必须在声明的时候初始化或者在构造器中初始化，否则就会报编译错误。final变量一旦被初始化后不能再次赋值。
+    本地变量必须在声明时赋值。 因为没有初始化的过程
+    在匿名类中所有变量都必须是final变量。
+    final方法不能被重写, final类不能被继承
+
+    接口中声明的所有变量本身是final的。类似于匿名类
+
+    final和abstract这两个关键字是反相关的，final类就不可能是abstract的。
+    final方法在编译阶段绑定，称为静态绑定(static binding)。
+    将类、方法、变量声明为final能够提高性能，这样JVM就有机会进行估计，然后优化。
+
+final方法的好处:
+
+    提高了性能，JVM在常量池中会缓存final变量
+    final变量在多线程中并发安全，无需额外的同步开销
+    final方法是静态编译的，提高了调用速度
+    final类创建的对象是只可读的，在多线程可以安全共享
+
+
+final方法的三条规则
+
+规则1：final修饰的方法不可以被重写。
+
+规则2：final修饰的方法仅仅是不能重写，但它完全可以被重载。
+
+规则3：父类中private final方法，子类可以重新定义，这种情况不是重写。
+
+代码示例
+
+规则1代码
+
+public class FinalMethodTest
+{
+	public final void test(){}
+}
+class Sub extends FinalMethodTest
+{
+	// 下面方法定义将出现编译错误，不能重写final方法
+	public void test(){}
+}
+
+规则2代码
+
+public class Finaloverload {
+	//final 修饰的方法只是不能重写，完全可以重载
+	public final void test(){}
+	public final void test(String arg){}
+}
+
+规则3代码
+
+public class PrivateFinalMethodTest
+{
+	private final void test(){}
+}
+class Sub extends PrivateFinalMethodTest
+{
+	// 下面方法定义将不会出现问题
+	public void test(){}
+}

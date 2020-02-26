@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="tk.mybatis.simple.mapper.StudentMapper">
+    <!--多对一查询1 按结果嵌套处理 -->
+    <select id="selectAll" resultMap="student">
+        select s.id sid, s.name sname, t.id tid, t.name tname from
+        student s, teacher t where s.tid = t.id
+    </select>
+    <resultMap id="student" type="Student">
+        <id column="sid" property="id"></id>
+        <result column="sname" property="name"></result>
+        <association property="teacher">
+            <id column="tid" property="id"></id>
+            <result column="tname" property="name"></result>
+        </association>
+    </resultMap>
+
+    <!--多对一查询2 按查询嵌套处理 -->
+    <select id="selectAll2" resultMap="student2">
+        select id,name,tid from student
+    </select>
+    <resultMap id="student2" type="Student">
+        <id column="id" property="id"></id>
+        <result column="name" property="name"></result>
+        <!-- column="{id=tid}"  tid是selectAll2里面返回的column tid， id是tk.mybatis.simple.mapper.TeacherMapper.getTeacher里面的#{id}-->
+        <association property="teacher" column="{id=tid}" select="tk.mybatis.simple.mapper.TeacherMapper.getTeacher"></association>
+    </resultMap>
+</mapper>
