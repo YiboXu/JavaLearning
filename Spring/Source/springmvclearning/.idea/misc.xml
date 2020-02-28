@@ -10,6 +10,7 @@
   </component>
   <component name="ProjectResources">
     <resource url="http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd" location="$PROJECT_DIR$/web-app_3_0.xsd" />
+    <resource url="http://www.springframework.org/schema/data/mongo" location="$PROJECT_DIR$/spring-mongo.xsd" />
   </component>
   <component name="ProjectRootManager" version="2" languageLevel="JDK_1_8" project-jdk-name="1.8" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/out" />

@@ -5,10 +5,10 @@
 <body>
 <h2>Login</h2>
 <p>${msg}</p>
-<form method="post">
-    Name:<input type="text" name="name"><br>
-    Password:<input type="password" name="psw"><br>
-    <input type="submit" value="add">
+<form action="/login" method="post">
+    Name:<input type="text" name="username"><br>
+    Password:<input type="password" name="password"><br>
+    <input type="submit" value="Login">
 </form>
 </body>
 </html>

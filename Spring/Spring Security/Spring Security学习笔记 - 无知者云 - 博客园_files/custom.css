@@ -1,0 +1,111 @@
+.postTitle {
+font-size:1.8em;
+margin-top: 20px;
+}
+
+.postTitle a:link, .postTitle a:visited, .postTitle a:active {
+color: deepSkyBlue;
+}
+
+.headermaintitle {
+font-size:1.8em;
+}
+
+.catListTitle{
+background: #1A6280;
+}
+
+.postBody {
+color:black;
+}
+
+.postBody a {
+color: #2eb1e8;
+}
+
+.dayTitle  {
+border-radius:0;
+}
+
+.catListFeedback {
+border-radius:0;
+}
+
+.newsItem {
+border-radius:0;
+color: #1A6280;
+}
+
+.catListPostArchive  {
+border-radius:0;
+}
+
+.catListComment {
+border-radius:0;
+}
+
+.catListTitle {
+border-top-left-radius:0;
+border-top-right-radius:0;
+
+}
+
+.catListTag {
+border-radius:0;
+}
+
+.commentform  {
+border-radius:0;
+}
+
+#topics {
+border-radius:0;
+}
+
+.catListView {
+border-radius:0;
+}
+
+.day  {
+border-radius:0;
+color:black;
+}
+
+#cnblogs_post_body p {
+line-height: 150% !important;
+
+}
+
+#cnblogs_post_body div {
+line-height: 200% !important;
+margin-left:20px;
+margin-right:20px;
+text-align: justify;
+}
+
+#cnblogs_post_body {
+line-height: 150% !important;
+margin-left:20px;
+margin-right:20px;
+text-align: justify;
+}
+
+.postBody p {
+font-size: 15px;
+}
+
+.postBody ol {
+font-size: 15px;
+}
+
+.postBody ul {
+font-size: 15px;
+}
+
+.postBody pre {
+font-size: 15px;
+}
+
+.cnblogs-markdown p {
+line-height: 150%  !important;
+}

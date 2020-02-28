@@ -30,6 +30,7 @@ public class LoginInterceptor implements HandlerInterceptor {
          * request.getServletPath()/resources/request.jsp
          */
         String requestUrl = request.getServletPath();
+
         for(String url : allowedUrl){
             if(requestUrl.startsWith(url)){
                 return true;
@@ -41,7 +42,7 @@ public class LoginInterceptor implements HandlerInterceptor {
         //response.sendRedirect("/login");
         //或者转发到登录页面，登录后在重新转发到原来访问的URL
         request.setAttribute("requestUrl",requestUrl);
-        request.getRequestDispatcher("/login").forward(request,response);
+        request.getRequestDispatcher("/myLogin").forward(request,response);
         return false;
     }
 }

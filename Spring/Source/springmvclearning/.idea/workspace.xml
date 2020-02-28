@@ -11,9 +11,10 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
+        <option value="HTML File" />
+        <option value="JSP" />
         <option value="Interface" />
         <option value="Class" />
-        <option value="JSP" />
       </list>
     </option>
   </component>
@@ -26,30 +27,31 @@
   </component>
   <component name="ProjectId" id="1YEgcaYVXXW2pF62iXsOXEjdOJ5" />
   <component name="PropertiesComponent">
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/src/main/resources/tk/springmvc/mybatis/mapper" />
+    <property name="DefaultHtmlFileTemplate" value="HTML File" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/spring-mongo.xsd" />
     <property name="project.structure.last.edited" value="Modules" />
     <property name="project.structure.proportion" value="0.0" />
     <property name="project.structure.side.proportion" value="0.2" />
     <property name="settings.editor.selected.configurable" value="preferences.externalResources" />
   </component>
   <component name="RecentsManager">
-    <key name="CopyFile.RECENT_KEYS">
-      <recent name="C:\IdeaProjects\springmvclearning\src\main\resources\tk\springmvc\mybatis\mapper" />
-      <recent name="C:\IdeaProjects\springmvclearning\src\main\java\tk\springmvc\mybatis\type" />
-      <recent name="C:\IdeaProjects\springmvclearning\src\main\resources" />
-      <recent name="C:\IdeaProjects\springmvclearning\src\main\webapp\js" />
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\IdeaProjects\springmvclearning\src\main\webapp\WEB-INF\views" />
+      <recent name="C:\IdeaProjects\springmvclearning\src\main\webapp\WEB-INF\views\sunset" />
+      <recent name="C:\IdeaProjects\springmvclearning\src\main\webapp\WEB-INF\views\html" />
       <recent name="C:\IdeaProjects\springmvclearning\src\main\webapp" />
+      <recent name="C:\IdeaProjects\springmvclearning\src\main\webapp\WEB-INF" />
     </key>
     <key name="CopyClassDialog.RECENTS_KEY">
       <recent name="tk.springmvc.mybatis.mapper" />
       <recent name="tk.springmvc.model" />
     </key>
-    <key name="MoveFile.RECENT_KEYS">
-      <recent name="C:\IdeaProjects\springmvclearning\src\main\resources" />
-      <recent name="C:\IdeaProjects\springmvclearning\src\main\webapp\WEB-INF\views" />
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\IdeaProjects\springmvclearning\src\main\webapp\WEB-INF\views\html" />
       <recent name="C:\IdeaProjects\springmvclearning\src\main\webapp" />
-      <recent name="C:\IdeaProjects\springmvclearning\src\main\webapp\WEB-INF" />
-      <recent name="C:\IdeaProjects\springmvclearning\src\main\webapp\redirect" />
+      <recent name="C:\IdeaProjects\springmvclearning\src\main\resources\tk\springmvc\mybatis\mapper" />
+      <recent name="C:\IdeaProjects\springmvclearning\src\main\java\tk\springmvc\mybatis\type" />
+      <recent name="C:\IdeaProjects\springmvclearning\src\main\resources" />
     </key>
   </component>
   <component name="RunDashboard">
@@ -64,7 +66,97 @@
       </list>
     </option>
   </component>
-  <component name="RunManager">
+  <component name="RunManager" selected="Smart Tomcat.Tomcat9">
+    <configuration name="Test1" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="tk.springmvc.Test1" />
+      <module name="springmvclearning" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="tk.springmvc.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="Test2" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="tk.springmvc.Test2" />
+      <module name="springmvclearning" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="tk.springmvc.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="Test3" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="tk.springmvc.Test3" />
+      <module name="springmvclearning" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="tk.springmvc.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="TestMongoDb" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="tk.springmvc.TestMongoDb" />
+      <module name="springmvclearning" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="tk.springmvc.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="TestRedis" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="tk.springmvc.TestRedis" />
+      <module name="springmvclearning" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="tk.springmvc.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="Tomcat9" type="com.poratu.idea.plugins.tomcat" factoryName="SMART_TOMCAT_FACTORY">
+      <option name="DOC_BASE" value="C:\IdeaProjects\springmvclearning\src\main\webapp" />
+      <option name="DOC_MODULE_ROOT" value="" />
+      <option name="CONTEXT_PATH" value="/" />
+      <option name="TOMCAT_PORT" value="8080" />
+      <option name="AJP_PORT" value="8009" />
+      <option name="ADMIN_PORT" value="8005" />
+      <option name="VM_OPTIONS" value="" />
+      <option name="PASS_PARENT_ENV_OPTIONS" value="true" />
+      <option name="CLASS_NAME" value="" />
+      <option name="DEBUG" value="" />
+      <option name="DIGEST" value="" />
+      <option name="ROLE_NAME_COL" value="" />
+      <option name="USER_CRED_COL" value="" />
+      <option name="USER_NAME_COL" value="" />
+      <option name="USER_ROLE_TABLE" value="" />
+      <option name="USER_TABLE" value="" />
+      <option name="JNDI_GLOBAL" value="" />
+      <option name="JNDI_NAME" value="" />
+      <option name="JNDI_TYPE" value="" />
+      <option name="DATA_SOURCE_NAME" value="" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
     <configuration default="true" type="com.poratu.idea.plugins.tomcat" factoryName="SMART_TOMCAT_FACTORY">
       <option name="DOC_BASE" value="C:\IdeaProjects\springmvclearning\src\main\webapp" />
       <option name="DOC_MODULE_ROOT" value="" />
@@ -90,31 +182,23 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="tomcat9" type="com.poratu.idea.plugins.tomcat" factoryName="SMART_TOMCAT_FACTORY">
-      <option name="DOC_BASE" value="C:\IdeaProjects\springmvclearning\src\main\webapp" />
-      <option name="DOC_MODULE_ROOT" value="" />
-      <option name="CONTEXT_PATH" value="/" />
-      <option name="TOMCAT_PORT" value="8080" />
-      <option name="AJP_PORT" value="8009" />
-      <option name="ADMIN_PORT" value="8005" />
-      <option name="VM_OPTIONS" value="" />
-      <option name="PASS_PARENT_ENV_OPTIONS" value="true" />
-      <option name="CLASS_NAME" value="" />
-      <option name="DEBUG" value="" />
-      <option name="DIGEST" value="" />
-      <option name="ROLE_NAME_COL" value="" />
-      <option name="USER_CRED_COL" value="" />
-      <option name="USER_NAME_COL" value="" />
-      <option name="USER_ROLE_TABLE" value="" />
-      <option name="USER_TABLE" value="" />
-      <option name="JNDI_GLOBAL" value="" />
-      <option name="JNDI_NAME" value="" />
-      <option name="JNDI_TYPE" value="" />
-      <option name="DATA_SOURCE_NAME" value="" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
+    <list>
+      <item itemvalue="Application.Test1" />
+      <item itemvalue="Application.Test2" />
+      <item itemvalue="Application.Test3" />
+      <item itemvalue="Smart Tomcat.Tomcat9" />
+      <item itemvalue="Application.TestMongoDb" />
+      <item itemvalue="Application.TestRedis" />
+    </list>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Application.TestRedis" />
+        <item itemvalue="Application.TestMongoDb" />
+        <item itemvalue="Application.Test2" />
+        <item itemvalue="Application.Test3" />
+        <item itemvalue="Application.Test1" />
+      </list>
+    </recent_temporary>
   </component>
   <component name="SvnConfiguration">
     <configuration />

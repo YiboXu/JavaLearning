@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="bdf826df-2892-48b5-bb1e-5e5265607456" name="Default Changelist" comment="" />
+    <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Interface" />
+        <option value="Class" />
+        <option value="JSP" />
+      </list>
+    </option>
+  </component>
+  <component name="MavenImportPreferences">
+    <option name="importingSettings">
+      <MavenImportingSettings>
+        <option name="importAutomatically" value="true" />
+      </MavenImportingSettings>
+    </option>
+  </component>
+  <component name="ProjectId" id="1YEgcaYVXXW2pF62iXsOXEjdOJ5" />
+  <component name="PropertiesComponent">
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/src/main/resources/tk/springmvc/mybatis/mapper" />
+    <property name="project.structure.last.edited" value="Modules" />
+    <property name="project.structure.proportion" value="0.0" />
+    <property name="project.structure.side.proportion" value="0.2" />
+    <property name="settings.editor.selected.configurable" value="preferences.externalResources" />
+  </component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\IdeaProjects\springmvclearning\src\main\resources\tk\springmvc\mybatis\mapper" />
+      <recent name="C:\IdeaProjects\springmvclearning\src\main\java\tk\springmvc\mybatis\type" />
+      <recent name="C:\IdeaProjects\springmvclearning\src\main\resources" />
+      <recent name="C:\IdeaProjects\springmvclearning\src\main\webapp\js" />
+      <recent name="C:\IdeaProjects\springmvclearning\src\main\webapp" />
+    </key>
+    <key name="CopyClassDialog.RECENTS_KEY">
+      <recent name="tk.springmvc.mybatis.mapper" />
+      <recent name="tk.springmvc.model" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\IdeaProjects\springmvclearning\src\main\resources" />
+      <recent name="C:\IdeaProjects\springmvclearning\src\main\webapp\WEB-INF\views" />
+      <recent name="C:\IdeaProjects\springmvclearning\src\main\webapp" />
+      <recent name="C:\IdeaProjects\springmvclearning\src\main\webapp\WEB-INF" />
+      <recent name="C:\IdeaProjects\springmvclearning\src\main\webapp\redirect" />
+    </key>
+  </component>
+  <component name="RunDashboard">
+    <option name="ruleStates">
+      <list>
+        <RuleState>
+          <option name="name" value="ConfigurationTypeDashboardGroupingRule" />
+        </RuleState>
+        <RuleState>
+          <option name="name" value="StatusDashboardGroupingRule" />
+        </RuleState>
+      </list>
+    </option>
+  </component>
+  <component name="RunManager">
+    <configuration default="true" type="com.poratu.idea.plugins.tomcat" factoryName="SMART_TOMCAT_FACTORY">
+      <option name="DOC_BASE" value="C:\IdeaProjects\springmvclearning\src\main\webapp" />
+      <option name="DOC_MODULE_ROOT" value="" />
+      <option name="CONTEXT_PATH" value="/springmvclearning" />
+      <option name="TOMCAT_PORT" value="8080" />
+      <option name="AJP_PORT" value="8009" />
+      <option name="ADMIN_PORT" value="8005" />
+      <option name="VM_OPTIONS" value="" />
+      <option name="PASS_PARENT_ENV_OPTIONS" value="true" />
+      <option name="CLASS_NAME" value="" />
+      <option name="DEBUG" value="" />
+      <option name="DIGEST" value="" />
+      <option name="ROLE_NAME_COL" value="" />
+      <option name="USER_CRED_COL" value="" />
+      <option name="USER_NAME_COL" value="" />
+      <option name="USER_ROLE_TABLE" value="" />
+      <option name="USER_TABLE" value="" />
+      <option name="JNDI_GLOBAL" value="" />
+      <option name="JNDI_NAME" value="" />
+      <option name="JNDI_TYPE" value="" />
+      <option name="DATA_SOURCE_NAME" value="" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="tomcat9" type="com.poratu.idea.plugins.tomcat" factoryName="SMART_TOMCAT_FACTORY">
+      <option name="DOC_BASE" value="C:\IdeaProjects\springmvclearning\src\main\webapp" />
+      <option name="DOC_MODULE_ROOT" value="" />
+      <option name="CONTEXT_PATH" value="/" />
+      <option name="TOMCAT_PORT" value="8080" />
+      <option name="AJP_PORT" value="8009" />
+      <option name="ADMIN_PORT" value="8005" />
+      <option name="VM_OPTIONS" value="" />
+      <option name="PASS_PARENT_ENV_OPTIONS" value="true" />
+      <option name="CLASS_NAME" value="" />
+      <option name="DEBUG" value="" />
+      <option name="DIGEST" value="" />
+      <option name="ROLE_NAME_COL" value="" />
+      <option name="USER_CRED_COL" value="" />
+      <option name="USER_NAME_COL" value="" />
+      <option name="USER_ROLE_TABLE" value="" />
+      <option name="USER_TABLE" value="" />
+      <option name="JNDI_GLOBAL" value="" />
+      <option name="JNDI_NAME" value="" />
+      <option name="JNDI_TYPE" value="" />
+      <option name="DATA_SOURCE_NAME" value="" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="bdf826df-2892-48b5-bb1e-5e5265607456" name="Default Changelist" comment="" />
+      <created>1582513247598</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1582513247598</updated>
+    </task>
+    <servers />
+  </component>
+</project>

@@ -180,6 +180,87 @@
       <version>2.10.2</version>
     </dependency>
 
+    <!--Spring Security-->
+    <!-- https://mvnrepository.com/artifact/org.springframework.security/spring-security-web -->
+    <dependency>
+      <groupId>org.springframework.security</groupId>
+      <artifactId>spring-security-web</artifactId>
+      <version>5.2.2.RELEASE</version>
+    </dependency>
+    <!-- https://mvnrepository.com/artifact/org.springframework.security/spring-security-config -->
+    <dependency>
+      <groupId>org.springframework.security</groupId>
+      <artifactId>spring-security-config</artifactId>
+      <version>5.2.2.RELEASE</version>
+    </dependency>
+
+    <!--Thymeleaf -->
+    <!-- https://mvnrepository.com/artifact/org.thymeleaf/thymeleaf -->
+    <dependency>
+      <groupId>org.thymeleaf</groupId>
+      <artifactId>thymeleaf</artifactId>
+      <version>3.0.11.RELEASE</version>
+    </dependency>
+
+    <!-- https://mvnrepository.com/artifact/org.thymeleaf/thymeleaf-spring4 -->
+    <dependency>
+      <groupId>org.thymeleaf</groupId>
+      <artifactId>thymeleaf-spring4</artifactId>
+      <version>3.0.11.RELEASE</version>
+    </dependency>
+
+    <!-- Spring JDBC 实验用途-->
+    <!-- https://mvnrepository.com/artifact/org.springframework/spring-jdbc -->
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-jdbc</artifactId>
+      <version>5.2.4.RELEASE</version>
+    </dependency>
+
+    <!-- Spring Data JPA 实验用途-->
+    <!-- https://mvnrepository.com/artifact/org.springframework.data/spring-data-jpa -->
+    <dependency>
+      <groupId>org.springframework.data</groupId>
+      <artifactId>spring-data-jpa</artifactId>
+      <version>2.2.5.RELEASE</version>
+    </dependency>
+    <!-- https://mvnrepository.com/artifact/org.hibernate/hibernate-c3p0 -->
+    <dependency>
+      <groupId>org.hibernate</groupId>
+      <artifactId>hibernate-c3p0</artifactId>
+      <version>5.4.12.Final</version>
+    </dependency>
+
+    <!--MongoDB-->
+    <!-- https://mvnrepository.com/artifact/org.mongodb/mongo-java-driver -->
+    <dependency>
+      <groupId>org.mongodb</groupId>
+      <artifactId>mongo-java-driver</artifactId>
+      <version>3.12.1</version>
+    </dependency>
+
+    <!-- https://mvnrepository.com/artifact/org.springframework.data/spring-data-mongodb -->
+    <dependency>
+      <groupId>org.springframework.data</groupId>
+      <artifactId>spring-data-mongodb</artifactId>
+      <version>2.2.5.RELEASE</version>
+    </dependency>
+
+    <!--Redis-->
+    <!-- https://mvnrepository.com/artifact/org.springframework.data/spring-data-redis -->
+    <dependency>
+      <groupId>org.springframework.data</groupId>
+      <artifactId>spring-data-redis</artifactId>
+      <version>2.2.5.RELEASE</version>
+    </dependency>
+
+    <!-- https://mvnrepository.com/artifact/redis.clients/jedis -->
+    <dependency>
+      <groupId>redis.clients</groupId>
+      <artifactId>jedis</artifactId>
+      <version>3.2.0</version>
+    </dependency>
+
   </dependencies>
 
   <build>

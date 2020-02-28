@@ -13,6 +13,7 @@
 
     <!-- 配置资源文件 -->
     <mvc:resources mapping="/js/**" location="/js/" ></mvc:resources>
+    <mvc:resources mapping="/resources/**" location="/resources/" ></mvc:resources>
 
     <!-- HandlerMapping -->
     <!-- 根据url来匹配对应的bean来进行url的处理， 比如url /, 那么就找到bean name="/"对应的class来处理 -->
@@ -22,16 +23,37 @@
     <bean class="org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter"/>
 
     <!--配置扫描该包下的注解 -->
-    <context:component-scan base-package="tk.springmvc.controller"/>
+    <context:component-scan base-package="tk.springmvc"/>
 
     <!--配置视图解析器 -->
+    <!-- JSP -->
     <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
         <property name="viewClass" value="org.springframework.web.servlet.view.JstlView"/>
         <property name="prefix" value="/WEB-INF/views/"/>
         <property name="suffix" value=".jsp"/>
     </bean>
 
-    <!--配置拦截器 -->
+    <!--单纯配置thymeleaf来支持html
+    <!-thymeleaf->
+    <bean class="org.thymeleaf.spring4.view.ThymeleafViewResolver">
+        <property name="templateEngine" ref="templateEngine"></property>
+        <property name="characterEncoding" value="UTF-8"></property>
+    </bean>
+
+    <!-thymeleaf模板解析器->
+    <bean id="templateResolver" class="org.thymeleaf.spring4.templateresolver.SpringResourceTemplateResolver">
+        <property name="prefix" value="/WEB-INF/views/html/"></property>
+        <property name="suffix" value=".html"></property>
+        <property name="templateMode" value="HTML"></property>
+        <property name="cacheable" value="false"></property>
+        <property name="characterEncoding" value="UTF-8"></property>
+    </bean>
+    <!-模板引擎配置->
+    <bean id="templateEngine" class="org.thymeleaf.spring4.SpringTemplateEngine">
+        <property name="templateResolver" ref="templateResolver"></property>
+    </bean>
+-->
+    <!--配置拦截器-->
     <mvc:interceptors>
         <!-- 配置所有路径都使用的公共拦截器,如果需要，去掉注释 -->
         <!-- <bean class="tk.springmvc.interceptor.GlobalInterceptor"></bean> -->
@@ -43,6 +65,7 @@
             <mvc:mapping path="/admin/**"/>
             <bean class="tk.springmvc.interceptor.AdminInterceptor"></bean>
         </mvc:interceptor>
+
         <mvc:interceptor>
             <!--所有路径都会经过拦截器除了下面mvc:exclude-mapping所包含的路径-->
             <mvc:mapping path="/**"/>
@@ -54,10 +77,13 @@
                     <list>
                         <value>/login</value>
                         <value>/hello</value>
+                        <!--因为启用了Spring Security, 为了保留样例，所以这里加上/来取消拦截器，实际使用中可以通过拦截器来做一起其他的事情 -->
+                        <value>/</value>
                     </list>
                 </property>
             </bean>
         </mvc:interceptor>
+
     </mvc:interceptors>
     <!--文件上传及下载 -->
     <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">

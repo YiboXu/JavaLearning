@@ -1,0 +1,153 @@
+1. 配置web.xml
+    <!--Spring Security -->
+    <filter>
+        <filter-name>springSecurityFilterChain</filter-name>
+        <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
+    </filter>
+
+    <filter-mapping>
+        <filter-name>springSecurityFilterChain</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+
+2. 如果通过JDBC验证权限，需要添加dataSource
+    <!--配置data source-->
+    <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+        <property name="driverClassName" value="com.mysql.cj.jdbc.Driver"/>
+        <property name="url" value="jdbc:mysql://localhost:3306/mybatis"/>
+        <property name="username" value="root"/>
+        <property name="password" value="123456"/>
+    </bean>
+
+3. 添加Configuration类
+package tk.springmvc.config;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+
+import javax.sql.DataSource;
+import javax.swing.*;
+
+@Configuration
+@EnableWebSecurity
+public class SecurityConfig extends WebSecurityConfigurerAdapter {
+    @Autowired
+    DataSource dataSource;
+
+    public void setDataSource(DataSource dataSource) {
+        this.dataSource = dataSource;
+    }
+
+    //配置哪些URL需要做授权
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+            http
+                .authorizeRequests()
+                .anyRequest().authenticated().and()
+                .formLogin().and()
+                .httpBasic();
+    }
+
+    //配置用来做授权的user store
+
+    /*
+    Spring Security中密码的存储格式是“{id}…………”。
+    {bcrypt}$2a$10$dXJ3SW6G7P50lGmMkkmwe.20cQQubK3.HZWzG3YB1tlRy.fqvM/BG
+    {noop}password
+    {pbkdf2}5d923b44a6d129f3ddf3e3c8d29412723dcbde72445e8ef6bf3b508fbf17fa4ed4d6b99ca763d8dc
+    {scrypt}$e0801$8bWJaSu2IKSn9Z9kM+TPXfOc/9bdYSrN1oD9qfVThWEwdRTnO7re7Ei+fUZRJ68k9lTyuTeUp4of4g24hHnazw==$OAOec05+bXxvuu/1qZ6NUR+xQYvYv7BeL1QxwRpY5Pc=
+    {sha256}97cde38028ad898ebc02e690819fa220e88c62e0699403e94fff291cfffaf8410849f27605abcbc0
+    所有这些都是明文密码'password‘
+    所以我们设置密码的时候需要用加密后的密码
+     */
+    @Override
+    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+        /*in-memory user store
+        auth.inMemoryAuthentication().passwordEncoder(new BCryptPasswordEncoder())
+                .withUser("billhu").password(new BCryptPasswordEncoder().encode("123456")).roles("USER","ADMIN").and()
+                .withUser("sofica").password(new BCryptPasswordEncoder().encode("123456")).roles("USER");
+        */
+
+        //JDBC user store
+        auth.jdbcAuthentication().passwordEncoder(new BCryptPasswordEncoder())
+                .dataSource(dataSource)
+                .usersByUsernameQuery("select username, password, true from users where username=?")
+                .authoritiesByUsernameQuery("select username, usergroup from users where username=?");
+    }
+}
+
+4. 建表
+create table users
+(
+    id int auto_increment primary key,
+    username varchar(64) unique not null,
+    usergroup varchar(64) not null,
+    password varchar(128) not null
+);
+
+insert into users(username,usergroup,password) values("billhu","ROLE_USER","$2a$10$9m95KVCKytv/INNprTORWe4LAceHoDHIX4C.C3VAFOiMFy95b2GJq");
+
+然后通过"billhu"和"password"
+
+5. 通过自定义的user store来控制权限
+- 第1，2步不变
+- 定义一个类实现UserDetailsService
+定义一个子接口继承UserDetailsService
+package tk.springmvc.service;
+
+import org.springframework.security.core.userdetails.UserDetailsService;
+
+public interface WebUserService extends UserDetailsService {
+}
+
+定义实现类
+package tk.springmvc.service.impl;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import tk.springmvc.dao.WebUserDao;
+import tk.springmvc.model.WebUser;
+import tk.springmvc.service.WebUserService;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class WebUserServiceImpl implements WebUserService {
+    @Autowired
+    private WebUserDao webUserDao;
+
+    public void setWebUserDao(WebUserDao webUserDao) {
+        this.webUserDao = webUserDao;
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        WebUser webUser = webUserDao.getWebUser(username);
+
+        if(webUser != null){
+            List<GrantedAuthority> authorities = new ArrayList<GrantedAuthority>();
+            authorities.add(new SimpleGrantedAuthority(webUser.getUsergroup()));
+
+            return new User(webUser.getUsername(),webUser.getPassword(),authorities);
+        }
+
+        throw new UsernameNotFoundException("User '" + username + "' not found.");
+    }
+}
+
+
+定义Mybatis相关配置
+参考springmvclearning代码
+
+-然后第3步里面对configure(AuthenticationManagerBuilder auth)的重写改成下面这样
+//自定义user store (通过WebUserServiceImpl从DataSource(MyBatis)里面获取用户
+auth.userDetailsService(webUserService).passwordEncoder(new BCryptPasswordEncoder());
