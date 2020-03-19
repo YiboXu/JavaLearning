@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="tk.springboot.mybatis.mapper.CountryMapper">
+	<select id="selectAll" resultType="Country">
+		select id,countryname,countrycode from country;
+	</select>
+
+	<insert id="insertCountry" parameterType="Country" useGeneratedKeys="true" keyProperty="id">
+		insert into country(countryname,countrycode) values(#{countryname},#{countrycode})
+	</insert>
+
+	<select id="selectCountryByNameAndCode" resultType="Country">
+		select * from country where  countryname=#{countryname} and countrycode=#{countrycode}
+	</select>
+
+	<select id="selectCountryByMap" resultType="Country">
+		select * from country where  countryname=#{countryname} and countrycode=#{countrycode}
+	</select>
+
+	<update id="updateCountry">
+		update country set countryname = #{countryname}
+		where countrycode = #{countrycode}
+	</update>
+
+	<delete id="deleteCountryByCountryCode">
+		delete from country where countrycode = #{countrycode}
+	</delete>
+
+	<select id="selectCountryById" resultType="Country">
+		select * from country where id = #{id}
+	</select>
+
+	<delete id="deleteCountryById">
+		delete from country where id = #{id}
+	</delete>
+
+	<select id="selectCountryByCountryCode" resultType="Country">
+		select * from country where countrycode = #{countrycode}
+	</select>
+
+	<select id="selectCountryByCountryName" resultType="Country">
+		select * from country where countryname = #{countryname}
+	</select>
+</mapper>

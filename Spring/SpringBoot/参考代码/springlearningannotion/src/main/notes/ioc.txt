@@ -1,0 +1,163 @@
+1. ComponentScan:
+默认情况下，spring会将ComponentScan指定的包下的所有的类拿出来扫描，如果类被注解为@Component @Repository @Service @Controller,就会被注入到spring容器中
+我们指定了扫描包后，还可以指定一个过滤规则来过滤被扫描的类，下面就是各种示例
+
+扫描"tk.spring.annotion"中的组件，但是只包含标注了@Repository的组件
+@ComponentScan(value="tk.spring.annotion",useDefaultFilters = false, includeFilters = {@ComponentScan.Filter(type=FilterType.ANNOTATION, classes={Repository.class})})
+
+扫描"tk.spring.annotion"中的下列组件：
+ - 标注了@Repository的组件
+ - 类型为PersonService.class的组件
+@ComponentScan(value="tk.spring.annotion", useDefaultFilters = false,
+        includeFilters = {@ComponentScan.Filter(type=FilterType.ANNOTATION,classes={Repository.class}),
+                          @ComponentScan.Filter(type=FilterType.ASSIGNABLE_TYPE,classes={PersonService.class})
+})
+
+扫描"tk.spring.annotion"中的组件，但是排除标注了@Controller和@Service的组件
+@ComponentScan(value="tk.spring.annotion",excludeFilters={@ComponentScan.Filter(type=FilterType.ANNOTATION,classes={Controller.class,Service.class})})
+
+自定义包扫描过滤规则
+@ComponentScan(value="tk.spring.annotion",useDefaultFilters = false, includeFilters = @ComponentScan.Filter(type = FilterType.CUSTOM,classes={MyTypeFilter.class}))
+
+
+2. Conditional:
+@Configuration
+public class ConditionConfig {
+    //满足条件才会实例化
+    @Conditional(WindowsCondition.class)
+    @Bean("Bill")
+    public Person person01(){
+        return new Person("Bill Gates",62);
+    }
+
+    //满足条件才会实例化
+    @Conditional(LinuxCondition.class)
+    @Bean("Linus")
+    public Person person02(){
+        return new Person("Linus",48);
+    }
+}
+
+
+3. 给容器中注册组件的几种方法:
+3.1. 对于自己的类，可以通过包扫描(ComponentScan) + 注解(@Component @Repository @Service @Controller)来注册
+3.2. 对于第三方的类，可以通过@Bean来注册
+3.3. 对于有无参构造方法的类，可以通过@Import来注册
+    3.1 @Import({Person.class, Color.class})
+    3.2 @Import(MyImportSelector.class) 对于实现了ImportSelector接口的类(MyImportSelector.class)，还会注册其selectImports方法返回的全类名对应的Bean
+    3.3 @Import(MyImportBeanDefinitionRegistrar.class) 对于实现了ImportBeanDefinitionRegistrar接口的类(MyImportBeanDefinitionRegistrar),调用其registerBeanDefinitions方法来将需要的类注册到容器
+    3.4 @Import(NestedConfig.class) 对于标注了@Configuration的类NestedConfig.class， 会将其里面所需要注入的组件都一起注入
+3.4. 通过注入FactoryBean来注入其getObject()方法放回的Bean到容器中. 参考FactoryBeanConfig.class
+
+Bean的生命周期为: 构造函数-->初始化方法-->销毁方法
+构造函数执行时间:
+单例Bean，默认是在容器创建的时候实例化，可以通过@Lazy来设置获取Bean的时候才实例化
+多例Bean, 是在获取Bean的时候实例化
+初始化方法执行时间:
+在对象创建后(构造方法执行后),并对相关域赋值后(比如有注入的),进行初始化方法执行
+销毁方法执行时间:
+对于单例Bean, spring容器关闭的时候进行销毁
+对于多例Bean, spring不会进行销毁，需要自己调用销毁方法进行销毁
+
+4. 管理Bean的生命周期:
+4.1. 通过在@Bean中指定初始化方法和销毁方法，来管理Bean的生命周期
+    @Bean(value = "car", initMethod = "init", destroyMethod = "destroy")
+    public Car car(){
+        return new Car();
+    }
+
+4.2. 通过让Bean实现接口InitializingBean和DisposableBean
+4.3. 通过在Bean的方法上面添加注解@PostConstruct @PreDestroy来指定初始化方法和销毁方法
+
+注意： 1，2，3里面都是针对某一个特定的Bean来定义的方法
+
+4.4. 通过注入一个实现了BeanPostProcessor的类，来对所有对象的声明周期进行一个管理
+   对于任意一个类，
+   postProcessBeforeInitialization 在构造方法之后，初始化方法(如果有)之前执行
+   postProcessAfterInitialization 在初始化方法(如果有)之后执行
+
+   可以注入多个实现了BeanPostProcessor的类，这些BeanPostProcessor的postProcessBeforeInitialization和postProcessAfterInitialization会一次执行
+   a. 执行实例化的类的构造方法
+   b. 首先执行所有BeanPostProcessor类的postProcessBeforeInitialization，如果某个BeanPostProcessor类的postProcessBeforeInitialization方法返回null,
+      那么后面其他BeanPostProcessor类的postProcessBeforeInitialization就不会在执行.
+   c. 执行实例化的类的初始化方法
+   d. 执行所有BeanPostProcessor类的postProcessAfterInitialization，如果某个BeanPostProcessor类的postProcessAfterInitialization方法返回null,
+      那么后面其他BeanPostProcessor类的postProcessAfterInitialization就不会在执行.
+   e. 对下一个需要实例化的类执行a-d
+
+   Spring底层对BeanPostProcessor的使用:
+   bean赋值，注入其他组件，@Autowired，生命周期注释功能，@Async等等都是通过在类被构造出来后，调用BeanPostProcessor里面的
+   postProcessBeforeInitialization方法来进行处理.
+
+5. @Autowired
+5.1.首先看是否有@Qualifier注解，如果有从容器中满足类型的组件中挑选id等于@Qualifier指定的值的组件注入
+5.2. 如果没有@Qualifier注解，就先通过需要注入的类型来查找
+   - 如果找到唯一一个可以注入的组件，就进行注入;
+   - 如果有多个相同条件的组件可以注入，优先注入标注了@Primary的组件
+   - 如果有多个相同条件的组件可以注入，而且这些组件上都没有标注@Primary,就再通过组件id来注入。
+     比如@Autowired标注再一个域名为person的域上，那就将bean id=person的组件注入
+5.3. 如果没有找到满足条件的组件注入， 而且@Autowired没有指定(required=false)就会报错，如果指定了，就将对应的域设置为null
+
+@Resource & @ Resource(name="xxx")
+@Resource相当于@Autowired，但是并不支持@Primary和 required=false
+Resource(name="xxx")相当于@Autowired + @Qualifier，但是并不支持@Primary和 required=false
+
+@Inject
+相当于@Autowired，并且也支持@Primary,但是不支持required=false，而且需要导入额外的依赖
+
+@Autowired是Spring的注解，脱离了Spring框架就不能用了. 但是@Resource和@Inject是Java规范，脱离Spring也可以使用.
+
+因为@Autowired功能更健全，所以一般都是使用@Autowired
+
+@Autowired标注的位置
+- 属性  - Spring在实例化组件的时候直接将属性赋值(注意这里并不是调用set方法)
+- 方法  - Spring在实例化组件的时候会执行改方法，如果方法有参数，会在容器中查找满足条件的组件进行注入(类型+名字)
+- 构造器 - Spring在实例化组件的时候会执行该构造方法，如果方法有参数，会在容器中查找满足条件的组件进行注入(类型+名字)
+          如果只有一个构造器，不论是否注解了@Autowired,都执行这个构造器，如果有参数，就注入参数
+          如果有多个构造器，而且都没有注解@Autowired，就执行无参构造器， 如果没有无参构造器，就报错
+          如果有多个构造器，其中一个标注了@Autowired，那么就执行这个来构造组件，如果有参数，就注入参数
+          如果有多个构造器，最多只能由一个构造器标注@Autowired，如果有多个，就报错。
+
+注意 @Bean标注的方法，里面的参数也会从容器中获取
+
+除了通过@Autowired来注入组件，还可以通过实现xxxxAware接口来注入spring底层的组件，例如 ApplicationContext, BeanFactory等等
+Aware (org.springframework.beans.factory)
+ApplicationEventPublisherAware (org.springframework.context)
+ServletContextAware (org.springframework.web.context)
+MessageSourceAware (org.springframework.context)
+ResourceLoaderAware (org.springframework.context)
+SchedulerContextAware (org.springframework.scheduling.quartz)
+NotificationPublisherAware (org.springframework.jmx.export.notification)
+BeanFactoryAware (org.springframework.beans.factory)
+EnvironmentAware (org.springframework.context)
+EmbeddedValueResolverAware (org.springframework.context)
+ImportAware (org.springframework.context.annotation)
+ServletConfigAware (org.springframework.web.context)
+BootstrapContextAware (org.springframework.jca.context)
+LoadTimeWeaverAware (org.springframework.context.weaving)
+BeanNameAware (org.springframework.beans.factory)
+BeanClassLoaderAware (org.springframework.beans.factory)
+ApplicationContextAware (org.springframework.context)
+
+这些xxxAware的功能都是由xxxAwareProcessor实现，这些xxxAwareProcessor都是实现了BeanPostProcessor，
+所以他们都会在容器中的类初始化方法前进行将这些spring底层的组件注入.
+每个Bean在创建的时候都会经过容器中每个BeanPostProcessor的
+postProcessBeforeInitialization和postProcessAfterInitialization方法的处理
+容器启动的时候会自动添加一个ApplicationContextAwareProcessor，它就是用来处理这些实现了xxxxAware的Bean的
+但是ApplicationContextAwareProcessor只处理一部分
+EnvironmentAware
+EmbeddedValueResolverAware
+ResourceLoaderAware
+ApplicationEventPublisherAware
+MessageSourceAware
+ApplicationContextAware
+DefaultListableBeanFactory里面的invokeAwareMethods方法(初始化Bean的时候会被调用)也会处理一部分
+BeanNameAware
+BeanClassLoaderAware
+BeanFactoryAware
+
+6. 通过@Profile来指定组件被注入的环境
+参考DataSourceConfig.java和TestDataSourceConfig.java
+除了想TestDataSourceConfig.java里面通过代码来设置spring.profiles.active外，还可以通过启动java程序时指定参数
+-Dspring.profiles.active=dev
+

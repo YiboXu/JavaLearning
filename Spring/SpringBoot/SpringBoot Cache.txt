@@ -1,0 +1,387 @@
+/**
+ * 一、搭建基本环境
+ * 1、创建Country表
+ * 2、创建javaBean封装数据
+ * 3、整合MyBatis操作数据库
+ * 		1.配置数据源信息
+ * 		2.使用注解版的MyBatis；
+ * 			1）、@MapperScan指定需要扫描的mapper接口所在的包
+ * 二、快速体验缓存
+ * 		步骤：
+ * 			1、开启基于注解的缓存 @EnableCaching
+ * 			2、标注缓存注解即可
+ * 				@Cacheable
+ * 				@CacheEvict
+ * 				@CachePut
+ * 默认使用的是ConcurrentMapCacheManager==ConcurrentMapCache；将数据保存在	ConcurrentMap<Object, Object>中
+ * 开发中使用缓存中间件；redis、memcached、ehcache；
+ * 三、整合redis作为缓存
+ * Redis 是一个开源（BSD许可）的，内存中的数据结构存储系统，它可以用作数据库、缓存和消息中间件。
+ * 	1、安装redis：使用docker；
+ * 	2、引入redis的starter
+ * 	3、配置redis
+ * 	4、测试缓存
+ * 		原理：CacheManager===Cache 缓存组件来实际给缓存中存取数据
+ *		1）、引入redis的starter，容器中保存的是 RedisCacheManager；
+ *		2）、RedisCacheManager 帮我们创建 RedisCache 来作为缓存组件；RedisCache通过操作redis缓存数据的
+ *		3）、默认保存数据 k-v 都是Object；利用序列化保存；如何保存为json
+ *   			1、引入了redis的starter，cacheManager变为 RedisCacheManager；
+ *   			2、默认创建的 RedisCacheManager 操作redis的时候使用的是 RedisTemplate<Object, Object>
+ *   			3、RedisTemplate<Object, Object> 是 默认使用jdk的序列化机制
+ *      4）、自定义CacheManager；
+ *
+ */
+
+package tk.springboot.service.impl;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.*;
+import org.springframework.stereotype.Service;
+import tk.springboot.model.Country;
+import tk.springboot.mybatis.mapper.CountryMapper;
+
+import java.util.List;
+import java.util.Map;
+
+/**
+ * 将方法的运行结果进行缓存；以后再要相同的数据，直接从缓存中获取，不用调用方法；
+ * CacheManager管理多个Cache组件的，对缓存的真正CRUD操作在Cache组件中，每一个缓存组件有自己唯一一个名字；
+ *
+
+ *
+ * 原理：
+ *   1、自动配置类；CacheAutoConfiguration
+ *   2、缓存的配置类
+ *   org.springframework.boot.autoconfigure.cache.GenericCacheConfiguration
+ *   org.springframework.boot.autoconfigure.cache.JCacheCacheConfiguration
+ *   org.springframework.boot.autoconfigure.cache.EhCacheCacheConfiguration
+ *   org.springframework.boot.autoconfigure.cache.HazelcastCacheConfiguration
+ *   org.springframework.boot.autoconfigure.cache.InfinispanCacheConfiguration
+ *   org.springframework.boot.autoconfigure.cache.CouchbaseCacheConfiguration
+ *   org.springframework.boot.autoconfigure.cache.RedisCacheConfiguration
+ *   org.springframework.boot.autoconfigure.cache.CaffeineCacheConfiguration
+ *   org.springframework.boot.autoconfigure.cache.GuavaCacheConfiguration
+ *   org.springframework.boot.autoconfigure.cache.SimpleCacheConfiguration【默认】
+ *   org.springframework.boot.autoconfigure.cache.NoOpCacheConfiguration
+ *   3、哪个配置类默认生效：SimpleCacheConfiguration；
+ *
+ *   4、给容器中注册了一个CacheManager：ConcurrentMapCacheManager
+ *   5、可以获取和创建ConcurrentMapCache类型的缓存组件；他的作用将数据保存在ConcurrentMap中；
+ *
+ *   运行流程：
+ *   @Cacheable：
+ *   1、方法运行之前，先去查询Cache（缓存组件），按照cacheNames指定的名字获取；
+ *      （CacheManager先获取相应的缓存），第一次获取缓存如果没有Cache组件会自动创建。
+ *   2、去Cache中查找缓存的内容，使用一个key，默认就是方法的参数；
+ *      key是按照某种策略生成的；默认是使用keyGenerator生成的，默认使用SimpleKeyGenerator生成key；
+ *          SimpleKeyGenerator生成key的默认策略；
+ *                  如果没有参数；key=new SimpleKey()；
+ *                  如果有一个参数：key=参数的值
+ *                  如果有多个参数：key=new SimpleKey(params)；
+ *   3、没有查到缓存就调用目标方法；
+ *   4、将目标方法返回的结果，放进缓存中
+ *
+ *   @Cacheable标注的方法执行之前先来检查缓存中有没有这个数据，默认按照参数的值作为key去查询缓存，
+ *   如果没有就运行方法并将结果放入缓存；以后再来调用就可以直接使用缓存中的数据；
+ *
+ *   核心：
+ *      1）、使用CacheManager【ConcurrentMapCacheManager】按照名字得到Cache【ConcurrentMapCache】组件
+ *      2）、key使用keyGenerator生成的，默认是SimpleKeyGenerator
+ *
+ *
+ *   几个属性：
+ *      cacheNames/value：指定缓存组件的名字;将方法的返回结果放在哪个缓存中，是数组的方式，可以指定多个缓存；
+ *
+ *      key：缓存数据使用的key；可以用它来指定。默认是使用方法参数的值  1-方法的返回值
+ *              编写SpEL； #i d;参数id的值   #a0  #p0  #root.args[0]
+ *              getEmp[2]
+ *
+ *      keyGenerator：key的生成器；可以自己指定key的生成器的组件id
+ *              key/keyGenerator：二选一使用;
+ *
+ *
+ *      cacheManager：指定缓存管理器；或者cacheResolver指定获取解析器
+ *
+ *      condition：指定符合条件的情况下才缓存；
+ *              ,condition = "#id>0"
+ *          condition = "#a0>1"：第一个参数的值》1的时候才进行缓存
+ *
+ *      unless:否定缓存；当unless指定的条件为true，方法的返回值就不会被缓存；可以获取到结果进行判断
+ *              unless = "#result == null"
+ *              unless = "#a0==2":如果第一个参数的值是2，结果不缓存；
+ *      sync：是否使用异步模式
+ */
+@Service("countryService")
+//@CacheConfig里面指定的参数应用于所有的类中的方法
+@CacheConfig(cacheNames={"country"})
+public class CountryService {
+    @Autowired
+    private CountryMapper countryMapper;
+
+    /**
+     * @CachePut：既调用方法，又更新缓存数据；同步更新缓存
+     * 修改了数据库的某个数据，同时更新缓存；
+     * 运行时机：
+     *  1、先调用目标方法
+     *  2、将目标方法的结果缓存起来
+     *
+     * 测试步骤：
+     *  1、查询1号员工；查到的结果会放在缓存中；
+     *          key：1  value：lastName：张三
+     *  2、以后查询还是之前的结果
+     *  3、更新1号员工；【lastName:zhangsan；gender:0】
+     *          将方法的返回值也放进缓存了；
+     *          key：传入的employee对象  值：返回的employee对象；
+     *  4、查询1号员工？
+     *      应该是更新后的员工；
+     *          key = "#employee.id":使用传入的参数的员工id；
+     *          key = "#result.id"：使用返回后的id
+     *             @Cacheable的key是不能用#result
+     *      为什么是没更新前的？【1号员工没有在缓存中更新】
+     *
+     * @Cacheable(cacheNames = {"country"},key = "#root.methodName+'['+#id+']'")
+     * 用我们自定义的keyGenerator(bean id = "muKeyGenerator")生成的key来缓存
+     * condition = "#id>0 and #id <10" 只有当参数id大于0且小于10的时候，才缓存返回的结果
+     * unless = "#id == 2" unless里面的条件为true的时候，不缓存
+     * sync = true 通过异步的方式进行缓存， 如果使用，unless将会失效
+     */
+
+    //@Cacheable(cacheNames = {"country"},keyGenerator = "myKeyGenerator",condition = "#id>0 and #id <10", unless = "#id == 2")
+    @Cacheable(cacheNames = {"country"},key = "'country'+#id")
+    public Country getById(Long id){
+        System.out.println("Invoking getById in CountryService");
+        return countryMapper.selectCountryById(id);
+    }
+
+    public List<Country> selectAll(){
+        return countryMapper.selectAll();
+    };
+
+    @CachePut(value={"country"},key = "'country'+#result.id")
+    public int insertCountry(Country country){
+        return countryMapper.insertCountry(country);
+    };
+
+
+    /**
+     * @CacheEvict：缓存清除
+     *  key：指定要清除的数据
+     *  allEntries = true：指定清除这个缓存中所有的数据
+     *  beforeInvocation = false：缓存的清除是否在方法之前执行
+     *      默认代表缓存清除操作是在方法执行之后执行;如果出现异常缓存就不会清除
+     *
+     *  beforeInvocation = true：
+     *      代表清除缓存操作是在方法运行之前执行，无论方法是否出现异常，缓存都清除
+     *
+     *
+     */
+    @CacheEvict(value={"country"},key = "'country'+#id")
+    public void deleteCountryById(Long id){
+        //countryMapper.deleteCountryById(id);
+    };
+
+    /**
+     * @CachePut：既调用方法，又更新缓存数据；同步更新缓存
+     * 修改了数据库的某个数据，同时更新缓存；
+     * 运行时机：
+     *  1、先调用目标方法
+     *  2、将目标方法的结果缓存起来
+     *
+     * 测试步骤：
+     *  1、查询3号员工；查到的结果会放在缓存中；
+     *          key：1  value：lastName：张三
+     *  2、以后查询还是之前的结果
+     *  3、更新1号员工；【lastName:zhangsan；gender:0】
+     *          将方法的返回值也放进缓存了；
+     *          key：传入的employee对象  值：返回的employee对象；
+     *  4、查询1号员工？
+     *      应该是更新后的员工；
+     *          key = "#employee.id":使用传入的参数的员工id；
+     *          key = "#result.id"：使用返回后的id
+     *             @Cacheable的key是不能用#result
+     *      为什么是没更新前的？【1号员工没有在缓存中更新】
+     *
+     */
+    @CachePut(value={"country"},key = "'country'+#result.id")
+    public Country updateCountry(Country country){
+        countryMapper.updateCountry(country);
+        return country;
+    };
+
+    // @Caching 定义复杂的缓存规则
+    //一旦调用这个方法，就会先在缓存中查找key = "'country'+#countrycode+#countryname"),如果找到就直接返回结果
+    //如果没有找到，就将返回结果写入到缓存中，key = "'country'+#countrycode+#countryname")
+    //同时，还会执行put = {...}中的缓存操作
+    @Caching(cacheable={@Cacheable(cacheNames = {"country"},key = "'country'+#countrycode+#countryname")},
+             put = {@CachePut(value={"country"},key = "'country'+#result.id"),
+                    @CachePut(value={"country"},key = "'country'+#result.countrycode"),
+                    @CachePut(value={"country"},key = "'country'+#result.countryname")})
+    public Country selectCountryByNameAndCode(String countryname, String countrycode){
+        return countryMapper.selectCountryByNameAndCode(countryname, countrycode);
+    };
+
+    public Country selectCountryByMap(Map<String, String> map){
+        return countryMapper.selectCountryByMap(map);
+    };
+
+    @Cacheable(cacheNames = {"country"},key = "'country'+#countrycode")
+    public Country selectCountryByCountryCode(String countrycode){
+        return countryMapper.selectCountryByCountryCode(countrycode);
+    }
+
+    @Cacheable(cacheNames = {"country"},key = "'country'+#countryname")
+    public Country selectCountryByCountryName(String countryname){
+        return countryMapper.selectCountryByCountryName(countryname);
+    }
+}
+=================================================================================================
+springboot整合Redis
+1. 添加Redis依赖
+		<!--Cache 缓存 -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-cache</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-redis</artifactId>
+		</dependency>
+2. 在需要缓存的方法上面标注@Cache.... 注解
+3. 如果需要手动进行缓存，直接注入需要的RedisTemplate就可以了
+
+@SpringBootTest
+public class TestRedis {
+    private Logger logger = LoggerFactory.getLogger(getClass());
+
+    @Autowired
+    StringRedisTemplate stringRedisTemplate;
+    @Autowired
+    RedisTemplate redisTemplate;
+    @Autowired
+    RedisTemplate<Object,Country> countryRedisTemplate;
+
+    @Autowired
+    CountryMapper countryMapper;
+
+    /**
+     * Redis常见的五大数据类型
+     *  String（字符串）、List（列表）、Set（集合）、Hash（散列）、ZSet（有序集合）
+     *  stringRedisTemplate.opsForValue()[String（字符串）]
+     *  stringRedisTemplate.opsForList()[List（列表）]
+     *  stringRedisTemplate.opsForSet()[Set（集合）]
+     *  stringRedisTemplate.opsForHash()[Hash（散列）]
+     *  stringRedisTemplate.opsForZSet()[ZSet（有序集合）]
+     */
+    @Test
+    public void test01(){
+        stringRedisTemplate.opsForValue().append("msg","Hello Redis");
+        logger.info(stringRedisTemplate.opsForValue().get("msg"));
+    }
+
+    @Test
+    public void test02(){
+        Country country = countryMapper.selectCountryById((long)2);
+        redisTemplate.opsForValue().set("country",country);
+        Country country2 = (Country)redisTemplate.opsForValue().get("country");
+        logger.info(country2.toString());
+    }
+
+    //用redisTemplate和countryRedisTemplate的区别仅仅在于保存在Redis中的数据格式不一样
+    //redisTemplate保存的是JDK序列化后的字节码
+    //countryRedisTemplate保存的是Json格式的数据
+    //用countryRedisTemplate需要自己配置一个RedisTemplate的Bean，将其默认序列化器设置为Json格式， 参看tk.springboot.caceh.RedisConfig
+    @Test
+    public void test03(){
+        Country country = countryMapper.selectCountryById((long)3);
+        countryRedisTemplate.opsForValue().set("countryjson",country);
+        logger.info(countryRedisTemplate.opsForValue().get("countryjson").toString());
+    }
+}
+
+配置自定义的RedisTemplate
+@Configuration
+public class RedisConfig {
+    @Bean("countryRedisTemplate")
+    public RedisTemplate<Object, Country> countryRedisTemplate(RedisConnectionFactory redisConnectionFactory)
+            throws UnknownHostException {
+        RedisTemplate<Object, Country> template = new RedisTemplate<>();
+        template.setConnectionFactory(redisConnectionFactory);
+        //设置默认序列化器，这样保存在Redis里面的数据就是序列化后的Json
+        template.setDefaultSerializer(new Jackson2JsonRedisSerializer<Country>(Country.class));
+        return template;
+    }
+}
+
+4. 还可以用自定义的CacheManager (样例)
+package com.atguigu.cache.config;
+
+
+import com.atguigu.cache.bean.Department;
+import com.atguigu.cache.bean.Employee;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
+import org.springframework.data.redis.cache.RedisCacheManager;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
+
+import java.net.UnknownHostException;
+
+@Configuration
+public class MyRedisConfig {
+
+    @Bean
+    public RedisTemplate<Object, Employee> empRedisTemplate(
+            RedisConnectionFactory redisConnectionFactory)
+            throws UnknownHostException {
+        RedisTemplate<Object, Employee> template = new RedisTemplate<Object, Employee>();
+        template.setConnectionFactory(redisConnectionFactory);
+        Jackson2JsonRedisSerializer<Employee> ser = new Jackson2JsonRedisSerializer<Employee>(Employee.class);
+        template.setDefaultSerializer(ser);
+        return template;
+    }
+    @Bean
+    public RedisTemplate<Object, Department> deptRedisTemplate(
+            RedisConnectionFactory redisConnectionFactory)
+            throws UnknownHostException {
+        RedisTemplate<Object, Department> template = new RedisTemplate<Object, Department>();
+        template.setConnectionFactory(redisConnectionFactory);
+        Jackson2JsonRedisSerializer<Department> ser = new Jackson2JsonRedisSerializer<Department>(Department.class);
+        template.setDefaultSerializer(ser);
+        return template;
+    }
+
+
+
+    //CacheManagerCustomizers可以来定制缓存的一些规则
+    @Primary  //将某个缓存管理器作为默认的
+    @Bean
+    public RedisCacheManager employeeCacheManager(RedisTemplate<Object, Employee> empRedisTemplate){
+        RedisCacheManager cacheManager = new RedisCacheManager(empRedisTemplate);
+        //key多了一个前缀
+
+        //使用前缀，默认会将CacheName作为key的前缀
+        cacheManager.setUsePrefix(true);
+
+        return cacheManager;
+    }
+
+    @Bean
+    public RedisCacheManager deptCacheManager(RedisTemplate<Object, Department> deptRedisTemplate){
+        RedisCacheManager cacheManager = new RedisCacheManager(deptRedisTemplate);
+        //key多了一个前缀
+
+        //使用前缀，默认会将CacheName作为key的前缀
+        cacheManager.setUsePrefix(true);
+
+        return cacheManager;
+    }
+
+
+}
+
+使用自定义CacheManager
+在需要使用对应CacheManager的类上标注，这样这个类中所有的方法都会使用所设置的CacheManager来进行缓存
+@CacheConfig(cacheNames="emp",cacheManager = "employeeCacheManager") 

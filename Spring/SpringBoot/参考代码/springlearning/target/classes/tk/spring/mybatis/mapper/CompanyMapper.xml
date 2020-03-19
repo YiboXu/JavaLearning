@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="tk.mybatis.simple.mapper.CompanyMapper">
+    <!--一对多查询1 按结果嵌套处理  -->
+    <select id="selectAll" resultMap="company">
+        select c.id cid, c.name cname, e.id eid, e.name ename from
+        company c, employee e where e.cid = c.id
+    </select>
+    <resultMap id="company" type="Company">
+        <id column="cid" property="id"></id>
+        <result column="cname" property="name"></result>
+        <collection property="employees" ofType="Employee">
+            <id column="eid" property="id"></id>
+            <result column="ename" property="name"></result>
+        </collection>
+    </resultMap>
+
+    <!--一对多查询1 按查询嵌套处理  -->
+    <select id="selectAll2" resultMap="company2">
+        select * from company
+    </select>
+    <resultMap id="company2" type="Company">
+        <id column="id" property="id"></id>
+        <result column="name" property="name"></result>
+        <!-- column="{cid=id}"  id是selectAll2里面返回的column id， cid是tk.mybatis.simple.mapper.EmployeeMapper.getEmployee里面的#{cid}-->
+        <collection property="employees" javaType="ArrayList" ofType="Employee" column="{cid=id}" select="tk.mybatis.simple.mapper.EmployeeMapper.getEmployee"></collection>
+    </resultMap>
+</mapper>

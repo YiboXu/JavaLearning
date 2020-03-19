@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/billhu-spring-boot-starter-autoconfigurer/billhu-spring-boot-starter-autoconfigurer.iml" filepath="$PROJECT_DIR$/billhu-spring-boot-starter-autoconfigurer/billhu-spring-boot-starter-autoconfigurer.iml" />
+      <module fileurl="file://$PROJECT_DIR$/billhuspringbootstarter/billhuspringbootstarter.iml" filepath="$PROJECT_DIR$/billhuspringbootstarter/billhuspringbootstarter.iml" />
+    </modules>
+  </component>
+</project>

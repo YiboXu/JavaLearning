@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+  PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-config.dtd">
+
+<configuration>
+	<settings>
+		<setting name="logImpl" value="LOG4J" />
+		<!-- will run association query only when the related column is accessed -->
+		<setting name="aggressiveLazyLoading" value="false"/>
+		<setting name="lazyLoadTriggerMethods" value="equals,clone,hashCode,toString" />
+		<setting name="cacheEnabled" value="true" />
+	</settings>
+
+	<typeAliases>
+		<package name="tk.mybatis.simple.model" />
+	</typeAliases>
+	
+	<typeHandlers>
+		<typeHandler javaType="tk.mybatis.simple.type.Enabled" handler="tk.mybatis.simple.type.EnabledTypeHandler"/>
+	</typeHandlers>
+	
+	<environments default="development">
+		<environment id="development">
+			<transactionManager type="JDBC">
+				<property name="" value="" />
+			</transactionManager>
+			<!--数据类型:
+			 UNPOOLED - 这个类型的数据源实现只是再每次需要的时候简单地打开和关闭连接
+			 POOLED - 这个数据源缓存了JDBC连接对象，用于避免每次创建新的数据库连接时都初始化和进行认证，加快程序响应.
+			 -->
+			<dataSource type="UNPOOLED">
+				<property name="driver" value="com.mysql.cj.jdbc.Driver"/>
+				<property name="url" value="jdbc:mysql://localhost:3306/mybatis"/>
+				<property name="username" value="root"/>
+				<property name="password" value="123456"/>
+			</dataSource>
+		</environment>
+	</environments>
+	
+	<mappers>
+		<mapper resource="tk/mybatis/simple/mapper/CountryMapper.xml" />
+		<mapper resource="tk/mybatis/simple/mapper/StudentMapper.xml" />
+		<mapper resource="tk/mybatis/simple/mapper/TeacherMapper.xml" />
+		<mapper resource="tk/mybatis/simple/mapper/CompanyMapper.xml" />
+		<mapper resource="tk/mybatis/simple/mapper/EmployeeMapper.xml" />
+	</mappers>
+</configuration>

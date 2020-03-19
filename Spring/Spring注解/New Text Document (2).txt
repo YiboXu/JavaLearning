@@ -1,0 +1,50 @@
+this = AnnotationConfigServletWebServerApplicationContext
+this.postProcessBeanFactory(beanFactory);   
+	没什么处理，如果需要，就重写改方法      
+this.invokeBeanFactoryPostProcessors(beanFactory);
+	-调用ApplicationContext的BeanFactoryPostProcessors的postProcessBeanDefinitionRegistry
+		0 = {SharedMetadataReaderFactoryContextInitializer$CachingMetadataReaderFactoryPostProcessor@4619} 
+		1 = {ConfigurationWarningsApplicationContextInitializer$ConfigurationWarningsPostProcessor@4620} 
+		2 = {ConfigFileApplicationListener$PropertySourceOrderingPostProcessor@4621} 
+	-依次调用ApplicationContext.beanFactory里面的BeanDefinitionRegistryPostProcessor的postProcessBeanDefinitionRegistry方法
+		-再这个方法里面，将beanFactory里所有定义的bean依次遍历，如果某个bean是配置类(这里一般就是注释了@SpringBootApplication的类),就调用ConfigurationClassParser.parse方法来解析其中的注解
+                 对注释了@SpringBootApplication的bean的处理结果就是：
+			-将这个bean所在的package下(包括子package)下的组件都添加到ApplicationContext.beanFactory中定义的bean列表中
+			-通过AutoConfigurationImportSelector.class筛选出需要自动配置的类
+				-扫描所有jar包类路径下 META‐INF/spring.factories
+				-把扫描到的这些文件的内容包装成properties对象
+				-从properties中获取到EnableAutoConfiguration.class类（类名）对应的值，然后把他们添加在beanFactory中定义的bean列表中
+		
+	-依次调用ApplicationContext.beanFactory里面的BeanFactoryPostProcessor的postProcessBeanFactory方法
+		-先处理属于PriorityOrdered.class类型的，然后是 Ordered.class，最后处理其他的
+                 
+this.registerBeanPostProcessors(beanFactory);    
+	-注册BeanPostProcessor 
+this.initMessageSource();                         
+this.initApplicationEventMulticaster();           
+this.onRefresh();                                 
+this.registerListeners();                         
+this.finishBeanFactoryInitialization(beanFactory);
+ 	-实例化所有的组件
+this.finishRefresh();                             
+
+
+0 = {SharedMetadataReaderFactoryContextInitializer$CachingMetadataReaderFactoryPostProcessor@4619} 
+1 = {ConfigurationWarningsApplicationContextInitializer$ConfigurationWarningsPostProcessor@4620} 
+2 = {ConfigFileApplicationListener$PropertySourceOrderingPostProcessor@4621} 
+
+遍历这3个BeanFactoryProcessor来再BeanFactory里面注册Bean
+
+SharedMetadataReaderFactoryContextInitializer$CachingMetadataReaderFactoryPostProcessor
+添加了
+"org.springframework.boot.autoconfigure.internalCachingMetadataReaderFactory" : SharedMetadataReaderFactoryContextInitializer.SharedMetadataReaderFactoryBean.class
+
+ConfigurationWarningsApplicationContextInitializer$ConfigurationWarningsPostProcessor
+没有添加Bean
+
+ConfigFileApplicationListener$PropertySourceOrderingPostProcessor 
+也没有添加Bean
+
+
+"org.springframework.context.annotation.internalConfigurationAnnotationProcessor"
+调用这个名字对应的类ConfigurationClassPostProcessor.class的postProcessBeanDefinitionRegistry

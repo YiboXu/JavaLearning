@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--当使用sqlSession.getMapper方式来进行数据库操作的时候，
+     mybatis就是在namespace的值对应的包里面取找CountryMapper这个接口，然后通过动态代理生成对应的数据库操作代理类
+     从而使得客户端可以通过接口来访问数据库。
+     如果通过指定namespace+id的方式sqlSession.selectList("tk.mybatis.simple.mapper.CountryMapper.selectAll")，就不需要
+     配置CountryMapper接口-->
+<mapper namespace="tk.spring.mybatis.mapper.CountryMapper">
+    <select id="selectAll" resultType="Country">
+        select id,countryname,countrycode from country
+    </select>
+
+    <insert id="insertCountry" parameterType="Country" useGeneratedKeys="true" keyProperty="id">
+        insert into country(countryname,countrycode) values(#{countryname},#{countrycode})
+    </insert>
+
+    <select id="selectCountryByNameAndCode" resultType="Country">
+        select * from country where  countryname=#{arg0} and countrycode=#{arg1}
+    </select>
+
+    <select id="selectCountryByMap" resultType="Country">
+        select * from country where  countryname=#{countryname} and countrycode=#{countrycode}
+    </select>
+
+    <update id="updateCountry">
+        update country set countryname = #{countryname}
+         where countrycode = #{countrycode}
+    </update>
+
+    <delete id="deleteCountryByCountryCode">
+        delete from country where countrycode = #{countrycode}
+    </delete>
+</mapper>

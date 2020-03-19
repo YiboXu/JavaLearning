@@ -1,0 +1,1661 @@
+一， 配置Spring数据源
+
+0 样例中用到的User类
+package example.domain;
+
+import java.util.Arrays;
+import java.util.Collection;
+
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
+public class User{
+	private String username;
+	private String password;
+	
+	public User() {}
+	
+	public User(String username, String password) {
+		this.username = username;
+		this.password = password;
+	}
+	
+	public String getUsername() {
+		return username;
+	}
+	public void setUsername(String username) {
+		this.username = username;
+	}
+	public String getPassword() {
+		return password;
+	}
+	public void setPassword(String password) {
+		this.password = password;
+	}
+	
+	public String toString() {
+		return username+":"+password;
+	}
+}
+
+
+1. 创建 DataSourceConfiguration
+
+package example.db;
+
+import javax.sql.DataSource;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
+import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
+
+@Configuration
+public class DataSourceConfiguration {
+
+	@Bean
+	public DataSource embeddedDataSource() {
+		System.out.println("DB Initialization");
+		return new EmbeddedDatabaseBuilder()
+				.setType(EmbeddedDatabaseType.H2)
+				.addScript("classpath:schema.sql")
+				.addScript("classpath:test-data.sql")
+				.build();
+	}
+	
+	//下面这2个Bean是通过JdbcTemplate来访问数据源是才需要的，否则直接通过datasource调用SQL就能访问数据库了
+	@Bean
+	public JdbcTemplate jdbcTemplate(DataSource dataSource) {
+		return new JdbcTemplate(dataSource);
+	}
+	
+	@Bean
+	public UserRepository userRepository(JdbcTemplate jdbcTemplate) {
+		return new JdbcUserRepository(jdbcTemplate);
+	}
+}
+
+配置其他数据源
+@Bean
+public DataSource dataSource() {
+	DriverManagerDataSource ds = new DriverManagerDataSource();
+	ds.setDriverClassName("org.h2.Driver");
+	ds.setUrl("jdbc:h2:tcp://localhost/~/spitter");
+	ds.setUsername("sa");
+	ds.setPassword("");
+	return ds;
+}
+
+2. 如果需要用JdbcTemplate来访问数据库，还需要定义:
+package example.db;
+
+import java.util.List;
+
+import example.domain.User;
+
+public interface UserRepository {
+
+	  long count();
+	  
+	  User save(User user);
+
+	  User findByUsername(String username);
+
+	  List<User> findAll();
+}
+
+
+
+package example.db;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
+import org.springframework.stereotype.Repository;
+
+import example.domain.User;
+
+@Repository
+public class JdbcUserRepository implements UserRepository{
+
+	private JdbcTemplate jdbcTemplate;
+	
+	@Autowired
+	public JdbcUserRepository(JdbcTemplate jdbcTemplate) {
+		this.jdbcTemplate = jdbcTemplate;
+	}
+	
+	@Override
+	public long count() {
+		// TODO Auto-generated method stub
+		return jdbcTemplate.queryForObject("select count(id) from Spitter",java.lang.Long.class);
+	}
+
+	@Override
+	public User save(User user) {
+		// TODO Auto-generated method stub
+		SimpleJdbcInsert jdbcInsert = new SimpleJdbcInsert(jdbcTemplate).withTableName("User");
+		Map<String, Object> args = new HashMap<String, Object>();
+		args.put("username", user.getUsername());
+		args.put("password", user.getPassword());
+		if(jdbcInsert.execute(args)>0)
+			return user;
+		else
+			return null;
+	}
+
+	@Override
+	public User findByUsername(String username) {
+		// TODO Auto-generated method stub
+		return jdbcTemplate.queryForObject("select username, password from User where username=?", new UserRowMapper(), username);
+	}
+
+	@Override
+	public List<User> findAll() {
+		// TODO Auto-generated method stub
+		return jdbcTemplate.query("select username, password from User", new UserRowMapper());
+	}
+
+	private static final class UserRowMapper implements RowMapper<User> {
+
+		@Override
+		public User mapRow(ResultSet rs, int rowNum) throws SQLException {
+			// TODO Auto-generated method stub
+			String username = rs.getString("username");
+			String password = rs.getString("password");
+			return new User(username, password);
+		}		
+	}
+}
+
+3. 如何访问数据库
+@Controller
+public class HomeController {
+	
+	@Autowired
+	private DataSource dataSource;
+	
+	@Autowired
+	private UserRepository userRepository;
+	
+	@RequestMapping(value="/", method=GET)
+	public String home() {
+		test1();
+		test2();
+		return "home";
+	}
+	
+	@RequestMapping(value="/index", method=GET)
+	public String index() {
+		return "index";
+	}
+	
+	//使用datasource来访问数据库
+	private void test1() {
+		Connection conn = null;
+		PreparedStatement stmt = null;
+		
+		try {
+			conn = dataSource.getConnection();
+			stmt = conn.prepareStatement("select * from User");
+			ResultSet result = stmt.executeQuery();
+			while(result.next()) {
+				//System.out.println(result.getString(0));
+				System.out.println(result.getString(1));
+				System.out.println(result.getString(2));
+				System.out.println(result.getString(3));
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}finally {
+			try {
+				if (stmt != null) {
+				stmt.close();
+				}
+				if (conn != null) {
+				conn.close();
+				}
+				} catch (SQLException e) {
+				// I'm even less sure about what to do here
+				}
+		}
+	}
+	
+	//使用JdbcTemplate来访问数据库
+	private void test2() {
+		userRepository.save(new User("hutao","123456"));
+		List<User> users = userRepository.findAll();
+		for(User user:users) {
+			System.out.println(user);
+		}
+	}
+}
+
+二 使用Spring Data JDBC & JPA & 整合Mybatis & Mongodb & Redis
+1. applicationContext.xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:jpa="http://www.springframework.org/schema/data/jpa"
+
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+      http://www.springframework.org/schema/beans/spring-beans.xsd
+      http://www.springframework.org/schema/context
+      http://www.springframework.org/schema/context/spring-context.xsd
+      http://www.springframework.org/schema/aop
+      http://www.springframework.org/schema/aop/spring-aop.xsd
+      http://www.springframework.org/schema/tx
+      http://www.springframework.org/schema/tx/spring-tx.xsd
+      http://www.springframework.org/schema/mvc
+      http://www.springframework.org/schema/mvc/spring-mvc.xsd
+      http://www.springframework.org/schema/data/jpa
+      http://www.springframework.org/schema/data/jpa/spring-jpa.xsd">
+
+    <!--配置data source-->
+    <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+        <property name="driverClassName" value="com.mysql.cj.jdbc.Driver"/>
+        <property name="url" value="jdbc:mysql://localhost:3306/mybatis"/>
+        <property name="username" value="root"/>
+        <property name="password" value="123456"/>
+    </bean>
+
+    <!-- 配置声明式事务 -->
+    <!--事务管理器-->
+    <bean id="txManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+
+    <!-- the transactional advice (what 'happens'; see the <aop:advisor/> bean below) -->
+    <tx:advice id="txAdvice" transaction-manager="txManager">
+        <!-- the transactional semantics... -->
+        <tx:attributes>
+            <!-- all methods starting with 'get' are read-only -->
+            <tx:method name="get*" read-only="true"/>
+            <!-- all methods starting with 'select' are read-only -->
+            <tx:method name="select*" read-only="true"/>
+            <!-- other methods use the default transaction settings (see below) -->
+            <tx:method name="*" propagation="REQUIRED"/>
+        </tx:attributes>
+    </tx:advice>
+
+    <!--配置tk.springmvc.service.impl包下所有类的所有方法都通过txAdvice来进行事务管理 -->
+    <aop:config>
+        <aop:pointcut id="updateTx" expression="execution(* tk.springmvc.service.impl.*.*(..))"/>
+        <aop:advisor advice-ref="txAdvice" pointcut-ref="updateTx"></aop:advisor>
+    </aop:config>
+
+    <!--配置扫描该包下的注解 -->
+    <context:component-scan base-package="tk.springmvc"/>
+
+
+    <!--配置相关的工厂类-->
+    <!--JdbcTemplate-->
+    <bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+        <constructor-arg name="dataSource" ref="dataSource"></constructor-arg>
+    </bean>
+
+    <!--MyBatis-->
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="configLocation" value="classpath:mybatis-config.xml"></property>
+        <property name="dataSource" ref="dataSource"></property>
+        <property name="mapperLocations">
+            <array>
+                <value>classpath:tk/springmvc/mybatis/mapper/CountryMapper.xml</value>
+                <value>classpath:tk/springmvc/mybatis/mapper/WebUserMapper.xml</value>
+            </array>
+        </property>
+        <property name="typeAliasesPackage" value="tk.springmvc.model"></property>
+    </bean>
+
+    <!--配置Spring Data JPA-->
+    <bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+        <property name="dataSource" ref="dataSource"></property>
+        <!--jpa适配器 -->
+        <property name="jpaVendorAdapter">
+            <!--基于hibernate的 -->
+            <bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter"></bean>
+        </property>
+        <property name="packagesToScan" value="tk.springmvc.model"></property>
+    </bean>
+
+    <!-- 重要配置：启用扫描并自动创建代理的功能，这样会自动为base-package下面继承了JpaRepository的接口创建一个实现类的实例  -->
+    <jpa:repositories base-package="tk.springmvc.jpa.repository"  transaction-manager-ref="txManager" entity-manager-factory-ref="entityManagerFactory"/>
+
+    <!-- MongoDB -->
+    <!-- 重要配置：启用扫描并自动创建代理的功能  -->
+    <mongo:repositories base-package="tk.springmvc.mongodb.repository" />
+
+    <!--配置mongo-client-->
+    <mongo:mongo-client id="mongo" host="localhost" port="27017"></mongo:mongo-client>
+
+    <!--配置mongoTemplate-->
+    <bean id="mongoTemplate" class="org.springframework.data.mongodb.core.MongoTemplate">
+        <constructor-arg name="mongoClient" ref="mongo" />
+        <constructor-arg name="databaseName" value="OrdersDB" />
+    </bean>
+
+    <!--配置Redis-->
+    <bean id="connectionFactory" class="org.springframework.data.redis.connection.jedis.JedisConnectionFactory">
+        <constructor-arg name="standaloneConfig">
+            <bean class="org.springframework.data.redis.connection.RedisStandaloneConfiguration">
+                <constructor-arg name="hostName" value="localhost"></constructor-arg>
+                <constructor-arg name="port" value="6379"></constructor-arg>
+            </bean>
+        </constructor-arg>
+    </bean>
+
+    <bean id="redisTemplate" class="org.springframework.data.redis.core.StringRedisTemplate">
+        <property name="connectionFactory"   ref="connectionFactory" />
+    </bean>
+</beans>
+
+2 mybatis-config.xml
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+  PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-config.dtd">
+
+<configuration>
+
+	
+	<typeHandlers>
+		<typeHandler javaType="tk.springmvc.mybatis.type.Enabled" handler="tk.springmvc.mybatis.type.EnabledTypeHandler"/>
+	</typeHandlers>
+
+</configuration>
+
+3. 如何访问数据
+3.1 JDBC
+- 创建实体类
+package tk.springmvc.model;
+
+public class Country {
+
+	private Long id;
+	private String countryname;
+	private String countrycode;
+
+	public Long getId() {
+		return id;
+	}
+	public void setId(Long id) {
+		this.id = id;
+	}
+	public String getCountryname() {
+		return countryname;
+	}
+	public void setCountryname(String countryname) {
+		this.countryname = countryname;
+	}
+	public String getCountrycode() {
+		return countrycode;
+	}
+	public void setCountrycode(String countrycode) {
+		this.countrycode = countrycode;
+	}
+
+	public String toString(){
+		return "id: "+id+",countryname: "+countryname+",countrycode: "+countrycode;
+	}
+}
+
+- 创建Dao层接口
+package tk.springmvc.dao;
+
+import tk.springmvc.model.Country;
+
+import java.util.List;
+
+//添加数据库操作
+public interface CountryDao {
+    List<Country> selectAll();
+}
+-创建Dao实现类
+package tk.springmvc.dao.impl;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcOperations;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.stereotype.Repository;
+import tk.springmvc.dao.CountryDao;
+import tk.springmvc.model.Country;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.List;
+
+@Repository("countryJdbcDao")
+public class CountryJdbcDaoImpl implements CountryDao {
+    @Autowired     //JdbcTemplate就是JdbcOperations的实现类，定义在applicationContext.xml里面
+    private JdbcOperations jdbcOperations;
+
+    public void setJdbcOperations(JdbcOperations jdbcOperations) {
+        this.jdbcOperations = jdbcOperations;
+    }
+
+    @Override
+    public List<Country> selectAll() {
+        return jdbcOperations.query("select id,countryname,countrycode from country",new CountryRowMapper());
+    }
+
+    private static final class CountryRowMapper implements RowMapper<Country> {
+        public Country mapRow(ResultSet rs, int rowNum) throws SQLException {
+            long id = rs.getLong("id");
+            String countryname = rs.getString("countryname");
+            String countrycode = rs.getString("countrycode");
+
+            Country country =  new Country();
+            country.setId(id);
+            country.setCountryname(countryname);
+            country.setCountrycode(countrycode);
+
+            return country;
+        }
+    }
+}
+-创建Service接口
+package tk.springmvc.service;
+
+import tk.springmvc.model.Country;
+
+import java.util.List;
+
+//添加业务处理代码
+public interface CountryService {
+    List<Country> selectAll();
+}
+
+-创建Service实现类
+package tk.springmvc.service.impl;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Service;
+import tk.springmvc.dao.CountryDao;
+import tk.springmvc.model.Country;
+import tk.springmvc.service.CountryService;
+
+import java.util.List;
+
+@Service("countryJdbcService")
+public class CountryJdbcServiceImple implements CountryService {
+
+    @Autowired
+    //因为有2个CountryDao的实现类，所以加上@Qualifier来通过名字注入，如果只有唯一实现类，就不需要@Qualifier
+    @Qualifier("countryJdbcDao")
+    private CountryDao countryDao;
+
+    @Override
+    public List<Country> selectAll() {
+        return countryDao.selectAll();
+    }
+}
+- 访问
+package tk.springmvc;
+
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+import tk.springmvc.dao.CountryDao;
+import tk.springmvc.dao.impl.CountryJdbcDaoImpl;
+import tk.springmvc.service.CountryService;
+
+public class Test2 {
+    public static void main(String[] args){
+        ApplicationContext applicationContext = new ClassPathXmlApplicationContext("classpath:applicationContext.xml");
+        CountryService countryService = (CountryService) applicationContext.getBean("countryJdbcService");
+        countryService.selectAll().stream().forEach(System.out::println);
+    }
+}
+
+或者通过@Autowired注入到其他类中进行使用
+
+3.2 MyBatis
+- 创建实体类
+package tk.springmvc.model;
+
+public class Country {
+
+	private Long id;
+	private String countryname;
+	private String countrycode;
+
+	public Long getId() {
+		return id;
+	}
+	public void setId(Long id) {
+		this.id = id;
+	}
+	public String getCountryname() {
+		return countryname;
+	}
+	public void setCountryname(String countryname) {
+		this.countryname = countryname;
+	}
+	public String getCountrycode() {
+		return countrycode;
+	}
+	public void setCountrycode(String countrycode) {
+		this.countrycode = countrycode;
+	}
+
+	public String toString(){
+		return "id: "+id+",countryname: "+countryname+",countrycode: "+countrycode;
+	}
+}
+
+- 创建Mapper接口  (列出所有需要的DB操作)
+package tk.springmvc.mybatis.mapper;
+
+import tk.springmvc.model.Country;
+
+import java.util.List;
+import java.util.Map;
+
+public interface CountryMapper {
+    List<Country> selectAll();
+
+    int insertCountry(Country country);
+
+    int deleteCountryByCountryCode(String countrycode);
+
+    int updateCountry(Country country);
+
+    Country selectCountryByNameAndCode(String countryname, String countrycode);
+    Country selectCountryByMap(Map<String, String> map);
+}
+
+- 创建mapper.xml  (resources/tk/springmvc/mybatis/mapper) 里面每个DB操作对应于上面mapper接口中定义的方法
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--当使用sqlSession.getMapper方式来进行数据库操作的时候，
+     mybatis就是在namespace的值对应的包里面取找CountryMapper这个接口，然后通过动态代理生成对应的数据库操作代理类
+     从而使得客户端可以通过接口来访问数据库。
+     如果通过指定namespace+id的方式sqlSession.selectList("tk.mybatis.simple.mapper.CountryMapper.selectAll")，就不需要
+     配置CountryMapper接口-->
+<mapper namespace="tk.springmvc.mybatis.mapper.CountryMapper">
+    <select id="selectAll" resultType="Country">
+        select id,countryname,countrycode from country
+    </select>
+
+    <insert id="insertCountry" parameterType="Country" useGeneratedKeys="true" keyProperty="id">
+        insert into country(countryname,countrycode) values(#{countryname},#{countrycode})
+    </insert>
+
+    <select id="selectCountryByNameAndCode" resultType="Country">
+        select * from country where  countryname=#{arg0} and countrycode=#{arg1}
+    </select>
+
+    <select id="selectCountryByMap" resultType="Country">
+        select * from country where  countryname=#{countryname} and countrycode=#{countrycode}
+    </select>
+
+    <update id="updateCountry">
+        update country set countryname = #{countryname}
+         where countrycode = #{countrycode}
+    </update>
+
+    <delete id="deleteCountryByCountryCode">
+        delete from country where countrycode = #{countrycode}
+    </delete>
+</mapper>
+
+- 创建Dao层接口  (只用从Mapper接口里面获取需要方法的即可)
+package tk.springmvc.dao;
+
+import tk.springmvc.model.Country;
+
+import java.util.List;
+
+//添加数据库操作
+public interface CountryDao {
+    List<Country> selectAll();
+}
+-创建Dao实现类
+package tk.springmvc.dao.impl;
+
+import org.apache.ibatis.session.SqlSessionFactory;
+import org.mybatis.spring.support.SqlSessionDaoSupport;
+import org.springframework.beans.factory.annotation.Autowired;
+
+public class BaseDao extends SqlSessionDaoSupport {
+    //给SqlSessionDaoSupport注入SqlSessionFactory(定义在applicationContext.xml)
+    //然后SqlSessionDaoSupport会创建一个SqlSessionTemplate来访问DB
+    @Autowired
+    public void setSqlSessionFactory(SqlSessionFactory sqlSessionFactory)
+    {
+        super.setSqlSessionFactory(sqlSessionFactory);
+    }
+}
+
+
+package tk.springmvc.dao.impl;
+
+import org.mybatis.spring.support.SqlSessionDaoSupport;
+import org.springframework.stereotype.Repository;
+import tk.springmvc.dao.CountryDao;
+import tk.springmvc.model.Country;
+import tk.springmvc.mybatis.mapper.CountryMapper;
+
+import java.util.List;
+
+@Repository("countryDao")
+public class CountryDaoImpl extends BaseDao implements CountryDao {
+
+    @Override
+    public List<Country> selectAll() {
+        return this.getSqlSession().getMapper(CountryMapper.class).selectAll();
+    }
+}
+
+- 创建Service接口
+package tk.springmvc.service;
+
+import tk.springmvc.model.Country;
+
+import java.util.List;
+
+//添加业务处理代码
+public interface CountryService {
+    List<Country> selectAll();
+}
+
+- 创建Service实现类
+package tk.springmvc.service.impl;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Service;
+import tk.springmvc.dao.CountryDao;
+import tk.springmvc.model.Country;
+import tk.springmvc.service.CountryService;
+
+import java.util.List;
+
+@Service("countryService")
+public class CountryServiceImpl implements CountryService {
+
+    @Autowired
+    //因为有2个CountryDao的实现类，所以加上@Qualifier来通过名字注入
+    @Qualifier("countryDao")
+    private CountryDao countryDao;
+
+    public void setCountryDao(CountryDao countryDao) {
+        this.countryDao = countryDao;
+    }
+
+    @Override
+    public List<Country> selectAll() {
+        return countryDao.selectAll();
+    }
+}
+
+- 访问
+package tk.springmvc.controller;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import tk.springmvc.model.Country;
+import tk.springmvc.service.CountryService;
+
+import java.util.List;
+
+@Controller
+@RequestMapping("/country")
+public class CountryController {
+    @Autowired
+    //因为有2个CountryService的实现类，所以加上@Qualifier来通过名字注入
+    @Qualifier("countryService")
+    private CountryService countryService;
+
+    public void setCountryService(CountryService countryService) {
+        this.countryService = countryService;
+    }
+
+    @GetMapping
+    public String loadPage(){
+        return "country";
+    }
+
+    @PostMapping
+    @ResponseBody
+    public List<Country> getCountry(){
+        return countryService.selectAll();
+    }
+}
+
+3.3 JPA
+-创建实体类
+package tk.springmvc.model;
+
+
+import javax.persistence.*;
+
+@Entity
+@Table(name="company")
+public class Company {
+    @Id
+    @GeneratedValue(strategy= GenerationType.IDENTITY)
+    private int id;
+
+    public Company(){}
+
+    public Company(int id, String name) {
+        this.id = id;
+        this.name = name;
+    }
+
+    @Column(name="name")
+    private String name;
+
+    public int getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    @Override
+    public String toString() {
+        return "Company{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                '}';
+    }
+}
+
+- 创建Repository接口
+package tk.springmvc.jpa.repository;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import tk.springmvc.model.Company;
+
+import java.io.Serializable;
+
+public interface CompanyRepository extends JpaRepository<Company, Serializable> {
+    Company findById(int id);
+    Company findByIdAndName(int id,String name);
+}
+
+-创建Service接口
+package tk.springmvc.service;
+
+import tk.springmvc.model.Company;
+
+import java.util.List;
+
+public interface CompanyService {
+    List<Company> queryAll();
+    Company querySingle(int id);
+}
+
+-创建Service实现类
+package tk.springmvc.service.impl;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
+import tk.springmvc.jpa.repository.CompanyRepository;
+import tk.springmvc.model.Company;
+import tk.springmvc.service.CompanyService;
+
+import java.util.List;
+
+@Service("companyService")
+public class CompanyServiceImpl implements CompanyService {
+    @Autowired
+    private CompanyRepository companyRepository;
+
+    public void setCompanyDao(CompanyRepository companyRepository) {
+        this.companyRepository = companyRepository;
+    }
+
+    @Override
+    public List<Company> queryAll() {
+        return companyRepository.findAll();
+    }
+
+    @Override
+    public Company querySingle(int id) {
+        return companyRepository.findById(id);
+    }
+}
+
+- 访问
+package tk.springmvc;
+
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+import tk.springmvc.service.CompanyService;
+
+public class Test3 {
+    public static void main(String[] args){
+        ApplicationContext applicationContext = new ClassPathXmlApplicationContext("classpath:applicationContext.xml");
+        CompanyService companyService = (CompanyService) applicationContext.getBean("companyService");
+        companyService.queryAll().stream().forEach(System.out::println);
+    }
+}
+
+或者通过@Autowired注入到其他类中进行使用
+
+3.4 MongoDB
+-定义实体类
+package tk.springmvc.model;
+
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
+
+import javax.persistence.Id;
+import java.util.Collection;
+import java.util.LinkedHashSet;
+
+@Document
+public class Order {
+    @Id
+    private String id;
+    @Field("client")
+    private String customer;
+    private String type;
+    private Collection<Item> items = new LinkedHashSet<Item>();
+    public String getCustomer() {
+        return customer;
+    }
+    public void setCustomer(String customer) {
+        this.customer = customer;
+    }
+    public String getType() {
+        return type;
+    }
+    public void setType(String type) {
+        this.type = type;
+    }
+    public Collection<Item> getItems() {
+        return items;
+    }
+    public void setItems(Collection<Item> items) {
+        this.items = items;
+    }
+    public String getId() {
+        return id;
+    }
+
+    @Override
+    public String toString() {
+        return "Order{" +
+                "id='" + id + '\'' +
+                ", customer='" + customer + '\'' +
+                ", type='" + type + '\'' +
+                ", items=" + items +
+                '}';
+    }
+}
+
+package tk.springmvc.model;
+
+public class Item {
+    private Long id;
+    private Order order;
+    private String product;
+    private double price;
+    private int quantity;
+
+    public Order getOrder() {
+        return order;
+    }
+    public String getProduct() {
+        return product;
+    }
+    public void setProduct(String product) {
+        this.product = product;
+    }
+    public double getPrice() {
+        return price;
+    }
+    public void setPrice(double price) {
+        this.price = price;
+    }
+    public int getQuantity() {
+        return quantity;
+    }
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
+    }
+    public Long getId() {
+        return id;
+    }
+
+    @Override
+    public String toString() {
+        return "Item{" +
+                "id=" + id +
+                ", order=" + order +
+                ", product='" + product + '\'' +
+                ", price=" + price +
+                ", quantity=" + quantity +
+                '}';
+    }
+}
+
+- 定义repository
+package tk.springmvc.mongodb.repository;
+
+import org.springframework.data.mongodb.repository.MongoRepository;
+import tk.springmvc.model.Order;
+
+public interface OrderRepository extends MongoRepository<Order, String> {
+}
+
+- 定义service接口
+package tk.springmvc.service;
+
+import tk.springmvc.model.Order;
+
+import java.util.List;
+
+public interface OrderService {
+    List<Order> selectAll();
+    void insertOrder(Order order);
+}
+
+
+-定义service接口实现
+package tk.springmvc.service.impl;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import tk.springmvc.model.Order;
+import tk.springmvc.mongodb.repository.OrderRepository;
+import tk.springmvc.service.OrderService;
+
+import java.util.List;
+
+@Service("orderService")
+public class OrderServiceImple implements OrderService {
+    @Autowired
+    private OrderRepository orderRepository;
+
+    public void setOrderRepository(OrderRepository orderRepository) {
+        this.orderRepository = orderRepository;
+    }
+
+    @Override
+    public List<Order> selectAll() {
+        return orderRepository.findAll();
+    }
+
+    @Override
+    public void insertOrder(Order order) {
+        orderRepository.insert(order);
+    }
+}
+
+
+- 访问
+package tk.springmvc;
+
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+import tk.springmvc.model.Item;
+import tk.springmvc.model.Order;
+import tk.springmvc.service.OrderService;
+
+import java.util.Arrays;
+
+public class TestMongoDb {
+    public static void main(String[] args){
+        ApplicationContext applicationContext = new ClassPathXmlApplicationContext("classpath:applicationContext.xml");
+        OrderService orderService = (OrderService) applicationContext.getBean("orderService");
+        Item item1 = new Item();
+        item1.setProduct("iphone1");
+        item1.setQuantity(1);
+        item1.setPrice(1000);
+
+        Item item2 = new Item();
+        item2.setProduct("iphone2");
+        item2.setQuantity(2);
+        item2.setPrice(2000);
+
+        Item item3 = new Item();
+        item3.setProduct("iphone3");
+        item3.setQuantity(3);
+        item3.setPrice(3000);
+
+        Order order = new Order();
+        order.setCustomer("SoficaYang");
+        order.setType("Customer Order");
+        order.setItems(Arrays.asList(item1,item2,item3));
+
+        orderService.insertOrder(order);
+
+        orderService.selectAll().stream().forEach(System.out::println);
+    }
+}
+
+或者在其他类中通过@Autowired自动注入OrderService来访问MongoDB
+
+3.5 Redis
+-访问
+package tk.springmvc;
+
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.data.redis.core.RedisTemplate;
+
+public class TestRedis {
+    public static void main(String[] args){
+        ApplicationContext applicationContext = new ClassPathXmlApplicationContext("classpath:applicationContext.xml");
+        RedisTemplate redis = (RedisTemplate) applicationContext.getBean("redisTemplate");
+        redis.opsForValue().set("message","Hello,Bill Hu");
+        System.out.println(redis.opsForValue().get("message"));
+    }
+}
+
+也可以将RedisTemplate通过@Autowired来注入到其他类种进行Redis的访问
+
+三。使用Spring boot + JDBC
+1 使用JDBC
+
+- 添加依赖
+<dependency>
+<groupId>org.springframework.boot</groupId>
+<artifactId>spring-boot-starter-jdbc</artifactId>
+</dependency>
+
+//如果用别的数据库，就换成对应的依赖
+<dependency>
+<groupId>com.h2database</groupId>
+<artifactId>h2</artifactId>
+<scope>runtime</scope>
+</dependency>
+
+2. 配置数据源
+在resource文件夹下添加application.properties配置文件并输入数据库参数，如下：
+
+spring.datasource.url=jdbc:mysql://127.0.0.1:3306/test
+
+spring.datasource.username=root
+
+spring.datasource.password=root
+
+spring.datasource.driver-class-name=com.mysql.jdbc.Driver
+
+spring.datasource.max-idle=10
+
+spring.datasource.max-wait=10000
+
+spring.datasource.min-idle=5
+
+spring.datasource.initial-size=5
+
+或者application.yml
+spring:
+  datasource:
+    url: jdbc:mysql://127.0.0.1:3306/test
+    username: root
+    password: root
+    driver-class-name: com.mysql.jdbc.Driver
+    max-idle: 10
+    max-wait: 10000
+    min-idle: 5
+    initial-size: 5
+
+2. 定义Repository
+package example.db;
+
+import java.util.List;
+
+import example.domain.User;
+
+public interface UserRepository {
+
+	  long count();
+	  
+	  User save(User user);
+
+	  User findByUsername(String username);
+
+	  List<User> findAll();
+}
+
+
+
+package example.db;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
+import org.springframework.stereotype.Repository;
+
+import example.domain.User;
+
+@Repository
+public class JdbcUserRepository implements UserRepository{
+
+	private JdbcTemplate jdbcTemplate;
+	
+	@Autowired
+	public JdbcUserRepository(JdbcTemplate jdbcTemplate) {
+		this.jdbcTemplate = jdbcTemplate;
+	}
+	
+	@Override
+	public long count() {
+		// TODO Auto-generated method stub
+		return jdbcTemplate.queryForObject("select count(id) from Spitter",java.lang.Long.class);
+	}
+
+	@Override
+	public User save(User user) {
+		// TODO Auto-generated method stub
+		SimpleJdbcInsert jdbcInsert = new SimpleJdbcInsert(jdbcTemplate).withTableName("User");
+		Map<String, Object> args = new HashMap<String, Object>();
+		args.put("username", user.getUsername());
+		args.put("password", user.getPassword());
+		if(jdbcInsert.execute(args)>0)
+			return user;
+		else
+			return null;
+	}
+
+	@Override
+	public User findByUsername(String username) {
+		// TODO Auto-generated method stub
+		return jdbcTemplate.queryForObject("select username, password from User where username=?", new UserRowMapper(), username);
+	}
+
+	@Override
+	public List<User> findAll() {
+		// TODO Auto-generated method stub
+		return jdbcTemplate.query("select username, password from User", new UserRowMapper());
+	}
+
+	private static final class UserRowMapper implements RowMapper<User> {
+
+		@Override
+		public User mapRow(ResultSet rs, int rowNum) throws SQLException {
+			// TODO Auto-generated method stub
+			String username = rs.getString("username");
+			String password = rs.getString("password");
+			return new User(username, password);
+		}		
+	}
+}
+
+3. 然后在需要访问数据库的地方注入Repository然后调用相应的方法来访问数据库
+@Autowired
+private UserRepository userRepository;
+
+四. 使用Spring boot + Mybatis (注解版)
+1. 添加依赖
+		<!-- Mybatis -->
+		<dependency>
+			<groupId>org.mybatis.spring.boot</groupId>
+			<artifactId>mybatis-spring-boot-starter</artifactId>
+			<version>2.1.1</version>
+		</dependency>
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+		</dependency>
+
+2. 添加数据源 (application.yml)
+spring:
+  messages:
+    basename: i18n.login
+
+  thymeleaf:
+    cache: false
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/mybatis?allowMultiQueries=true
+    username: root
+    password: 123456
+    driver-class-name: com.mysql.cj.jdbc.Driver
+3. 添加配置类
+package tk.springboot.config;
+
+import org.apache.ibatis.session.Configuration;
+import org.mybatis.spring.boot.autoconfigure.ConfigurationCustomizer;
+import org.springframework.context.annotation.Bean;
+
+@org.springframework.context.annotation.Configuration
+public class MybatisConfig {
+    @Bean
+    public ConfigurationCustomizer mybatisConfig(){
+        return new ConfigurationCustomizer(){
+            @Override
+            public void customize(Configuration configuration) {
+                configuration.setMapUnderscoreToCamelCase(true);
+            }
+        };
+    }
+}
+
+4. 定义mapper
+package tk.springboot.mybatis.mapper;
+
+import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Select;
+import tk.springboot.model.Country;
+import java.util.List;
+
+@Mapper
+public interface CountryMapper {
+
+	@Select("select * from country")
+	List<Country> selectAll();
+}
+
+5. 访问
+package tk.springboot.api.controller;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import tk.springboot.model.Country;
+import tk.springboot.mybatis.mapper.CountryMapper;
+
+import java.util.List;
+
+@RestController
+public class CountryController {
+    @Autowired
+    private CountryMapper countryMapper;
+
+    public void setCountryMapper(CountryMapper countryMapper) {
+        this.countryMapper = countryMapper;
+    }
+
+    @RequestMapping("/country")
+    public List<Country> countryList(){
+        return countryMapper.selectAll();
+    }
+}
+
+五. Springboot + mybatis (配置版)
+1. 添加依赖
+		<!-- Mybatis -->
+		<dependency>
+			<groupId>org.mybatis.spring.boot</groupId>
+			<artifactId>mybatis-spring-boot-starter</artifactId>
+			<version>2.1.1</version>
+		</dependency>
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+		</dependency>
+
+2. 添加数据源及mybatis 配置属性(application.yml)
+spring:
+  messages:
+    basename: i18n.login
+
+  thymeleaf:
+    cache: false
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/mybatis?allowMultiQueries=true
+    username: root
+    password: 123456
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+mybatis:
+  config-location: classpath:mybatis-config.xml
+  mapper-locations:
+    - classpath:mapper/*.xml
+  type-aliases-package: tk.springboot.model
+
+3. 添加mapper扫描配置
+@SpringBootApplication
+@MapperScan("tk.springboot.mybatis.mapper")       ===>配置mybatis mapper自动扫描的包
+public class SpringbootlearningApplication {
+
+	public static void main(String[] args) {
+		SpringApplication.run(SpringbootlearningApplication.class, args);
+	}
+
+}
+
+4. 创建mapper xml文件 (reslurce/mapper/CountryMapper.xml)  ======>路径要和application.yml里面的mapper-locations一致
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="tk.springboot.mybatis.mapper.CountryMapper">
+	<select id="selectAll" resultType="Country">
+		select id,countryname,countrycode from country;
+	</select>
+</mapper>
+
+5. 创建mybatis-config.xml (resource/mybatis-config.xml) ======>路径要和application.yml里面的config-location一致
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+  PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-config.dtd">
+
+<configuration>
+
+	
+	<typeHandlers>
+		<typeHandler javaType="tk.springboot.mybatis.type.Enabled" handler="tk.springboot.mybatis.type.EnabledTypeHandler"/>
+	</typeHandlers>
+
+</configuration>
+
+5. 定义mapper
+package tk.springboot.mybatis.mapper;
+
+import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Select;
+import tk.springboot.model.Country;
+import java.util.List;
+
+public interface CountryMapper {
+
+	List<Country> selectAll();
+}
+
+6. 访问
+package tk.springboot.api.controller;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import tk.springboot.model.Country;
+import tk.springboot.mybatis.mapper.CountryMapper;
+
+import java.util.List;
+
+@RestController
+public class CountryController {
+    @Autowired
+    private CountryMapper countryMapper;
+
+    public void setCountryMapper(CountryMapper countryMapper) {
+        this.countryMapper = countryMapper;
+    }
+
+    @RequestMapping("/country")
+    public List<Country> countryList(){
+        return countryMapper.selectAll();
+    }
+}
+
+其他:
+Country实体类
+package tk.springboot.model;
+
+public class Country {
+
+	private Long id;
+	private String countryname;
+	private String countrycode;
+	
+	public Long getId() {
+		return id;
+	}
+	public void setId(Long id) {
+		this.id = id;
+	}
+	public String getCountryname() {
+		return countryname;
+	}
+	public void setCountryname(String countryname) {
+		this.countryname = countryname;
+	}
+	public String getCountrycode() {
+		return countrycode;
+	}
+	public void setCountrycode(String countrycode) {
+		this.countrycode = countrycode;
+	}
+
+	@Override
+	public String toString() {
+		return "Country{" +
+				"id=" + id +
+				", countryname='" + countryname + '\'' +
+				", countrycode='" + countrycode + '\'' +
+				'}';
+	}
+}
+
+类型转换类
+package tk.springboot.mybatis.type;
+
+public enum Enabled {
+
+	DISABLE(0),
+	ENABLE(1);
+	
+	private final int value;
+	
+	private Enabled(int value) {
+		this.value = value;
+	}
+
+	public int getValue() {
+		return value;
+	}
+}
+
+
+package tk.springboot.mybatis.type;
+
+import org.apache.ibatis.type.JdbcType;
+import org.apache.ibatis.type.MappedTypes;
+import org.apache.ibatis.type.TypeHandler;
+
+import javax.servlet.annotation.HandlesTypes;
+import java.sql.CallableStatement;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Map;
+
+public class EnabledTypeHandler implements TypeHandler<Enabled>{
+
+	private Map<Integer, Enabled> enabledMap = new HashMap<Integer, Enabled>();
+	
+	public EnabledTypeHandler() {
+		for(Enabled enabled:Enabled.values()) {
+			enabledMap.put(enabled.getValue(), enabled);
+		}
+	}
+	
+	public void setParameter(PreparedStatement ps, int i, Enabled parameter, JdbcType jdbcType) throws SQLException {
+		// TODO Auto-generated method stub
+		ps.setInt(i, parameter.getValue());
+		
+	}
+
+	public Enabled getResult(ResultSet rs, String columnName) throws SQLException {
+		// TODO Auto-generated method stub
+		int value = rs.getInt(columnName);
+		return enabledMap.get(value);
+	}
+
+	public Enabled getResult(ResultSet rs, int columnIndex) throws SQLException {
+		// TODO Auto-generated method stub
+		int value =rs.getInt(columnIndex);
+		return enabledMap.get(value);
+	}
+
+	public Enabled getResult(CallableStatement cs, int columnIndex) throws SQLException {
+		// TODO Auto-generated method stub
+		int value = cs.getInt(columnIndex);
+		return enabledMap.get(value);
+	}
+
+}
+
+备注：
+1. @Mapper注解：
+
+作用：在接口类上添加了@Mapper，在编译之后会生成相应的接口实现类
+添加位置：接口类上面:
+
+@Mapper
+public interface UserDAO {
+   //代码
+}
+
+如果想要每个接口都要变成实现类，那么需要在每个接口类上加上@Mapper注解，比较麻烦，解决这个问题用@MapperScan
+2、@MapperScan:
+
+作用：指定要变成实现类的接口所在的包，然后包下面的所有接口在编译之后都会生成相应的实现类
+添加位置：是在Springboot启动类上面添加，
+
+@SpringBootApplication
+@MapperScan("com.martina.dao")
+public class SpringbootMybatisDemoApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(SpringbootMybatisDemoApplication.class, args);
+    }
+}
+
+添加@MapperScan(“com.martina.dao”)注解以后，com.martina.dao包下面的接口类，在编译之后都会生成相应的实现类
+3、使用@MapperScan注解多个包
+
+（实际用的时候根据自己的包路径进行修改）
+
+@SpringBootApplication  
+@MapperScan({"com.kfit.demo","com.kfit.user"})  
+public class App {  
+    public static void main(String[] args) {  
+       SpringApplication.run(App.class, args);  
+    }  
+}  
+
+六: Springboot + JPA
+1. 添加依赖
+		<!-- JPA -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-jpa</artifactId>
+		</dependency>
+2. 创建实体类
+package tk.springboot.model;
+
+
+import javax.persistence.*;
+
+@Entity
+@Table(name="company")
+public class Company {
+    @Id
+    @GeneratedValue(strategy= GenerationType.IDENTITY)
+    private int id;
+
+    public Company(){}
+
+    public Company(int id, String name) {
+        this.id = id;
+        this.name = name;
+    }
+
+    @Column(name="name")
+    private String name;
+
+    public int getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    @Override
+    public String toString() {
+        return "Company{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                '}';
+    }
+}
+
+3. 创建repository
+package tk.springboot.jpa.repository;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import tk.springboot.model.Company;
+
+import java.io.Serializable;
+
+public interface CompanyRepository extends JpaRepository<Company, Serializable> {
+    //添加自定义方法
+    Company findById(int id);
+    Company findByIdAndName(int id, String name);
+}
+
+4 访问
+package tk.springboot.api.controller;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import tk.springboot.jpa.repository.CompanyRepository;
+import tk.springboot.model.Company;
+
+import java.util.List;
+
+@RestController
+public class CompanyController {
+    @Autowired
+    private CompanyRepository companyRepository;
+
+    public void setCompanyRepository(CompanyRepository companyRepository) {
+        this.companyRepository = companyRepository;
+    }
+
+    @RequestMapping("/company")
+    public List<Company> listCompany(){
+        return companyRepository.findAll();
+    }
+}
+

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" th:href="@{/img/favicon.ico}">
+
+    <title>Signin Template for Bootstrap</title>
+
+    <!-- Bootstrap core CSS -->
+    <link th:href="@{/webjars/bootstrap/4.4.1-1/css/bootstrap.min.css}" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link th:href="@{css/signin.css}" rel="stylesheet">
+  </head>
+
+  <body>
+
+    <div class="container">
+
+      <form class="form-signin" th:action="@{/login}" method="post">
+        <h2 class="form-signin-heading" th:text="#{login.tip}">Please sign in</h2>
+        <p style="color: red" th:text="${msg}" th:if="${not #strings.isEmpty(msg)}"></p>
+        <label for="inputUsername" class="sr-only" th:text="#{login.username}">Username</label>
+        <input type="text" id="inputUsername" name="inputUsername" class="form-control" placeholder="Username" th:placeholder="#{login.username}" required autofocus>
+        <label for="inputPassword" class="sr-only" th:text="#{login.password}">Password</label>
+        <input type="password" id="inputPassword" name="inputPassword" class="form-control" placeholder="Password" th:placeholder="#{login.password}" required>
+        <div class="checkbox">
+          <label>
+            <input type="checkbox" value="remember-me" /> [[#{login.remember}]]
+          </label>
+        </div>
+        <button class="btn btn-lg btn-primary btn-block" type="submit" th:text="#{login.btn}">Sign in</button>
+      </form>
+      <a th:href="@{/(lang='en_US')}">English</a>
+      <a th:href="@{/(lang='zh_CN')}">中文</a>
+    </div> <!-- /container -->
+  </body>
+</html>

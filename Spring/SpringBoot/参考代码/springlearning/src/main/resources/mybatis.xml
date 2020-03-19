@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="
+        http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/aop https://www.springframework.org/schema/aop/spring-aop.xsd
+        http://www.springframework.org/schema/tx
+        https://www.springframework.org/schema/tx/spring-tx.xsd">
+    <bean id="dataSource" class="org.apache.ibatis.datasource.pooled.PooledDataSource">
+        <property name="driver" value="com.mysql.cj.jdbc.Driver"/>
+        <property name="url" value="jdbc:mysql://localhost:3306/mybatis"/>
+        <property name="username" value="root"/>
+        <property name="password" value="123456"/>
+    </bean>
+
+    <!-- 在spring里面访问mybatis的原型如下:
+        SqlSessionFactoryBean sqlSessionFactoryBean = new SqlSessionFactoryBean();
+        SqlSessionFactory sqlSessionFactory = sqlSessionFactoryBean.getObject();
+        SqlSessionTemplate template = new SqlSessionTemplate(sqlSessionFactory);
+        template.selectList("tk.spring.mybatis.mapper.CountryMapper.selectAll");
+        按照这个方式，我们可以通过IoC来生成这些类实例
+        注意sqlSessionFactory是实现了spring的FactoryBean的类，所以这里虽然class定义的是org.mybatis.spring.SqlSessionFactoryBean
+        但是返回的却是SqlSessionFactoryBean.getObject()返回的实例，也就是SqlSessionFactory
+
+        通过这样配置的好处:
+        1. 只用配置一次
+        2. 保证他们都是单例的
+    -->
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="configLocation" value="classpath:mybatis-config.xml"></property>
+        <property name="dataSource" ref="dataSource"></property>
+        <property name="mapperLocations">
+            <array>
+                <value>classpath:tk/spring/mybatis/mapper/CountryMapper.xml</value>
+            </array>
+        </property>
+        <property name="typeAliasesPackage" value="tk.spring.mybatis.model"></property>
+    </bean>
+    <bean id="sqlSessionTemplate" class="org.mybatis.spring.SqlSessionTemplate">
+        <constructor-arg index="0" ref="sqlSessionFactory"></constructor-arg>
+    </bean>
+
+    <!--配置访问Mybatis的第一种方法: -->
+    <!-- 然后就可以通过下面的方式进行访问
+        ApplicationContext context = new ClassPathXmlApplicationContext("mybatis.xml");
+        CountryDao countryDao = (CountryDao) context.getBean("countryDao");
+        List<Country> countries = countryDao.selectAll();
+    -->
+    <bean id="countryDao" class="tk.spring.mybatis.Dao.MyBatisCountryDao">
+        <property name="sqlSessionTemplate" ref="sqlSessionTemplate"></property>
+    </bean>
+    <bean id="countryDao2" class="tk.spring.mybatis.Dao.MyBatisCountryDao2">
+        <property name="sqlSessionTemplate" ref="sqlSessionTemplate"></property>
+    </bean>
+
+    <!--Spring配置Mybatis的第二种方法: -->
+    <!--然后就可以通过下面的方式进行访问:
+        ApplicationContext context = new ClassPathXmlApplicationContext("mybatis.xml");
+        CountryMapper countryMapper = (CountryMapper) context.getBean("countryMapper");
+        countryMapper.selectAll().stream().forEach(System.out::println);
+     -->
+    <bean id="countryMapper" class="org.mybatis.spring.mapper.MapperFactoryBean">
+        <property name="mapperInterface" value="tk.spring.mybatis.mapper.CountryMapper" />
+        <property name="sqlSessionFactory" ref="sqlSessionFactory" />
+    </bean>
+
+    <!--配置事务管理 -->
+    <bean id="txManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+
+    <!-- the transactional advice (what 'happens'; see the <aop:advisor/> bean below) -->
+    <tx:advice id="txAdvice" transaction-manager="txManager">
+        <!-- the transactional semantics... -->
+        <tx:attributes>
+            <!-- all methods starting with 'get' are read-only -->
+            <tx:method name="get*" read-only="true"/>
+            <!-- all methods starting with 'select' are read-only -->
+            <tx:method name="select*" read-only="true"/>
+            <!-- other methods use the default transaction settings (see below) -->
+            <tx:method name="*"/>
+        </tx:attributes>
+    </tx:advice>
+
+    <bean id="countryService" class="tk.spring.mybatis.service.CountryService">
+        <property name="countryDao" ref="countryDao"></property>
+    </bean>
+    
+    <aop:config>
+        <aop:pointcut id="changeCountry" expression="execution(* tk.spring.mybatis.service.CountryService.*(..))"/>
+        <aop:advisor advice-ref="txAdvice" pointcut-ref="changeCountry"></aop:advisor>
+    </aop:config>
+</beans>

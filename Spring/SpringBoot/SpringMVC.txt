@@ -1,0 +1,986 @@
+SpringMVC流程
+5.1.1 Following the life of a request
+Every time a user clicks a link or submits a form in their web browser, a request goes to
+work. A request’s job description is that of a courier. Just like a postal carrier or a
+FedEx delivery person, a request lives to carry information from one place to another.
+The request is a busy creature. From the time it leaves the browser until it returns
+with a response, it makes several stops, each time dropping off a bit of information
+and picking up some more. Figure 5.1 shows all the stops the request makes as it travels
+through Spring MVC.
+When the request leaves the browser B, it carries information about what the user
+is asking for. At the least, the request will be carrying the requested URL. But it may
+also carry additional data, such as the information submitted in a form by the user.
+
+The first stop in the request’s travels is at Spring’s DispatcherServlet. Like most Javabased
+web frameworks, Spring MVC funnels requests through a single front controller
+servlet. A front controller is a common web application pattern where a single servlet
+delegates responsibility for a request to other components of an application to perform
+actual processing. In the case of Spring MVC, DispatcherServlet is the front
+controller.
+The DispatcherServlet’s job is to send the request on to a Spring MVC controller.
+A controller is a Spring component that processes the request. But a typical application
+may have several controllers, and DispatcherServlet needs some help deciding
+which controller to send the request to. So the DispatcherServlet consults one or
+more handler mappings C to figure out where the request’s next stop will be. The
+handler mapping pays particular attention to the URL carried by the request when
+making its decision.
+Once an appropriate controller has been chosen, DispatcherServlet sends the
+request on its merry way to the chosen controller D. At the controller, the request
+drops off its payload (the information submitted by the user) and patiently waits while
+the controller processes that information. (Actually, a well-designed controller performs
+little or no processing itself and instead delegates responsibility for the business
+logic to one or more service objects.)
+The logic performed by a controller often results in some information that needs
+to be carried back to the user and displayed in the browser. This information is
+referred to as the model. But sending raw information back to the user isn’t sufficient—
+it needs to be formatted in a user-friendly format, typically HTML. For that, the
+information needs to be given to a view, typically a JavaServer Page (JSP).
+One of the last things a controller does is package up the model data and identify
+the name of a view that should render the output. It then sends the request, along
+with the model and view name, back to the DispatcherServlet E.
+So that the controller doesn’t get coupled to a particular view, the view name
+passed back to DispatcherServlet doesn’t directly identify a specific JSP. It doesn’t
+even necessarily suggest that the view is a JSP. Instead, it only carries a logical name
+that will be used to look up the actual view that will produce the result. The
+DispatcherServlet consults a view resolver F to map the logical view name to a specific
+view implementation, which may or may not be a JSP.
+Now that DispatcherServlet knows which view will render the result, the
+request’s job is almost over. Its final stop is at the view implementation G, typically a
+JSP, where it delivers the model data. The request’s job is finally done. The view will
+use the model data to render output that will be carried back to the client by the (notso-
+hardworking) response object H.
+As you can see, a request goes through several steps along its way to producing a
+response for the client. Most of these steps take place within the Spring MVC framework,
+in the components shown in figure 5.1. Although the bulk of this chapter will
+focus on writing controllers, let’s take a moment to set up the essential components of
+Spring MVC.
+
+
+一.传统SpringMVC (定义XML）
+
+1. 创建Maven的webapp项目
+2. 修改pom.xml添加依赖
+  <dependencies>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>3.8.1</version>
+      <scope>test</scope>
+    </dependency>
+    
+    <!--日志-->
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-log4j12</artifactId>
+      <version>1.7.21</version>
+    </dependency>
+    <!--J2EE-->
+    <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>javax.servlet-api</artifactId>
+      <version>3.1.0</version>
+    </dependency>
+    <dependency>
+      <groupId>javax.servlet.jsp</groupId>
+      <artifactId>jsp-api</artifactId>
+      <version>2.2</version>
+    </dependency>
+    <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>jstl</artifactId>
+      <version>1.2</version>
+    </dependency>
+    <!--mysql驱动包-->
+    <dependency>
+      <groupId>mysql</groupId>
+      <artifactId>mysql-connector-java</artifactId>
+      <version>5.1.35</version>
+    </dependency>
+    <!--springframework-->
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-web</artifactId>
+      <version>4.2.6.RELEASE</version>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-webmvc</artifactId>
+      <version>4.2.6.RELEASE</version>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-context</artifactId>
+      <version>4.2.6.RELEASE</version>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-test</artifactId>
+      <version>4.2.6.RELEASE</version>
+    </dependency>
+      <dependency>
+          <groupId>org.springframework</groupId>
+          <artifactId>spring-jdbc</artifactId>
+          <version>4.2.6.RELEASE</version>
+      </dependency>
+    <dependency>
+      <groupId>com.github.stefanbirkner</groupId>
+      <artifactId>system-rules</artifactId>
+      <version>1.16.1</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.aspectj</groupId>
+      <artifactId>aspectjweaver</artifactId>
+      <version>1.8.9</version>
+    </dependency>
+    <!--其他需要的包-->
+    <dependency>
+        <groupId>org.apache.commons</groupId>
+        <artifactId>commons-lang3</artifactId>
+        <version>3.4</version>
+    </dependency>
+  </dependencies>
+
+3. 修改web.xml
+<web-app id="WebApp_ID" version="2.4"
+    xmlns="http://java.sun.com/xml/ns/j2ee"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee
+    http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">  
+
+  <display-name>Archetype Created Web Application</display-name>                              
+                                                                                              
+      <!-- ?applicationContext.xml???? -->                                                    
+    <context-param>                                                                           
+        <param-name>contextConfigLocation</param-name>                                        
+        <param-value>/WEB-INF/applicationContext.xml</param-value>                            
+    </context-param>                                                                          
+    <listener>                                                                                
+        <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+    </listener>                                                                               
+                                                                                              
+    <!--??springmvc DispatcherServlet-->                                                      
+    <servlet>                                                                                 
+        <servlet-name>springMVC</servlet-name>                                                
+        <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>      
+        <init-param>                                                                          
+            <!--??dispatcher.xml??mvc?????-->                                                 
+            <param-name>contextConfigLocation</param-name>                                    
+            <param-value>/WEB-INF/dispatcher-servlet.xml</param-value>                        
+        </init-param>                                                                         
+        <load-on-startup>1</load-on-startup>                                                  
+    </servlet>                                                                                
+    <servlet-mapping>                                                                         
+        <servlet-name>springMVC</servlet-name>                                                
+        <url-pattern>/</url-pattern>                                                          
+    </servlet-mapping>                        
+</web-app>
+
+
+4. 创建dispatcher-servlet.xml
+<?xml version="1.0" encoding="UTF-8"?>
+    <beans xmlns="http://www.springframework.org/schema/beans"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xmlns:context="http://www.springframework.org/schema/context"
+           xmlns:mvc="http://www.springframework.org/schema/mvc"
+           xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd">
+ 
+    <!--启用spring的一些annotation -->
+    <context:annotation-config/> 
+ 
+    <!-- 配置注解驱动 可以将request参数与绑定到controller参数上 -->
+    <mvc:annotation-driven/>
+    
+    <!-- HandlerMapping -->  
+	<bean class="org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping"/>  
+   
+	<!-- HandlerAdapter -->  
+	<bean class="org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter"/> 
+
+    <context:component-scan base-package="example.controller"/>
+     
+     <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">  
+    	<property name="viewClass" value="org.springframework.web.servlet.view.JstlView"/>  
+    	<property name="prefix" value="/WEB-INF/views/"/>  
+    	<property name="suffix" value=".jsp"/>  
+	</bean>
+
+	<bean name="/hello" class="example.controller.HelloController"/> 
+</beans>
+
+5. 创建applicationContext.xml (这里是个空的，里面可以添加bean)
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:aop="http://www.springframework.org/schema/aop"
+    xmlns:tx="http://www.springframework.org/schema/tx"
+    xmlns:mvc="http://www.springframework.org/schema/mvc"
+    
+    xsi:schemaLocation="http://www.springframework.org/schema/beans
+      http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+      http://www.springframework.org/schema/context
+      http://www.springframework.org/schema/context/spring-context-3.2.xsd
+      http://www.springframework.org/schema/aop
+      http://www.springframework.org/schema/aop/spring-aop-3.2.xsd
+      http://www.springframework.org/schema/tx
+      http://www.springframework.org/schema/tx/spring-tx-3.2.xsd
+      http://www.springframework.org/schema/mvc
+      http://www.springframework.org/schema/mvc/spring-mvc-3.2.xsd
+      ">
+ 
+
+</beans>
+
+6 创建目录 src/main/java/webapp/WEB-INF/views
+这个里面都放者页面， 因为这里dispatcher-servlet.xml里面指定的viewResolver是JSP，所以里面都存放JSP
+
+7 创建controller 
+
+(这个是在web.xml里面指定了调用map,  /hello => example.controller.HelloController)
+
+package example.controller;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.mvc.Controller;
+
+public class HelloController implements Controller{
+
+	@Override
+	public ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response) throws Exception {
+		// TODO Auto-generated method stub
+		ModelAndView mv = new ModelAndView();  
+		mv.addObject("message", "Hello World!");  
+		mv.setViewName("hello");  
+		return mv;
+	}
+
+}
+
+
+(这个是通过注解来指定调用map)
+
+package example.controller;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+
+@Controller
+public class IndexController {
+
+    @RequestMapping("/index")
+    public String index(Model model) {
+    	model.addAttribute("message", "Hello World");
+        return "index";
+    }
+    
+    @RequestMapping(path="/test",method=RequestMethod.GET)
+    public String testPara(
+    @RequestParam("parm1") int parm1,
+    @RequestParam("parm2") String parm2, Model model) {
+    	model.addAttribute("parm1",parm1);
+    	model.addAttribute("parm2",parm2);
+    	return "test";
+    }
+}
+
+8 启动项目就可以访问页面了
+
+二 Springmvc 注解
+0. pom.xml中添加依赖
+        <!--日志-->
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-log4j12</artifactId>
+      <version>1.7.21</version>
+    </dependency>
+    <!--J2EE-->
+    <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>javax.servlet-api</artifactId>
+      <version>3.1.0</version>
+    </dependency>
+    <dependency>
+      <groupId>javax.servlet.jsp</groupId>
+      <artifactId>jsp-api</artifactId>
+      <version>2.2</version>
+    </dependency>
+    <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>jstl</artifactId>
+      <version>1.2</version>
+    </dependency>
+    <!--mysql驱动包-->
+    <dependency>
+      <groupId>mysql</groupId>
+      <artifactId>mysql-connector-java</artifactId>
+      <version>5.1.35</version>
+    </dependency>
+    <!--springframework-->
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-web</artifactId>
+      <version>4.2.6.RELEASE</version>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-webmvc</artifactId>
+      <version>4.2.6.RELEASE</version>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-context</artifactId>
+      <version>4.2.6.RELEASE</version>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-test</artifactId>
+      <version>4.2.6.RELEASE</version>
+    </dependency>
+      <dependency>
+          <groupId>org.springframework</groupId>
+          <artifactId>spring-jdbc</artifactId>
+          <version>4.2.6.RELEASE</version>
+      </dependency>
+    <dependency>
+      <groupId>com.github.stefanbirkner</groupId>
+      <artifactId>system-rules</artifactId>
+      <version>1.16.1</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.aspectj</groupId>
+      <artifactId>aspectjweaver</artifactId>
+      <version>1.8.9</version>
+    </dependency>
+    <!--其他需要的包-->
+    <dependency>
+        <groupId>org.apache.commons</groupId>
+        <artifactId>commons-lang3</artifactId>
+        <version>3.4</version>
+    </dependency>
+    
+    <!-- validation -->
+    <dependency>
+    <groupId>javax.validation</groupId>
+    <artifactId>validation-api</artifactId>
+    <version>1.0.0.GA</version>
+	</dependency>
+	
+  </dependencies>
+
+0.1 原理
+Servlet 3.0新特性
+Shared libraries（共享库） / runtimes pluggability（运行时插件能力）
+
+1、Servlet容器启动会扫描，当前应用里面每一个jar包的
+	ServletContainerInitializer的实现
+2、提供ServletContainerInitializer的实现类；
+	必须绑定在，META-INF/services/javax.servlet.ServletContainerInitializer
+	文件的内容就是ServletContainerInitializer实现类的全类名；
+
+总结：容器在启动应用的时候，会扫描当前应用每一个jar包里面
+META-INF/services/javax.servlet.ServletContainerInitializer
+指定的实现类，启动并运行这个实现类的方法；传入感兴趣的类型；
+
+
+ServletContainerInitializer；
+@HandlesTypes；
+
+SpringMVC:
+SpringMVC就是利用Servlet 3.0的这个新特性，在org.springframework.spring-web这个包下有META-INF/services/javax.servlet.ServletContainerInitializer
+里面内容是org.springframework.web.SpringServletContainerInitializer. 这个类有注释@HandlesTypes(WebApplicationInitializer.class)和一个onStartup方法.
+所以web容器启动的时候，就会调用SpringServletContainerInitializer的onStartup方法来加载注释@HandlesTypes里面指明的类的实现类.
+
+1、web容器在启动的时候，会扫描每个jar包下的META-INF/services/javax.servlet.ServletContainerInitializer
+2、加载这个文件指定的类SpringServletContainerInitializer
+3、spring的应用一启动会加载感兴趣的WebApplicationInitializer接口的下的所有组件；
+4、并且为WebApplicationInitializer组件创建对象（组件不是接口，不是抽象类）
+	1）、AbstractContextLoaderInitializer：创建根容器；createRootApplicationContext()；
+	2）、AbstractDispatcherServletInitializer：
+			创建一个web的ioc容器；createServletApplicationContext();                ===>相当于创建web.xml并嵌入一个dispatcher-servlet.xml
+			创建了DispatcherServlet；createDispatcherServlet()；
+			将创建的DispatcherServlet添加到ServletContext中；
+				getServletMappings();
+		    并添加Filter和Listener
+	3）、AbstractAnnotationConfigDispatcherServletInitializer：注解方式配置的DispatcherServlet初始化器
+			创建根容器：createRootApplicationContext()           ====>相当于通过一个spring的@Configuration类来启动一个IOC容器(根ioc容器)
+					getRootConfigClasses();传入一个配置类              在里面配置Service,Repositories
+			创建web的ioc容器： createServletApplicationContext();    ====>相当于通过一个spring的@Configuration类来启动一个IOC容器(web的ioc容器)
+					获取配置类；getServletConfigClasses();                  在里面配置Controller, ViewResolver, HandlerMapping
+
+总结：
+	以注解方式来启动SpringMVC；继承AbstractAnnotationConfigDispatcherServletInitializer；
+实现抽象方法:
+getRootConfigClasses: 指定配置类来配置Service,Repositories
+getServletConfigClasses: 指定配置类来配置Controller, ViewResolver, HandlerMapping
+
+===========================
+定制SpringMVC；
+1）、@EnableWebMvc:开启SpringMVC定制配置功能；
+	<mvc:annotation-driven/>；
+
+2）、配置组件（视图解析器、视图映射、静态资源映射、拦截器。。。）
+	extends WebMvcConfigurerAdapter
+
+以下是具体步骤:
+1. 定义WebAppInitializer
+any class that extends AbstractAnnotationConfigDispatcherServletInitializer will automatically
+be used to configure DispatcherServlet and the Spring application context
+in the application’s servlet context.
+任何继承AbstractAnnotationConfigDispatcherServletInitializer的类都会自动用来配置DispatcherServlet 
+
+package example;
+
+import org.springframework.web.servlet.support.AbstractAnnotationConfigDispatcherServletInitializer;
+
+public class Springmvc3WebAppInitializer extends AbstractAnnotationConfigDispatcherServletInitializer{   ==>相当于web.xml里面的定义
+
+	//获取DispatcherServlet的映射信息
+    	//  /：拦截所有请求（包括静态资源（xx.js,xx.png）），但是不包括*.jsp；
+    	//  /*：拦截所有请求；连*.jsp页面都拦截；jsp页面是tomcat的jsp引擎解析的；
+	@Override
+	protected String[] getServletMappings() {
+		// TODO Auto-generated method stub
+		return new String[] { "/" };
+	}
+	
+	//获取web容器的配置类（SpringMVC配置文件）  子容器； 指定配置类来配置Controller, ViewResolver, HandlerMapping
+	@Override
+	protected Class<?>[] getServletConfigClasses() {
+		// TODO Auto-generated method stub
+		return new Class<?>[] { WebConfig.class };
+	}
+	
+	//获取根容器的配置类；（Spring的配置文件）   父容器；指定配置类来配置Service,Repositories
+	@Override
+	protected Class<?>[] getRootConfigClasses() {
+		// TODO Auto-generated method stub
+		return new Class<?>[] { RootConfig.class };
+	}
+
+    //添加监听器或其他组件
+    @Override
+    public void onStartup(ServletContext servletContext) throws ServletException {
+        super.onStartup(servletContext);
+        servletContext.addListener(new ServletContextListener() {
+            @Override
+            public void contextInitialized(ServletContextEvent sce) {
+                System.out.println("It's my added Listener in onStartup");
+            }
+        });
+
+        //添加其他组件
+        //servletContext.addxxxxxx
+    }
+}
+
+2. 定义WebConfig.class
+package example;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.ViewResolver;
+import org.springframework.web.servlet.config.annotation.DefaultServletHandlerConfigurer;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
+import org.springframework.web.servlet.view.InternalResourceViewResolver;
+
+@Configuration
+@EnableWebMvc
+@ComponentScan("example.web")   //all controller will be put in package example.web
+public class WebConfig extends WebMvcConfigurerAdapter{
+
+	//配置视图解析器
+	@Bean
+	public ViewResolver viewResolver() {
+		InternalResourceViewResolver resolver =new InternalResourceViewResolver();
+		resolver.setPrefix("/WEB-INF/views/");
+		resolver.setSuffix(".jsp");
+		resolver.setExposeContextBeansAsAttributes(true);
+		return resolver;
+	}
+	
+	//配置静态资源
+	@Override
+	public void configureDefaultServletHandling(DefaultServletHandlerConfigurer configurer) {
+		configurer.enable();
+	}
+}
+
+
+3. 定义RootConfig.class
+package example;
+
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.ComponentScan.Filter;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.FilterType;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+
+@Configuration
+@ComponentScan(basePackages={"example"},
+			   //do not scan the class annotated with @EnableWebMvc
+			   excludeFilters={@Filter(type=FilterType.ANNOTATION, value=EnableWebMvc.class)})
+public class RootConfig {
+
+}
+
+4. 定义controller
+
+package example.web;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import static org.springframework.web.bind.annotation.RequestMethod.*;
+
+@Controller
+public class HomeController {
+	
+	@RequestMapping(value="/", method=GET)
+	public String home() {
+		return "home";
+	}
+}
+
+
+package example.web;
+
+import static org.springframework.web.bind.annotation.RequestMethod.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+
+import example.Spitter;
+
+@Controller
+@RequestMapping("/spitter")
+public class SpitterController {
+
+	@RequestMapping(value="/register", method=GET)
+	public String showRegistrationForm() {
+		return "registerForm";
+	}
+	
+	@RequestMapping(value="/register", method=POST)
+	public String processRegistration(Spitter spitter, Model model) {
+	
+		model.addAttribute(spitter);
+		return "redirect:/spitter/" + spitter.getUsername();
+	}
+	
+	@RequestMapping(value="/{username}", method=GET)
+	public String showSpitterProfile(
+	@PathVariable String username, Model model) {
+		model.addAttribute("received", username);
+		return "profile";
+	}
+}
+
+
+5. 在src\main\webapp\WEB-INF\views里面创建JSP
+
+这种方式就避免的第一种方式那样需要写各种xml, 第二种方式更易读
+
+四.Springboot + SpringMVC
+
+1. 创建sping starter project
+2. 修改pom.xml添加依赖
+	<dependencies>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter</artifactId>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>org.junit.vintage</groupId>
+					<artifactId>junit-vintage-engine</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-thymeleaf</artifactId>
+		</dependency>
+	</dependencies>
+
+
+3 创建controller  (指定调用路径 /hello)
+
+package cadt;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+@Controller
+public class HelloController {
+
+    @RequestMapping("/hello")
+    public String index(Model model) {
+    	model.addAttribute("message", "Hello World");   //添加返回值
+        return "hello";
+    }
+}
+
+以上就是运用SpringBoot的webmvc自动配置，如果想修改默认配置，可以额外定义一个类来修改默认的配置
+package tk.springboot.config;
+
+@Configuration       ====>注意，一定不能加@EnableWebMvc
+public class MyMvcConfig implements WebMvcConfigurer {
+    @Override
+    public void addViewControllers(ViewControllerRegistry registry) {
+        registry.addViewController("/").setViewName("login");
+        registry.addViewController("/login").setViewName("login");
+        registry.addViewController("/main").setViewName("dashboard");
+    }
+
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(new MyLoginInspector()).addPathPatterns("/**")
+                .excludePathPatterns("/login","/","/userLogin","/webjars/**","/assets/**","/css/**","dist/**","img/**","/js/**");
+    }
+
+    //注入自己的国际化解析器
+    @Bean("localeResolver")
+    public LocaleResolver localeResolver(){
+        return new MyLocaleResolver();
+    }
+
+    //注入自定义的servlet
+    @Bean
+    public ServletRegistrationBean myServlet(){
+        return new ServletRegistrationBean(new MyServlet(),"/myservlet");
+    }
+
+    //注入自定义的Filter
+    @Bean
+    public FilterRegistrationBean myFilter(){
+        FilterRegistrationBean filterRegistrationBean = new FilterRegistrationBean();
+        filterRegistrationBean.setFilter(new MyFilter());
+        filterRegistrationBean.setUrlPatterns(Arrays.asList("/myservlet"));
+
+        return filterRegistrationBean;
+    }
+
+    //注入自定义的Listener
+    @Bean
+    public ServletListenerRegistrationBean myListener(){
+        ServletListenerRegistrationBean servletListenerRegistrationBean = new ServletListenerRegistrationBean(new MyListener());
+        return servletListenerRegistrationBean;
+    }
+
+    //修改容器配置
+    @Bean
+    public WebServerFactoryCustomizer<ConfigurableWebServerFactory> webServerFactoryCustomizer(){
+       return new WebServerFactoryCustomizer<ConfigurableWebServerFactory>(){
+
+           @Override
+           public void customize(ConfigurableWebServerFactory factory) {
+               factory.setPort(8080);
+           }
+       };
+    }
+}
+
+如果不想用SpringBoot的webmvc配置，jiu在上面自己定义的加上@EnableWebMvc,这样下面的类就全面接管了SpringMVC的配置, Spring里面的WebMvcAutoConfiguration.class不会起作用.
+@Configuration       ====>注意，加上@EnableWebMvc
+@EnableWebMvc
+public class MyMvcConfig implements WebMvcConfigurer {
+    @Override
+    public void addViewControllers(ViewControllerRegistry registry) {
+        registry.addViewController("/").setViewName("login");
+        registry.addViewController("/login").setViewName("login");
+        registry.addViewController("/main").setViewName("dashboard");
+    }
+
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(new MyLoginInspector()).addPathPatterns("/**")
+                .excludePathPatterns("/login","/","/userLogin","/webjars/**","/assets/**","/css/**","dist/**","img/**","/js/**");
+    }
+
+    //注入自己的国际化解析器
+    @Bean("localeResolver")
+    public LocaleResolver localeResolver(){
+        return new MyLocaleResolver();
+    }
+
+    //注入自定义的servlet
+    @Bean
+    public ServletRegistrationBean myServlet(){
+        return new ServletRegistrationBean(new MyServlet(),"/myservlet");
+    }
+
+    //注入自定义的Filter
+    @Bean
+    public FilterRegistrationBean myFilter(){
+        FilterRegistrationBean filterRegistrationBean = new FilterRegistrationBean();
+        filterRegistrationBean.setFilter(new MyFilter());
+        filterRegistrationBean.setUrlPatterns(Arrays.asList("/myservlet"));
+
+        return filterRegistrationBean;
+    }
+
+    //注入自定义的Listener
+    @Bean
+    public ServletListenerRegistrationBean myListener(){
+        ServletListenerRegistrationBean servletListenerRegistrationBean = new ServletListenerRegistrationBean(new MyListener());
+        return servletListenerRegistrationBean;
+    }
+
+    //修改容器配置
+    @Bean
+    public WebServerFactoryCustomizer<ConfigurableWebServerFactory> webServerFactoryCustomizer(){
+       return new WebServerFactoryCustomizer<ConfigurableWebServerFactory>(){
+
+           @Override
+           public void customize(ConfigurableWebServerFactory factory) {
+               factory.setPort(8080);
+           }
+       };
+    }
+}
+
+
+我们可以看到加上了springboot后，不用再去创建web.xml, dispatcher-servlet.xml, applicationContext.xml，也不用创建初始化dispatcherServlet的类了。
+所以四种方式，一种比一种简单，但是背后的原理都是一样的。
+
+==========================================================================================================================================================
+SpringMVC就是利用Servlet 3.0的这个新特性，在org.springframework.spring-web这个包下有META-INF/services/javax.servlet.ServletContainerInitializer
+里面内容是org.springframework.web.SpringServletContainerInitializer. 这个类有注释@HandlesTypes(WebApplicationInitializer.class)和一个onStartup方法.
+所以web容器启动的时候，就会调用SpringServletContainerInitializer的onStartup方法来加载注释@HandlesTypes里面指明的类的实现类.
+
+@HandlesTypes({WebApplicationInitializer.class})
+public class SpringServletContainerInitializer implements ServletContainerInitializer {
+    public SpringServletContainerInitializer() {
+    }
+
+    public void onStartup(@Nullable Set<Class<?>> webAppInitializerClasses, ServletContext servletContext) throws ServletException {
+        List<WebApplicationInitializer> initializers = new LinkedList();
+        Iterator var4;
+        if (webAppInitializerClasses != null) {
+            var4 = webAppInitializerClasses.iterator();
+
+            while(var4.hasNext()) {
+                Class<?> waiClass = (Class)var4.next();
+                if (!waiClass.isInterface() && !Modifier.isAbstract(waiClass.getModifiers()) && WebApplicationInitializer.class.isAssignableFrom(waiClass)) {
+                    try {
+                        initializers.add((WebApplicationInitializer)ReflectionUtils.accessibleConstructor(waiClass, new Class[0]).newInstance());
+                    } catch (Throwable var7) {
+                        throw new ServletException("Failed to instantiate WebApplicationInitializer class", var7);
+                    }
+                }
+            }
+        }
+
+        if (initializers.isEmpty()) {
+            servletContext.log("No Spring WebApplicationInitializer types detected on classpath");
+        } else {
+            servletContext.log(initializers.size() + " Spring WebApplicationInitializers detected on classpath");
+            AnnotationAwareOrderComparator.sort(initializers);
+            var4 = initializers.iterator();
+
+            while(var4.hasNext()) {
+                WebApplicationInitializer initializer = (WebApplicationInitializer)var4.next();
+                initializer.onStartup(servletContext);
+            }
+
+        }
+    }
+}
+
+
+然后这个类就会将@HandlesTypes({WebApplicationInitializer.class})里面的类的实现类拿出来遍历，只要不是接口，不是抽象类，就将其实例化，然后执行其onStartup方法
+-如果不用SpringBoot,WebApplicationInitializer.class有下面几个子接口
+	-AbstractContextLoaderInitializer：创建根容器；createRootApplicationContext()；
+	  -AbstractDispatcherServletInitializer：
+	    -AbstractAnnotationConfigDispatcherServletInitializer
+这几个都是抽象类，所以为了开启SpringMVC,我们需要创建一个类来继承最下面的AbstractAnnotationConfigDispatcherServletInitializer
+public class MyWebConfig extends AbstractAnnotationConfigDispatcherServletInitializer {
+
+    //获取根容器的配置类；（Spring的配置文件）   父容器；指定配置类来配置Service,Repositories
+    @Override
+    protected Class<?>[] getRootConfigClasses() {
+        return new Class[]{RootConfig.class};
+    }
+
+    //获取web容器的配置类（SpringMVC配置文件）  子容器； 指定配置类来配置Controller, ViewResolver, HandlerMapping
+    @Override
+    protected Class<?>[] getServletConfigClasses() {
+
+        return new Class[]{AppConfig.class};
+    }
+
+    //获取DispatcherServlet的映射信息
+    //  /：拦截所有请求（包括静态资源（xx.js,xx.png）），但是不包括*.jsp；
+    //  /*：拦截所有请求；连*.jsp页面都拦截；jsp页面是tomcat的jsp引擎解析的；
+    @Override
+    protected String[] getServletMappings() {
+        return new String[]{
+                "/"
+        };
+    }
+
+    //添加监听器或其他组件
+    @Override
+    public void onStartup(ServletContext servletContext) throws ServletException {
+        super.onStartup(servletContext);
+        servletContext.addListener(new ServletContextListener() {
+            @Override
+            public void contextInitialized(ServletContextEvent sce) {
+                System.out.println("It's my added Listener in onStartup");
+            }
+        });
+        
+        //添加其他组件
+        //servletContext.addxxxxxx
+    }
+}
+
+-如果使用了SpringBoot，并且向使用SpringBoot的默认SpringMVC配置
+就会由这个类WebMvcAutoConfiguration.class来进行所有的SpringMVC配置
+这个类会做下面这些事情:
+BeanNameViewResolver beans.
+
+Support for serving static resources, including support for WebJars (covered later in this document)).
+
+Automatic registration of Converter, GenericConverter, and Formatter beans.
+
+Support for HttpMessageConverters (covered later in this document).
+
+Automatic registration of MessageCodesResolver (covered later in this document).
+
+Static index.html support.
+
+Custom Favicon support (covered later in this document).
+
+Automatic use of a ConfigurableWebBindingInitializer bean (covered later in this document).
+
+同时，它还支持我们对其的扩展，如何扩展呢：
+@Configuration
+public class MyMvcConfig implements WebMvcConfigurer {
+    @Override
+    public void addViewControllers(ViewControllerRegistry registry) {
+        registry.addViewController("/").setViewName("login");
+        registry.addViewController("/login").setViewName("login");
+        registry.addViewController("/main").setViewName("dashboard");
+    }
+
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(new MyLoginInspector()).addPathPatterns("/**")
+                .excludePathPatterns("/login","/","/userLogin","/webjars/**","/assets/**","/css/**","dist/**","img/**","/js/**");
+    }
+
+    //注入自己的国际化解析器
+    @Bean("localeResolver")
+    public LocaleResolver localeResolver(){
+        return new MyLocaleResolver();
+    }
+
+    //注入自定义的servlet
+    @Bean
+    public ServletRegistrationBean myServlet(){
+        return new ServletRegistrationBean(new MyServlet(),"/myservlet");
+    }
+
+    //注入自定义的Filter
+    @Bean
+    public FilterRegistrationBean myFilter(){
+        FilterRegistrationBean filterRegistrationBean = new FilterRegistrationBean();
+        filterRegistrationBean.setFilter(new MyFilter());
+        filterRegistrationBean.setUrlPatterns(Arrays.asList("/myservlet"));
+
+        return filterRegistrationBean;
+    }
+
+    //注入自定义的Listener
+    @Bean
+    public ServletListenerRegistrationBean myListener(){
+        ServletListenerRegistrationBean servletListenerRegistrationBean = new ServletListenerRegistrationBean(new MyListener());
+        return servletListenerRegistrationBean;
+    }
+
+    //修改容器配置
+    //有一个WebServerFactoryCustomizerBeanPostProcessor，它会再servlet容器初始化之前调用每个xxxxCustomizer的customize方法.
+    @Bean
+    public WebServerFactoryCustomizer<ConfigurableWebServerFactory> webServerFactoryCustomizer(){
+       return new WebServerFactoryCustomizer<ConfigurableWebServerFactory>(){
+
+           @Override
+           public void customize(ConfigurableWebServerFactory factory) {
+               factory.setPort(8080);
+           }
+       };
+    }
+}
+
+这个扩展的功能就是通过下面导入@Import(EnableWebMvcConfiguration.class)这个类来实现的
+	// Defined as a nested config to ensure WebMvcConfigurer is not read when not
+	// on the classpath
+	@Configuration(proxyBeanMethods = false)
+	@Import(EnableWebMvcConfiguration.class)
+	@EnableConfigurationProperties({ WebMvcProperties.class, ResourceProperties.class })
+	@Order(0)
+	public static class WebMvcAutoConfigurationAdapter implements WebMvcConfigurer {
+
+		private static final Log logger = LogFactory.getLog(WebMvcConfigurer.class);
+
+		private final ResourceProperties resourceProperties;
+		...................
+	}
+
+我们来看看EnableWebMvcConfiguration.class这个类
+	@Configuration(proxyBeanMethods = false)
+	public static class EnableWebMvcConfiguration extends DelegatingWebMvcConfiguration implements ResourceLoaderAware {
+	.................
+	}
+
+它继承DelegatingWebMvcConfiguration.class
+
+@Configuration(
+    proxyBeanMethods = false
+)
+public class DelegatingWebMvcConfiguration extends WebMvcConfigurationSupport {
+    private final WebMvcConfigurerComposite configurers = new WebMvcConfigurerComposite();
+
+    public DelegatingWebMvcConfiguration() {
+    }
+
+    @Autowired(
+        required = false
+    )
+    public void setConfigurers(List<WebMvcConfigurer> configurers) {
+        if (!CollectionUtils.isEmpty(configurers)) {
+            this.configurers.addWebMvcConfigurers(configurers);
+        }
+
+    }
+}
+
+我们看到里面setConfigurers方法被@Autowired注解，所以在DelegatingWebMvcConfiguration 类被实例化的时候就会被调用
+这个setConfigurers就是将spring 容器中所有的WebMvcConfigurer所有实例都添加进来，然后这些实例定义的配置都会通过
+WebMvcAutoConfiguration配置起来
+
+-如果使用了SpringBoot，但是不想使用SpringBoot的默认SpringMVC配置

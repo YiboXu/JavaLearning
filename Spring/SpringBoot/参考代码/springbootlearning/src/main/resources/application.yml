@@ -1,0 +1,88 @@
+person:
+  name: billtt@163.com
+  age: 37
+  birth: 1983/01/20
+  boss: false
+  maps: {k1: 123, k2: 456}
+  list:
+    - item1
+    - item2
+    - item3
+  dog:
+    name: 旺财
+    age: 2
+
+logging:
+  level:
+    tk:
+      springboot: trace
+
+server:
+  error:
+    include-exception: true
+
+mybatis:
+  config-location: classpath:mybatis-config.xml
+  mapper-locations:
+    - classpath:mapper/*.xml
+  type-aliases-package: tk.springboot.model
+
+spring:
+  messages:
+    basename: i18n.login
+
+  jpa:
+    hibernate:
+#自动根据标注了@Entity的实体类来创建对应的表或者实体类发生变化后对表进行相应的更改
+      ddl-auto: update
+    show-sql: true
+
+  thymeleaf:
+    cache: false
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/mybatis?allowMultiQueries=true
+    username: root
+    password: 123456
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    type: com.alibaba.druid.pool.DruidDataSource
+#Druid的相关配置
+    initialSize: 5
+    minIdle: 5
+    maxActive: 20
+    maxWait: 60000
+    timeBetweenEvictionRunsMillis: 60000
+    minEvictableIdleTimeMillis: 300000
+    validationQuery: SELECT 1 FROM DUAL
+    testWhileIdle: true
+    testOnBorrow: false
+    testOnReturn: false
+    poolPreparedStatements: true
+    filters: stat,wall
+    maxPoolPreparedStatementPerConnectionSize: 20
+    useGlobalDataSourceStat: true
+    connectionProperties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=500
+
+#redis
+  redis:
+    host: 127.0.0.1
+    port: 6379
+
+#RabbitMQ
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+    virtual-host: /
+
+#ElasticSearch Rest Client
+  elasticsearch:
+    rest:
+      uris:
+        - 127.0.0.1:9200
+#自定义启动包配置
+billhu:
+  hello:
+    prefix: billhu-starter-prefix
+    suffix: billhu-start-suffix

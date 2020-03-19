@@ -1,0 +1,101 @@
+一. 异步任务
+1. Service
+package tk.springboot.service.impl;
+
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Service;
+
+@Service
+public class AsyncService {
+    @Async    ===>标注异步任务注解，spring会开启新线程对其调用
+    public void hello(){
+        try {
+            Thread.sleep(3000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        System.out.println("数据处理种.....");
+    }
+}
+
+2. Controller
+package tk.springboot.api.controller;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import tk.springboot.service.impl.AsyncService;
+
+@RestController
+public class AsyncController {
+    @Autowired
+    private AsyncService asyncService;
+
+    @RequestMapping("/async")
+    public String async(){
+        //这个hello方法会被另一个线程所提交执行
+        asyncService.hello();
+        //controller里面的方法会立即返回，不用等到hello()方法执行完毕
+        //所以可以用hello方法提交一些比较耗时的操作，提交就不不管了，历及返回，让hello自己去处理，当然一般会提供一个功能来查看hello的处理结果
+        return "porcess complete";
+    }
+}
+
+3. 主程序
+package tk.springboot;
+
+@SpringBootApplication
+//开启异步任务支持
+@EnableAsync
+public class SpringbootlearningApplication {
+
+	public static void main(String[] args) {
+		SpringApplication.run(SpringbootlearningApplication.class, args);
+	}
+
+}
+
+
+二. 定时任务
+
+1. 主程序
+package tk.springboot;
+
+@SpringBootApplication
+//开启定时任务
+@EnableScheduling
+public class SpringbootlearningApplication {
+
+	public static void main(String[] args) {
+		SpringApplication.run(SpringbootlearningApplication.class, args);
+	}
+
+}
+
+
+2. 任务
+package tk.springboot.service.impl;
+
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
+
+@Service
+public class ScheduledService {
+
+    /**
+     * second(秒), minute（分）, hour（时）, day of month（日）, month（月）, day of week（周几）.
+     * 0 * * * * MON-FRI
+     *  【0 0/5 14,18 * * ?】 每天14点整，和18点整，每隔5分钟执行一次
+     *  【0 15 10 ? * 1-6】 每个月的周一至周六10:15分执行一次
+     *  【0 0 2 ? * 6L】每个月的最后一个周六凌晨2点执行一次
+     *  【0 0 2 LW * ?】每个月的最后一个工作日凌晨2点执行一次
+     *  【0 0 2-4 ? * 1#1】每个月的第一个周一凌晨2点到4点期间，每个整点都执行一次；
+     */
+    // @Scheduled(cron = "0 * * * * MON-SAT")
+    //@Scheduled(cron = "0,1,2,3,4 * * * * MON-SAT")
+    // @Scheduled(cron = "0-4 * * * * MON-SAT")
+    @Scheduled(cron = "0/4 * * * * MON-SAT")  //每4秒执行一次
+    public void hello(){
+        System.out.println("hello ... ");
+    }
+}

@@ -1,0 +1,6 @@
+InstantiationAwareBeanPostProcessor  实例化之前执行   postProcessBeforeInstantiation
+MergedBeanDefinitionPostProcessor    实例化之前,InstantiationAwareBeanPostProcessor  之后， 执行 postProcessMergedBeanDefinition
+实例化
+BeanPostProcessor的postProcessBeforeInitialization 初始化之前
+初始化
+BeanPostProcessor的postProcessAfterInitialization方法  初始化方法之后
