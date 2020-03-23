@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="91f684f0-9cf2-476f-9bd3-9c0908805e34" name="Default Changelist" comment="" />
+    <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Interface" />
+        <option value="Class" />
+      </list>
+    </option>
+  </component>
+  <component name="MavenImportPreferences">
+    <option name="importingSettings">
+      <MavenImportingSettings>
+        <option name="importAutomatically" value="true" />
+      </MavenImportingSettings>
+    </option>
+  </component>
+  <component name="ProjectId" id="1ZNiuGzJ8hsMaVGu8vXIi5yqdWt" />
+  <component name="PropertiesComponent">
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/microservicecloud-config-dept-client-8001/src/main/resources/git_config_file" />
+    <property name="project.structure.last.edited" value="Modules" />
+    <property name="project.structure.proportion" value="0.15" />
+    <property name="project.structure.side.proportion" value="0.2" />
+    <property name="settings.editor.selected.configurable" value="preferences.pluginManager" />
+  </component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\IdeaProjects\springcloud\microservicecloud\microservicecloud-config-dept-client-8001\src\main\resources\git_config_file" />
+      <recent name="C:\IdeaProjects\springcloud\microservicecloud\microservicecloud-config-dept-client-8001\src\main\java\tk\springlearning\springcloud" />
+      <recent name="C:\IdeaProjects\springcloud\microservicecloud\microservicecloud-config-dept-client-8001\src\main\resources" />
+      <recent name="C:\IdeaProjects\springcloud\microservicecloud\microservicecloud-config-eureka-client-7001\src\main\resources" />
+      <recent name="C:\IdeaProjects\springcloud\microservicecloud\microservicecloud-config-client-3355\src\main\resources" />
+    </key>
+    <key name="CopyClassDialog.RECENTS_KEY">
+      <recent name="" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\IdeaProjects\springcloud\microservicecloud\microservicecloud-config-eureka-client-7001\src\main\resources\git_config_file" />
+      <recent name="C:\IdeaProjects\springcloud\microservicecloud\microservicecloud-provider-dept-8001\src\main\resources\mybatis" />
+    </key>
+  </component>
+  <component name="RunDashboard">
+    <option name="ruleStates">
+      <list>
+        <RuleState>
+          <option name="name" value="ConfigurationTypeDashboardGroupingRule" />
+        </RuleState>
+        <RuleState>
+          <option name="name" value="StatusDashboardGroupingRule" />
+        </RuleState>
+      </list>
+    </option>
+  </component>
+  <component name="RunManager" selected="Application.DeptProvider8001_Config_App">
+    <configuration name="ConfigClient_3355_StartSpringCloudApp" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="tk.springlearning.springcloud.ConfigClient_3355_StartSpringCloudApp" />
+      <module name="microservicecloudconfigclient3355" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="tk.springlearning.springcloud.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="Config_3344_StartSpringCloudApp" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="tk.springlearning.springcloud.Config_3344_StartSpringCloudApp" />
+      <module name="microservicecloudconfig3344" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="tk.springlearning.springcloud.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="Config_Git_EurekaServerApplication" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="tk.springlearning.springcloud.Config_Git_EurekaServerApplication" />
+      <module name="microservicecloudconfigeurekaclient7001" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="tk.springlearning.springcloud.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="DeptProvider8001_Config_App" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="tk.springlearning.springcloud.DeptProvider8001_Config_App" />
+      <module name="microservicecloudconfigdeptclient8001" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="tk.springlearning.springcloud.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="Zuul_9527_StartSpringCloudApp" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="tk.springleanring.springcloud.Zuul_9527_StartSpringCloudApp" />
+      <module name="microservicecloudzuulgateway9527" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="tk.springleanring.springcloud.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Application.DeptProvider8001_Config_App" />
+        <item itemvalue="Application.Config_Git_EurekaServerApplication" />
+        <item itemvalue="Application.ConfigClient_3355_StartSpringCloudApp" />
+        <item itemvalue="Application.Config_3344_StartSpringCloudApp" />
+        <item itemvalue="Application.Zuul_9527_StartSpringCloudApp" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="91f684f0-9cf2-476f-9bd3-9c0908805e34" name="Default Changelist" comment="" />
+      <created>1584686173261</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1584686173261</updated>
+    </task>
+    <servers />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>jar://$MAVEN_REPOSITORY$/com/netflix/ribbon/ribbon-loadbalancer/2.2.2/ribbon-loadbalancer-2.2.2.jar!/com/netflix/loadbalancer/RoundRobinRule.class</url>
+          <line>20</line>
+          <option name="timeStamp" value="2" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+  </component>
+</project>
