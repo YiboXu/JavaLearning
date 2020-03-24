@@ -118,8 +118,843 @@ BestAvailableRule        会先过滤掉由于多次访问故障而处于断路�
 
 ZoneAvoidanceRule        默认规则， 符合判断server所在区域的性能和server的可用性选择器
 
+一 Idea创建多模块项目
+1. 创建一个Maven空project (不用archetype)
+2. 修改pom.xml (参考C:\IdeaProjects\springcloud\microservicecloud\pom.xml)
+   <packaging>pom</packaging>
+3. 删除刚创建的project里面的src目录
+4. 在这个空project里创建一个Module(右键->new->Module),这个Module将用来创建所有其他模块需要公用的一些类(参考C:\IdeaProjects\springcloud\microservicecloud\microservicecloud-api)
+5. 修改Pom.xml(C:\IdeaProjects\springcloud\microservicecloud\microservicecloud-api\pom.xml)
+   <?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>tk.springlearning.springcloud</groupId>
+    <artifactId>microservicecloud</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+        <junit.version>4.12</junit.version>
+        <log4j.version>1.2.17</log4j.version>
+        <lombok.version>1.16.18</lombok.version>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+	.............
+        </dependencies>
+    </dependencyManagement>
+</project>
+6. maven clean & install 
+7. 这样就可以在其他模块的pom中引入刚创建的模块作为依赖
+        <!-- 引入自己定义的api通用包，可以使用Dept部门Entity -->
+        <dependency>
+            <groupId>tk.springlearning.springcloud</groupId>
+            <artifactId>microservicecloud-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+8. 依次在这个空project里创建其他Module(右键->new->Module)，每个创建的模块都会在其pom.xml中列出来
+    <modules>
+        <module>microservicecloud-api</module>
+        .................
+    </modules>
+
+二 Eureka 微服务注册与发现
+1. 创建Eureka微服务(服务器) C:\IdeaProjects\springcloud\microservicecloud\microservicecloud-eureka-7001
+2. 修改pom.xml (C:\IdeaProjects\springcloud\microservicecloud\microservicecloud-eureka-7001\pom.xml)
+3. 修改application.yml
+server:
+  port: 7001
+
+eureka:
+  instance:
+    hostname: eureka7001.com
+  client:
+    register-with-eureka: false
+    fetch-registry: false
+    service-url:
+      #defaultZone: http://${eureka.instance.hostname}:${server.port}/eureka       #单机版
+      defaultZone: http://eureka7002.com:7002/eureka,http://eureka7003.com:7003/eureka
+
+4. 创建主启动类
+@SpringBootApplication
+@EnableEurekaServer
+public class EurekaServer7001_App {
+    public static void main(String[] args) {
+        SpringApplication.run(EurekaServer7001_App.class,args);
+    }
+}
+5. 创建需要注册到Eureka的微服务 (C:\IdeaProjects\springcloud\microservicecloud\microservicecloud-provider-dept-8001)
+- 修改pom (C:\IdeaProjects\springcloud\microservicecloud\microservicecloud-provider-dept-8001\pom.xml)
+- 修改application.yml
+eureka:
+  client:
+    service-url:
+      #defaultZone: http://localhost:7001/eureka
+      defaultZone: http://localhost:7001/eureka,http://eureka7002.com:7002/eureka,http://eureka7003.com:7003/eureka
+  instance:
+    instance-id: microservicecloud-dept8001    #自定义服务的名称信息
+    prefer-ip-address: true                    #访问路径可以显示IP地址
+
+info:
+  app.name: springlearning-microservicecloud
+  company.name: www.springlearning.com
+  build.artifactId: ${project.artifactId}
+  build.version: ${project.version}
+- 修改主启动类
+@SpringBootApplication
+@EnableEurekaClient
+@EnableDiscoveryClient   //开启服务发现
+public class DeptProvider8001_App {
+    public static void main(String[] args){
+        SpringApplication.run(DeptProvider8001_App.class,args);
+    }
+}
+三. Ribbon (负载均衡)
+Ribbon初步配置 (C:\IdeaProjects\springcloud\microservicecloud\microservicecloud-consumer-dept-80)
+
+    ==Ribbon是客户端负载均衡工具！！！Ribbon是客户端负载均衡工具！！！Ribbon是客户端负载均衡工具！！！==所以应该配置在客户端
+
+    加入依赖，因为Riboon需要依赖Eureka运行，所以要同时加入Eureka依赖
+
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-eureka</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-ribbon</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-config</artifactId>
+
+    对实现类加入@LoadBalanced注解
+
+@Bean
+@LoadBalanced
+public RestTemplate getRestTemplate() {
+        return  new RestTemplate();
+    }
+}
+
+    在application.yml文件中配置向注册中心注册，如果是作为消费者模块不提供服务，不应该注册自己
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://eureka7001.com:7001/eureka/,http://eureka7002.com:7002/eureka/,http://eureka7003.com:7003/eureka/
+    register-with-eureka: false				#作为消费者不提供服务，不应该注册自己
+
+    主启动类中加入@EnableEurekaClient注解
+
+@SpringBootApplication
+@EnableEurekaClient
+public class Consumer80_APP {
+    public static void main(String[] args) {
+        SpringApplication.run(Consumer80_APP.class,args);
+    }
+}
+
+    以上步骤1~4完成后即可在controller中直接通过服务名访问系统中的微服务，服务名作为URI
+
+private static final String URL_PREFIX = "http://MICROSERVICECLOUD-DEPT/";
 
 
+四 Feign负载均衡 (C:\IdeaProjects\springcloud\microservicecloud\microservicecloud-consumer-dept-feign)
+
+Feign是一个声明式WebService客户端，使用方法时定义一个接口并在上面添加注解即可。Feign支持可拔插式的编码器和解码器。Spring Cloud对Feign进行了封装，使其支持SpringMVC和HttpMessageConverters。Feign可以与Eureka和Ribbon组合使用以支持负载均衡。
+使用案例
+
+    新建Feign模块，加入依赖（其实跟80消费者差不多，主要是多了Feign依赖）
+
+    <dependencies>
+        <dependency>
+            <groupId>com.XXX</groupId>
+            <artifactId>microservice-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-feign</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-eureka</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-ribbon</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-config</artifactId>
+        </dependency>
+        <!--热部署-->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>springloaded</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-devtools</artifactId>
+        </dependency>
+    </dependencies>
+
+    因为Feign开发其实是面向接口编程，所以Feign接口可以放在api模块中供各模块使用，所以要在api模块中添加Feign依赖
+    在api中编写接口，接口上添加@FeignClient注解，并通过value指定作用的微服务名
+
+@FeignClient(value = "MICROSERVICECLOUD-DEPT")
+public interface DeptClientService {
+
+    @PostMapping("/dept")
+    public boolean addDept(Dept dept);
+
+    @GetMapping("/dept")
+    public List<Dept> findAll();
+
+    @GetMapping("/dept/{id}")
+    public Dept findById(@PathVariable("id")Integer id);
+}
+
+    在Feign模块中编写Controller，并注入FeignClient接口，直接调用service接口中的方法即可（因为声明Feign接口时已经指定过微服务，所以访问时会正确地找到微服务）
+
+@RestController
+@RequestMapping("/consumer")
+public class ConsumerDeptController {
+    @Autowired
+    private DeptClientService service;
+
+    @PostMapping("/dept")
+    public boolean addDept(Dept dept){
+        return service.addDept(dept);
+    }
+
+    @GetMapping("/dept")
+    public List<Dept> findAll(){
+        return service.findAll();
+    }
+
+    @GetMapping("/dept/{id}")
+    public Dept findById(@PathVariable("id")Integer id){
+        return service.findById(id);
+    }
+}
+
+    修改Feign模块的主启动类，加入@EnableFeignClients注解和@ComponentScan注解（主要是扫描api中声明的接口）
+
+@SpringBootApplication
+@EnableEurekaClient
+@EnableFeignClients(basePackages = {"com.XXX"})
+@ComponentScan("com.XXX")
+public class Consumer80Feign_APP {
+    public static void main(String[] args) {
+        SpringApplication.run(Consumer80Feign_APP.class,args);
+    }
+}
+
+    启动后访问，即会按照轮询的方式调用provider集群
+
+总结
+
+    Feign通过接口方法调用REST服务，在Eureka中查找对应的服务
+    Feign集成了Ribbon技术，所以也支持负载均衡（轮询）
+
+
+
+五 Hystrix断路器 (C:\IdeaProjects\springcloud\microservicecloud\microservicecloud-provider-dept-hystrix-8001, C:\IdeaProjects\springcloud\microservicecloud\microservicecloud-consumer-hystrix-dashboard-9001)
+分布式系统面临的问题
+扇出
+
+多个微服务互相调用的时候，如果A调用B、C，而B、C又继续调用其他微服务，这就是扇出（像一把扇子一样慢慢打开。
+服务雪崩
+
+    删除过程中，如果某一个环节的服务出现故障或连接超时，就会导致前面的服务占用越来越多的资源，进而引起系统崩溃，就是“雪崩效应”。
+    对于高流量的应用来说，单一的后端依赖会导致服务器所有的资源都在几秒钟内饱和。比失败更糟糕的是，这些应用程序还可能导致服务之间的延迟增加，备份队列，线程和其他系统资源紧张，导致整个系统发生更多的级联故障。这些都表示需要==对故障和延迟进行隔离和管理==，以便单个依赖关系的失败，不能取消整个应用程序或系统。
+
+Hystrix介绍
+
+    Hystrix是一个用于处理分布式系统延迟和容错的开源库。分布式系统中，依赖避免不了调用失败，比如超时，异常等。Hystrix能保证在出现问题的时候，不会导致整体服务失败，避免级联故障，以提高分布式系统的弹性。
+    Hystrix类似一个“断路器”，当系统中异常发生时，断路器给调用返回一个符合预期的，可处理的FallBack，这样就可以避免长时间无响应或抛出异常，使故障不能再系统中蔓延，造成雪崩。
+
+服务熔断
+
+    熔断机制的注解是@HystrixCommand
+    熔断机制是应对雪崩效应的一种==链路保护机制==，一般存在于服务端
+    当扇出链路的某个服务出现故障或响应超时，会进行==服务降级==，进而==熔断该节点的服务调用==，快速返回“错误”的相应信息。、
+    Hystrix的熔断存在阈值，缺省是5秒内20次调用失败就会触发
+
+熔断案例
+
+    构建一个新的provider module（如复制8001module）
+    pom.xml加入hystrix依赖（一定要配合Eureka）
+
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-hystrix</artifactId>
+        </dependency>
+
+    application.xml中配置端口和Eureka信息（必配）和其他框架的配置信息（可选，如mybatis）
+    编写具体业务逻辑
+    controller类中，在需要配置Fallback的方法上加入@@HystrixCommand(fallbackMethod = "XXX")注解，XXX为FallBack方法名本例中作为测试所以抛出了异常
+
+    @ResponseBody
+    @GetMapping("/dept/{id}")
+    @HystrixCommand(fallbackMethod = "nullDeptFallBack")
+    public Dept findById(@PathVariable("id")Integer id) {
+        Dept dept = deptService.findById(id);
+        if (null == dept){
+            throw new RuntimeException("返回值为空！");
+        }
+        return dept;
+    }
+
+    根据需要配置FallBack的方法返回值编写代码
+
+ public Dept nullDeptFallBack(@PathVariable("id")Integer id) {
+        System.out.println(111);
+        return new Dept().setId(id).setDeptName("nullName").setDbSource("nullDB");
+    }
+
+    主启动类中加入@EnableCircuitBreaker注解
+    开启服务，测试
+
+解耦与降级处理
+降级
+
+    当系统整体资源快不够的时候，忍痛将部分服务暂时关闭，带渡过难关后，再重新开启。
+    降级处理时在==客户端==完成的，与服务端没有关系
+    理解：所谓降级，一般是从==整体负荷==考虑，当某个服务熔断之后，服务器将不再被调用，此时客户端可以自己准备一个本地的FallBack回调，返回一个缺省值。这样做虽然服务水平下降，但好歹可用，比直接挂掉好。
+
+为什么要解耦
+
+如果按照上面的熔断案例来做的话，Controller下的每个方法，都要给其编写一个FallBack方法，当方法慢慢变多，就会造成代码膨胀，一个是增加编写的工作量，另外一个也会增大维护的难度，代码的耦合度也会高，是十分不合理的，所以要将其解耦。
+解耦思路
+
+因为服务端的是通过实现接口访问服务端的，如果在父接口上实现了FallBack方法，通过这样一种方式去维护起来就能实现解耦，也顺便完成了降级的机制。
+解耦&降级案例
+
+    在api模块中新建实现了FallbackFactory接口的类，其中泛型T就是我们需要维护其FallBack的接口方法，并实现其create方法，在create方法中返回实现了T的对象，使用匿名内部类实现T。==注意：这个类一定要加@Component注解！！这个类一定要加@Component注解！！这个类一定要加@Component注解！！==
+
+import com.XXX.entity.Dept;
+import feign.hystrix.FallbackFactory;
+import org.springframework.stereotype.Component;
+
+import java.util.List;
+
+@Component
+public class DeptClientServiceFallBackFactory implements FallbackFactory<DeptClientService> {
+    public DeptClientService create(Throwable throwable) {
+        return new DeptClientService() {
+            public boolean addDept(Dept dept) {
+                return false;
+            }
+
+            public List<Dept> findAll() {
+                return null;
+            }
+
+            public Dept findById(Integer id) {
+                return new Dept().setId(id).setDeptName("服务器跪了,").setDbSource("迟点来吧");
+            }
+        };
+    }
+}
+
+    修改步骤1中传入的泛型T接口，添加@FeignClient(fallbackFactory = T.class)注解
+
+@FeignClient(value = "MICROSERVICECLOUD-DEPT",fallbackFactory = DeptClientServiceFallBackFactory.class)
+public interface DeptClientService {
+
+    @PostMapping("/dept")
+    public boolean addDept(Dept dept);
+
+    @GetMapping("/dept")
+    public List<Dept> findAll();
+
+    @GetMapping("/dept/{id}")
+    public Dept findById(@PathVariable("id")Integer id);
+}
+
+    修改consumer feign模块的application.xml文件，开启hystrix（注：在IDEA中可能没有代码提示，开启的true也没有正常高亮，但好像不需要做额外操作也不影响结果）
+
+feign:
+  hystrix:
+    enabled: true
+
+    开启服务并测试
+
+HystrixDashboard服务监控
+
+介绍：SpringCloud对Hystrix Dashboard进行了整合，可以对通过Hystrix发起的请求进行准实时统计，并以报表和图形的形式展示给用户（包括每秒执行多少次请求成功和失败等）。
+配置案例
+
+    新建HystrixDashboard模块，pom.xml文件加入HystrixDashboard依赖，其他依赖包括Feign，Ribbon，Eureka（可参考80模块的依赖）
+
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-hystrix-dashboard</artifactId>
+        </dependency>
+
+    application.yml文件中配置端口（如9001）
+    provider类中确认要加入actuator依赖（此为监控依赖）
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+
+    编写主启动类，上标@EnableHystrixDashboard标注
+
+@SpringBootApplication
+@EnableHystrixDashboard
+public class DashBoard9001_APP {
+    public static void main(String[] args) {
+        SpringApplication.run(DashBoard9001_APP.class,args);
+    }
+}
+
+    启动服务进行测试，访问地址：http://localhost:9001/hystrix，（根据配置端口号），==看到刺猬表示已经配置好了==
+
+如何监控
+
+    在dashboard界面中，填入需要监控的服务地址和端口号加上\hystrix.stream和监测间隔即可进入监控。（如http://localhost:8001/hystrix.stream
+
+监控分析
+
+    七色：进入监控界面后会有其中颜色的数字，其含义可以对应右上角相同颜色的单词表示的状态，其值代表该状态下触发的次数
+    一圈：圈的大小代表该服务的流量，圈越大流量越大
+    一线：代表监控间隔中，服务被访问的频率的折线图
+    通过观察这些就可以在大量的实例中找出故障实例和高压实例进行修复和维护。
+
+
+六 Zuul路由网关  C:\IdeaProjects\springcloud\microservicecloud\microservicecloud-zuul-gateway-9527
+概述
+
+    代理：Zuul提供外部的请求转发到具体的微服务实例中的服务
+
+    路由：Zuul可以对外部访问实现统一的入口
+
+    过滤：Zuul可以对外部访问进行干预，如请求校验、服务聚合等
+
+    Zuul需要配合Eureka使用，需要在Eureka中注册并获得其他微服务的信息
+
+    理解：Zuul就像大楼的保安，可以请他找人（代理），找的人在外面叫什么名字（路由），准不准你进楼（过滤）。因为保安属于物业公司，所以保安要在物业公司注册，所获得的信息也来源于物业公司（与Eureka的关系）。
+
+基本配置
+
+    构建新的Zuul模块并在pom.xml中加入依赖（Zuul和Eureka必须同时加入）
+
+<dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-eureka</artifactId>
+</dependency>
+<dependency>
+       <groupId>org.springframework.cloud</groupId>
+       <artifactId>spring-cloud-starter-zuul</artifactId>
+</dependency>
+
+    新建application.yml文件并配置（一定要向Eureka注册，因为Zuul本身也是一个微服务）
+
+server:
+  port: 9527
+
+spring:
+  application:
+    name: microservicecloud-zuul   #为这个服务取名，非常重要！！！！！
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://eureka7001.com:7001/eureka/,http://eureka7002.com:7002/eureka/,http://eureka7003.com:7003/eureka/
+  instance:
+    instance-id: zuul.com
+    prefer-ip-address: true
+
+    修改hosts文件（非必须，不过能更好看出效果）
+
+127.0.0.0 zuul.com
+
+    创建主启动类，并加入@EnableZuulProxy注解
+
+@SpringBootApplication
+@EnableZuulProxy
+public class Zuul9527_APP {
+
+    public static void main(String[] args) {
+        SpringApplication.run(Zuul9527_APP.class,args);
+    }
+}
+
+    启动测试，访问规则：步骤3中指定映射+端口号+微服务名称+访问路径。
+
+    例子：http://zuul.com:9527/microservicecloud-dept/dept
+
+路由访问映射规则
+服务名映射和统一公共前缀
+
+当不向暴露真实的服务名时，可以对服务名进行映射，只需在application.yml中配置即可，==具体作用看注释==
+
+zuul:
+  routes:
+  	#dept0是可以自定义的只是作为区分，没什么具体意义
+    dept0.serviceId: microservicecloud-dept		
+    #路径也是自定义的，支持通配符
+    dept0.path: /dept10/**						
+  #需要隐藏的服务名，可以使用通配符，配置之后通过这个微服务名访问就失效了
+  ignored-services: microservicecloud-*
+  #设置统一公共前缀，设置后访问路径：http://zuul.com:9527/nihao/dept10/dept/3
+  prefix: /nihao								
+
+==注：因为Zuul是针对外部访问管理的，所以配置了隐藏的服务，在系统中其他模块进行服务名访问时依然可以正常运行的，这点可以通过打开consumer模块进行验证！==
+
+
+七 SpringCloud Config 分布式配置中心
+C:\IdeaProjects\springcloud\microservicecloud\microservicecloud-config-3344
+C:\IdeaProjects\springcloud\microservicecloud\microservicecloud-config-client-3355
+
+C:\IdeaProjects\springcloud\microservicecloud\microservicecloud-config-eureka-client-7001
+C:\IdeaProjects\springcloud\microservicecloud\microservicecloud-config-dept-client-8001
+
+分布式系统面临的配置问题：微服务意味着将单体应用拆分成一个个自服务，这些服务都是要相应的配置信息才能运行，随着系统内微服务数量越来越多，配置信息也不断地增多，所以一套集中式的、动态的配置管理设施是必不可少的。
+概述
+
+    SpringCloud Config是一个提供外部集中式配置管理的设施，配置服务器为各种不同的额微服务应用提供了一个中心化的外部配置
+    SpringCloud Config分为客户端和服务端两部分
+        服务端：分布式配置中心，是一个独立的微服务，用来连接并为客户端提供配置信息，加密/解密信息等访问接口
+        客户端：通过指定的配置中心获取配置资源，cloud推荐用git来存储配置信息
+    SpringCloud Config解决的问题：
+        集中管理配置文件
+        不同环境不同配置，动态化的配置更新
+        运行期间动态调整配置，不再需要在每个服务部署的机器上编写配置文件，让服务中心统一为服务拉取配置文件
+        当配置发生变动时，服务不需要重启即可感知配置变化并应用
+        将配置信息以REST接口形式暴露
+
+![SpringCloud Config架构图](images\SpringCloud Config架构图.png)
+SpringCloud Config服务端与Github通讯
+
+目标：将配置文件部署在github，Config服务端从github获取配置
+案例
+
+    新建ConfigServer模块并配置pom.xml
+
+		<!-- springCloud Config -->
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-config-server</artifactId>
+		</dependency>
+		<!-- 避免Config的Git插件报错：org/eclipse/jgit/api/TransportConfigCallback -->
+		<dependency>
+			<groupId>org.eclipse.jgit</groupId>
+			<artifactId>org.eclipse.jgit</artifactId>
+			<version>4.10.0.201712302008-r</version>
+		</dependency>
+
+    建立远程仓库，并上传配置文件。如下例
+
+spring: 
+    profiles: 
+        active:
+           - dev
+---
+spring:
+    profiles: dev
+    application:
+        name: microservicecloud-config-XXX-dev
+---
+spring:
+    profiles: test
+    application:
+        name: microservicecloud-config-XXX-test
+
+    在application.xml文件中配置github地址
+
+server:
+  port: 3344
+
+spring:
+  application:
+    #为这个服务取名，非常重要！！！！！
+    name: microservicecloud-config
+  cloud:
+    config:
+      server:
+        git:
+          # uri填github上仓库地址
+          uri: https://github.com/XXXX/SpringCloud_Configuration.git
+
+    编写主启动类，加入@EnableConfigServer注解
+
+@SpringBootApplication
+@EnableConfigServer
+public class ConfigServer3344_APP {
+    public static void main(String[] args) {
+        SpringApplication.run(ConfigServer3344_APP.class,args);
+    }
+}
+
+    启动服务并尝试访问配置文件，有以下五种访问配置规则
+        {application}：配置文件的文件名
+        {profile}：读取的环境
+        {lable}：分支
+
+/{application}/{profile}[/{lable}]
+/{application}-{profile}.yml
+/{lable}/{application}-{profile}.yml
+/{application}-{profile}.properties
+/{lable}/{application}-{profile}.properties
+
+可用例子（返回格式可能不大相同，但返回值相同）：
+
+    http://config3344.com:3344/application-test.yml
+    http://config3344.com:3344/master/application-dev.yml
+    http://config3344.com:3344/application-test.yml/master
+
+不可用例子：
+
+    没有该环境，返回空值：http://config3344.com:3344/application-test11.yml/master
+    没有配置文件，犯回错误页面：http://config3344.com:3344/lkjliiusdfsddsfl.yml
+
+bootstrap.yml介绍
+
+    bootstrap.yml比application.yml具有更高的优先级。
+    bootstrap.yml是系统级的资源配置项，application.yml是用户级的资源配置项。
+    SpringCloud会创建"BootStrap Context"作为"ApplicationContext"的==父上下文==。初始化的时候BootStrap Context负责从外部源加载配置属性并解析。这两个上下文共享一个"Environment"，BootStrap 具有更高优先级，他们不会被本地配置覆盖。
+
+客户端的配置与测试
+
+介绍：客户端主要是在==加载时==通过config server服务端获得github配置仓库的地址，进而通过目标配置文件的文件名获取相应的配置，最后将取得的配置对自身资源进行赋值并提供访问
+实现过程
+
+1.创建远程配置yml文件并上传到github上。如下测试案例因为需要进行测试，所以配置了两个profiles方便切换并观察
+
+spring: 
+    profiles: 
+        active:
+           - dev
+---
+server: 
+    port: 8201
+spring:
+    profiles: dev
+    application:
+        name: microservicecloud-config-client-dev
+eureka:
+    client: 
+        service-url: 
+            defaultZone: http://eureka-dev.com:7001/eureka/
+---
+server: 
+    port: 8202
+spring:
+    profiles: test
+    application:
+        name: microservicecloud-config-client-test
+eureka:
+    client: 
+        service-url: 
+            defaultZone: http://eureka-dev.com:7001/eureka/
+
+    本地创建config client模块，并配置好pom.xml，以下本组件是必选依赖
+
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-config</artifactId>
+        </dependency>
+
+    编写bootstrap.yml配置文件，这个步骤比较关键，主要是根据此处的配置信息去寻找config server以获得github仓库地址和配置中的目标配置文件文件名
+
+spring:
+  cloud:
+    config:
+      name: application_config #需要从github上读取的资源名称，注意没有yml后缀名
+      profile: test   #本次访问的配置项
+      label: master
+      uri: http://config3344.com:3344  #本微服务启动后先去找3344号服务，通过SpringCloudConfig获取GitHub的服务地址
+
+    application.yml文件在本module中其实是可写可不写的，为了习惯需要，还是给他写了个名字
+
+spring:
+  application:
+    name: microservicecloud_config
+
+    修改host文件增加映射，和3344一样
+    编写主启动类，没什么特别的，最基本的主启动类
+    编写controller，此步骤也比较关键，主要是利用@Value注解赋值，若写错了bootstrap.yml中的配置文件名称而没有获取到配置，启动时这里会抛出异常。@Value中注解的参数即是目标配置文件中的参数值，使用El表达式获取
+
+@org.springframework.web.bind.annotation.RestController
+public class RestController {
+    @Value("${server.port}")
+    private String port;
+    @Value("${eureka.client.service-url.defaultZone}")
+    private String eurekaZone;
+    @Value("${spring.application.name}")
+    private String name;
+
+
+    @GetMapping("/config")
+    @Override
+    public String toString() {
+        return "RestController{" +
+                "port='" + port + '\'' +
+                ", eurekaZone='" + eurekaZone + '\'' +
+                ", name='" + name + '\'' +
+                '}';
+    }
+}
+
+    先启动config server服务，然后再启用本client服务，根据profiles的值访问对应的端口即可。如本例选择的是test，则访问端口为：http://config3355.com:8202/config。（config3355.com为hosts文件中配置了的映射）
+
+SpringCloud的配置实战
+
+介绍：其实前面client的配置案例都是帮助理解这个组件为主，并没有很大的实际意义。。。。。。这节的案例中是配置一个Provider，一个eureka，他们的配置统一在github上获取，实现统一配置分布式管理和多环境变更，这个才比较有实战意义。
+实现过程
+
+    先写好provider和Eureka的配置yml文件，这两个文件和平常配置没什么不同，因为这里主要是说config，所以就没有配置集群，上传yml到github
+
+Eureka配置文件示例：
+
+spring: 
+    profiles: 
+        active:
+           - dev
+---
+spring:
+    profiles: dev
+    application:
+        name: microservicecloud-eureka-client-dev
+server:
+  port: 7001
+eureka:
+  instance:
+    hostname: eureka7001.com    #hostname为hosts文件中映射的地址
+  client:
+    register-with-eureka: false     #false表示不向注册中心注册自己
+    fetch-registry: false           #false表示自己就是注册中心，职责是维护实例，不参加检索
+    service-url:
+      defaultZone: http://eureka7001.com:7001/eureka/   #设置eureka server的交互地址
+
+---
+spring:
+    profiles: test
+    application:
+        name: microservicecloud-eureka-client-dev
+server:
+  port: 7001
+eureka:
+  instance:
+    hostname: eureka7001.com    #hostname为hosts文件中映射的地址
+  client:
+    register-with-eureka: false     #false表示不向注册中心注册自己
+    fetch-registry: false           #false表示自己就是注册中心，职责是维护实例，不参加检索
+    service-url:
+      defaultZone: http://eureka7001.com:7001/eureka/    #设置eureka server的交互地址
+
+Provider配置文件示例：
+
+spring: 
+    profiles: 
+        active:
+           - dev
+---
+server:
+  port: 8001
+
+mybatis:
+  config-location: classpath:mybatis/mybatis.cfg.xml
+  type-aliases-package: com.XXX.entity
+  mapper-locations:
+  - classpath:mybatis/mapper/**/*.xml
+spring:
+  profiles: dev
+  application:
+    name: microservicecloud-dept   #为这个服务取名，非常重要！！！！！
+  datasource:
+    type: com.alibaba.druid.pool.DruidDataSource
+    driver-class-name: org.gjt.mm.mysql.Driver
+    url: jdbc:mysql://192.168.88.246:3306/cloudDB01
+    username: root
+    password: 123456
+    dbcp2:
+      min-idle: 5         #最小连接数
+      initial-size: 5    #初始化连接数
+      max-total: 10      #最大连接数
+      max-wait-millis: 200  #等待连接最长的超时时间
+eureka:
+  client:
+    service-url:
+      defaultZone: http://eureka7001.com:7001/eureka/
+  instance:
+    instance-id: dept8001
+    prefer-ip-address: true
+---
+server:
+  port: 8001
+
+mybatis:
+  config-location: classpath:mybatis/mybatis.cfg.xml
+  type-aliases-package: com.XXX.entity
+  mapper-locations:
+  - classpath:mybatis/mapper/**/*.xml
+spring:
+  profiles: test
+  application:
+    name: microservicecloud-dept   #为这个服务取名，非常重要！！！！！
+  datasource:
+    type: com.alibaba.druid.pool.DruidDataSource
+    driver-class-name: org.gjt.mm.mysql.Driver
+    url: jdbc:mysql://192.168.88.246:3306/cloudDB02
+    username: root
+    password: 123456
+    dbcp2:
+      min-idle: 5         #最小连接数
+      initial-size: 5    #初始化连接数
+      max-total: 10      #最大连接数
+      max-wait-millis: 200  #等待连接最长的超时时间
+eureka:
+  client:
+    service-url:
+      defaultZone: http://eureka7001.com:7001/eureka/
+  instance:
+    instance-id: dept8001
+    prefer-ip-address: true
+
+    新开eureka和provide的模块并在pom.xml中添加依赖，其他必要依赖和之前的案例一样，但是config的依赖一定要添加上
+
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-config</artifactId>
+        </dependency>
+
+    两个模块都要编写bootstrap.yml文件，和上面的案例一样
+
+spring:
+  cloud:
+    config:
+      name: application_config #需要从github上读取的资源名称，注意没有yml后缀名
+      profile: test   #本次访问的配置项
+      label: master
+      uri: http://config3344.com:3344  #本微服务启动后先去找3344号服务，通过SpringCloudConfig获取GitHub的服务地址
+
+    (可选)两个模块中编写application.yml文件，可以配置一下服务名
+
+spring:
+  application:
+    name: microservicecloud_config
+
+    两个模块的主启动类，Eureka的正常加EurekaServer注解，Provider加EurekaClient注解，不详述
+    编写Provider模块的业务代码
+    启动测试，因为这两个模块都要通过3344ConfigServer为其在github上获取配置，所以要先启动3344模块，然后再一次启动eureka和provider模块，进行测试即可。
 
 
 
