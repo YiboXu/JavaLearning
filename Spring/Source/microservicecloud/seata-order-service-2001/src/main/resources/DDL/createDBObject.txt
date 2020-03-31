@@ -1,0 +1,42 @@
+create database seata_order;
+use seata_order;
+create table t_order (
+`id` bigint(20) not null auto_increment primary key,
+`user_id` bigint(20) default null comment '用户ID',
+`product_id` bigint(20) default null comment '产品ID',
+`count` int(11) default null comment '数量',
+`money` decimal(18,2) default null comment '金额',
+`status` int(1) default null comment '订单状态：0-创建中，1-已完结'
+) engine=INNODB auto_increment = 1 default charset = 'utf8';
+
+select * from t_order;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

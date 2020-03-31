@@ -1,0 +1,37 @@
+server:
+  port: 80
+
+#如果通过@FeignClient来访问微服务，通过下面的配置来设置timeout
+hystrix:
+  command:
+    default:  #default全局有效，service id指定应用有效
+      execution:
+        timeout:
+          #是否开启超时熔断
+          enabled: true
+        isolation:
+          thread:
+            timeoutInMilliseconds: 5000 #断路器超时时间，默认1000ms
+
+#开启服务降级功能，当服务不可用的时候，会调用对应的FallbackFactory里面提供的服务 参考tk.springlearning.springcloud.service.DeptClientService
+feign:
+  hystrix:
+    enabled: true
+
+# 设置feign客户端超时时间(OpenFeign默认支持ribbon)
+ribbon:
+  # 指的是建立连接所用的时间,适用于网络状态正常的情况下,两端连接所用的时间
+  ReadTimeout: 5000
+  # 指的是建立连接后从服务器读取到可用资源所用的时间
+  ConnectTimeout: 5000
+
+logging:
+  level:
+    # feign日志以什么级别监控哪个接口
+    tk.springlearning.springcloud.service.DeptClientService: debug
+
+eureka:
+  client:
+    register-with-eureka: false
+    service-url:
+      defaultZone: http://eureka7001.com:7001/eureka,http://eureka7002.com:7002/eureka,http://eureka7003.com:7003/eureka

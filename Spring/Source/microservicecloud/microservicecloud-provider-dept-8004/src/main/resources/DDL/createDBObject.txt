@@ -1,0 +1,45 @@
+DROP DATABASE IF EXISTS cloudDB04;
+CREATE DATABASE cloudDB04;
+USE cloudDB04;
+
+CREATE TABLE dept
+(
+    deptNo BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    deptName VARCHAR(60),
+    dbSource VARCHAR(60)
+);
+
+INSERT INTO dept(deptName,dbSource) VALUES('Development',DATABASE());
+INSERT INTO dept(deptName,dbSource) VALUES('Human Resource',DATABASE());
+INSERT INTO dept(deptName,dbSource) VALUES('Accounting',DATABASE());
+INSERT INTO dept(deptName,dbSource) VALUES('Market',DATABASE());
+INSERT INTO dept(deptName,dbSource) VALUES('Operation',DATABASE());
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

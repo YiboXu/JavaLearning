@@ -1,0 +1,23 @@
+spring:
+  application:
+    name: microservicecloud-dept
+  #Alibaba Nacos
+  cloud:
+    nacos:
+      discovery:
+        server-addr: localhost:8848 # 注册中心
+#       group: group_test    #表示将微服务注册到group_test组里
+#       namesapce: namespace_test   #表示将微服务注册到namespace_test名命空间里
+      config:
+        server-addr: localhost:8848 # 配置中心
+        file-extension: yml # 这里指定的文件格式需要和nacos上新建的配置文件后缀相同，否则读不到
+        group: location_wuhan
+        namespace: business-domain-dept
+
+#配置文件匹配规则匹配对应namespace及group下的 ${spring.application.name}-${spring.profile.active}.${spring.cloud.nacos.config.file-extension}
+#所以这里就是获取 部门业务领域(business-domain-dept)下的 运行在wuhan (location_wuhan) 的 dev (spring.profiles.active)服务器配置
+
+#服务注册(spring.cloud.nacos.discovery.group,spring.cloud.nacos.discovery.namespace)
+#只有注册到同一个namespace和group里面的微服务才能相互访问
+#服务配置(spring.cloud.nacos.config.group,spring.cloud.nacos.config.namespace)
+#通过指定namespace和group，来从nacos服务器上读取对应的namespace和group下的配置文件

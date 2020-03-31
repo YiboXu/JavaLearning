@@ -1,0 +1,44 @@
+create database seata_storage;
+use seata_storage;
+create table t_storage (
+`id` bigint(20) not null auto_increment primary key,
+`product_id` bigint(20) default null comment '产品ID',
+`total` int(11) default null comment '总库存',
+`used` int(11) default null comment '使用库存',
+`residue` int(11) default null comment '剩余库存'
+) engine=INNODB auto_increment = 1 default charset = 'utf8';
+
+insert into t_storage(`id`, `product_id`, `total`, `used`, `residue`) values('1', '1', '100' , '0', '100');
+
+select * from t_storage;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

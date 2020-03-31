@@ -1,0 +1,30 @@
+server:
+  port: 8005
+
+mybatis:
+  config-location: classpath:mybatis/mybatis-config.xml
+  mapper-locations:
+    - classpath:mybatis/mapper/**/*.xml
+  type-aliases-package: tk.springlearning.springcloud.entities
+
+spring:
+  application:
+    name: microservicecloud-dept
+  datasource:
+    url: jdbc:mysql://localhost:3306/cloudDB05
+    username: root
+    password: 123456
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    type: com.alibaba.druid.pool.DruidDataSource
+    dbcp2:
+      min-idle: 5
+      initial-size: 5
+      max-total: 5
+      max-wait-millis: 200
+  #set consul server info
+  cloud:
+    consul:
+      host: localhost
+      port: 8500
+      discovery:
+        service-name: ${spring.application.name}

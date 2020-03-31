@@ -1,0 +1,70 @@
+    <modules>
+公共模块:
+        <module>microservicecloud-api</module>
+EurekaClient微服务(提供者8001)注册进Eureka
+        <module>microservicecloud-provider-dept-8001</module>
+EurekaClient微服务(消费者)注册进Eureka
+        <module>microservicecloud-consumer-dept-80</module>
+注册Eureka集群(7001,7002,7003)
+        <module>microservicecloud-eureka-7001</module>
+        <module>microservicecloud-eureka-7002</module>
+        <module>microservicecloud-eureka-7003</module>
+EurekaClient微服务(提供者8002)注册进Eureka
+        <module>microservicecloud-provider-dept-8002</module>
+EurekaClient微服务(提供者8003)注册进Eureka
+        <module>microservicecloud-provider-dept-8003</module>
+EurekaClient微服务(消费者)注册进Eureka,通过feign来访问注册在Eureka的其他微服务(microservicecloud-provider-dept-8001,8002,8003)
+        <module>microservicecloud-consumer-dept-feign</module>
+EurekaClient微服务(提供者8001)注册进Eureka-服务提供者端通过hystrix来提供服务熔断和服务降级
+        <module>microservicecloud-provider-dept-hystrix-8001</module>
+EurekaClient微服务(消费者)注册进Eureka-服务消费者端通过hystrix来进行服务降级(服务降级处理逻辑混合在业务逻辑controller中)
+        <module>microservicecloud-consumer-dept-feign-hystrix-80</module>
+EurekaClient微服务(消费者)注册进Eureka-服务消费者端通过hystrix来进行服务降级(服务降级处理分离到feignclient中)
+        <module>microservicecloud-consumer-dept-feign-hystrix2-80</module>
+EurekaClient微服务(提供者9001)注册进Eureka-通过hystrix dashboard来提供服务监控
+        <module>microservicecloud-consumer-hystrix-dashboard-9001</module>
+EurekaClient微服务(提供者9527)注册进Eureka-通过zuul提供网关服务
+        <module>microservicecloud-zuul-gateway-9527</module>
+EurekaClient微服务(提供者9527)注册进Eureka-通过gateway提供网关服务
+        <module>microservicecloud-gateway-gateway9527</module>
+EurekaClient的服务配置(config server)
+        <module>microservicecloud-config-3344</module>
+EurekaClient的服务配置(config client)
+        <module>microservicecloud-config-client-3355</module>
+EurekaClient的服务配置(config client)
+        <module>microservicecloud-config-eureka-client-7001</module>
+EurekaClient的服务配置(config client)
+        <module>microservicecloud-config-dept-client-8001</module>
+通过zookeeper来注册微服务
+        <module>microservicecloud-provider-dept-8004</module>
+通过zookeeper来发现微服务进行调用
+        <module>microservicecloud-consumer-zk-dept-80</module>
+通过consul来注册微服务
+        <module>microservicecloud-provider-dept-8005</module>
+通过consul来发现微服务进行调用
+        <module>microservicecloud-consumer-consul-dept-80</module>
+springcloud stream - 通过消息中间件进行通信 - 消息发送方(发起事件者)
+        <module>microservicecloud-stream-rabbitmq-provider8801</module>
+springcloud stream - 通过消息中间件进行通信 - 消息订阅方(被事件触发者)
+        <module>microservicecloud-stream-rabbitmq-consumer8802</module>
+        <module>microservicecloud-stream-rabbitmq-consumer8803</module>
+        <module>microservicecloud-stream-rabbitmq-consumer8804</module>
+Alibaba Nacos微服务(提供者)注册进Nacos
+        <module>cloudalibaba-provider-dept-9001</module>
+        <module>cloudalibaba-provider-dept-9002</module>
+        <module>cloudalibaba-provider-dept-9003</module>
+Alibaba Nacos微服务(消费者)注册进Nacos-通过Ribbon+RestTemplate来访问其他问服务
+        <module>cloudalibaba-consumer-dept-81</module>
+Alibaba Sentinel - 服务提供方进行服务降级和熔断(sentinel UI上的限流配置)，以及UI配置通过NACOS自动导入
+        <module>cloudalibaba-provider-dept-sentinel-8401</module>
+        <module>cloudalibaba-provider-dept-sentinel-8402</module>
+        <module>cloudalibaba-provider-dept-sentinel-8403</module>
+Alibaba Sentinel-服务消费方进行服务降级和熔断，并且通过RestTemplate+Ribbon调用其他微服务
+        <module>cloudalibaba-consumer-dept-ribbon-83</module>
+Alibaba Sentinel-服务消费方进行服务降级和熔断，并且通过Feign+Ribbon调用其他微服务
+        <module>cloudalibaba-consumer-dept-feign-82</module>
+Alibaba Seata 分布式事务
+        <module>seata-order-service-2001</module>
+        <module>seata-storage-service-2002</module>
+        <module>seata-account-service-2003</module>
+    </modules>

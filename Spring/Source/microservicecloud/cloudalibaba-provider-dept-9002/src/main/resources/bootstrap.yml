@@ -1,0 +1,16 @@
+spring:
+  application:
+    name: microservicecloud-dept
+  #Alibaba Nacos
+  cloud:
+    nacos:
+      discovery:
+        server-addr: localhost:8848 # 注册中心
+      config:
+        server-addr: localhost:8848 # 配置中心
+        file-extension: yml # 这里指定的文件格式需要和nacos上新建的配置文件后缀相同，否则读不到
+        group: location_beijing
+        namespace: business-domain-dept
+
+#配置文件匹配规则匹配对应namespace及group下的 ${spring.application.name}-${spring.profile.active}.${spring.cloud.nacos.config.file-extension}
+#所以这里就是获取 部门业务领域(business-domain-dept)下的 运行在beijing (location_wuhan) 的 dev (spring.profiles.active)服务器配置

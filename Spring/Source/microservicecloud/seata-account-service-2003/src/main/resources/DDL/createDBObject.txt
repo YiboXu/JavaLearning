@@ -1,0 +1,44 @@
+create database seata_account;
+use seata_account;
+
+create table t_account (
+`id` bigint(20) not null auto_increment primary key,
+`user_id` bigint(20) default null comment '用户ID',
+`total` decimal(18,2) default null comment '总额度',
+`used` decimal(18,2) default null comment '使用额度',
+`residue` decimal(18,2) default '0' null comment '剩余额度'
+) engine=INNODB auto_increment = 1 default charset = 'utf8';
+
+insert into t_account(`id`, `user_id`, `total`, `used`, `residue`) values('1', '1', '10000' , '0', '10000');
+select * from t_account;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

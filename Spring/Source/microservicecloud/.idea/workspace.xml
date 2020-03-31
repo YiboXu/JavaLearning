@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="91f684f0-9cf2-476f-9bd3-9c0908805e34" name="Default Changelist" comment="" />
+    <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="FxmlFile" />
+        <option value="Interface" />
+        <option value="Class" />
+      </list>
+    </option>
+  </component>
+  <component name="MavenImportPreferences">
+    <option name="importingSettings">
+      <MavenImportingSettings>
+        <option name="importAutomatically" value="true" />
+      </MavenImportingSettings>
+    </option>
+  </component>
+  <component name="ProjectId" id="1ZNiuGzJ8hsMaVGu8vXIi5yqdWt" />
+  <component name="PropertiesComponent">
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/seata-storage-service-2002/src/main/java/tk/springlearning/springcloud" />
+    <property name="project.structure.last.edited" value="Modules" />
+    <property name="project.structure.proportion" value="0.15" />
+    <property name="project.structure.side.proportion" value="0.2" />
+    <property name="settings.editor.selected.configurable" value="preferences.pluginManager" />
+  </component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\IdeaProjects\springcloud\microservicecloud\seata-storage-service-2002\src\main\java\tk\springlearning\springcloud" />
+      <recent name="C:\IdeaProjects\springcloud\microservicecloud\seata-account-service-2003\src\main\resources" />
+      <recent name="C:\IdeaProjects\springcloud\microservicecloud\seata-storage-service-2002\src\main\java\tk\springlearning\springcloud\domain" />
+      <recent name="C:\IdeaProjects\springcloud\microservicecloud\seata-storage-service-2002\src\main\resources" />
+      <recent name="C:\IdeaProjects\springcloud\microservicecloud\seata-order-service-2001\src\main\java\tk\springlearning\springcloud" />
+    </key>
+    <key name="CopyClassDialog.RECENTS_KEY">
+      <recent name="tk.springlearning.springcloud.config" />
+      <recent name="tk.springlearning.springcloud" />
+      <recent name="tk.springlearning.springcloud.domain" />
+      <recent name="tk.springlearning.springcloud.dao" />
+      <recent name="tk.springlearning.springcloud.component" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\IdeaProjects\springcloud\microservicecloud\microservicecloud-config-eureka-client-7001\src\main\resources\git_config_file" />
+      <recent name="C:\IdeaProjects\springcloud\microservicecloud\microservicecloud-provider-dept-8001\src\main\resources\mybatis" />
+    </key>
+  </component>
+  <component name="RunDashboard">
+    <option name="ruleStates">
+      <list>
+        <RuleState>
+          <option name="name" value="ConfigurationTypeDashboardGroupingRule" />
+        </RuleState>
+        <RuleState>
+          <option name="name" value="StatusDashboardGroupingRule" />
+        </RuleState>
+      </list>
+    </option>
+  </component>
+  <component name="RunManager" selected="Application.SeataStorageMainApp2002">
+    <configuration name="DeptProvider8402_App" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="tk.springlearning.springcloud.DeptProvider8402_App" />
+      <module name="cloudalibabaproviderdeptsentinel8402" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="tk.springlearning.springcloud.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="DeptProvider8403_App" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="tk.springlearning.springcloud.DeptProvider8403_App" />
+      <module name="cloudalibabaproviderdeptsentinel8403" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="tk.springlearning.springcloud.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="SeataAccountMainApp2003" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="tk.springlearning.springcloud.SeataAccountMainApp2003" />
+      <module name="seataaccountservice2003" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="tk.springlearning.springcloud.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="SeataOrderMainApp2001" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="tk.springlearning.springcloud.SeataOrderMainApp2001" />
+      <module name="seataorderservice2001" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="tk.springlearning.springcloud.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="SeataStorageMainApp2002" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="tk.springlearning.springcloud.SeataStorageMainApp2002" />
+      <module name="seatastorageservice2002" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="tk.springlearning.springcloud.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Application.SeataAccountMainApp2003" />
+        <item itemvalue="Application.SeataStorageMainApp2002" />
+        <item itemvalue="Application.SeataOrderMainApp2001" />
+        <item itemvalue="Application.DeptProvider8403_App" />
+        <item itemvalue="Application.DeptProvider8402_App" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="91f684f0-9cf2-476f-9bd3-9c0908805e34" name="Default Changelist" comment="" />
+      <created>1584686173261</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1584686173261</updated>
+    </task>
+    <servers />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>jar://$MAVEN_REPOSITORY$/com/netflix/ribbon/ribbon-loadbalancer/2.2.2/ribbon-loadbalancer-2.2.2.jar!/com/netflix/loadbalancer/RoundRobinRule.class</url>
+          <line>20</line>
+          <option name="timeStamp" value="2" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>jar://$MAVEN_REPOSITORY$/org/springframework/cloud/spring-cloud-stream/3.0.1.RELEASE/spring-cloud-stream-3.0.1.RELEASE.jar!/org/springframework/cloud/stream/config/BindingBeansRegistrar.class</url>
+          <line>22</line>
+          <option name="timeStamp" value="5" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>jar://$MAVEN_REPOSITORY$/org/springframework/cloud/spring-cloud-stream/3.0.1.RELEASE/spring-cloud-stream-3.0.1.RELEASE.jar!/org/springframework/cloud/stream/binding/BindingBeanDefinitionRegistryUtils.class</url>
+          <line>54</line>
+          <option name="timeStamp" value="7" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>jar://$MAVEN_REPOSITORY$/org/springframework/cloud/spring-cloud-stream/3.0.1.RELEASE/spring-cloud-stream-3.0.1.RELEASE-sources.jar!/org/springframework/cloud/stream/messaging/DirectWithAttributesChannel.java</url>
+          <line>29</line>
+          <option name="timeStamp" value="9" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-method">
+          <url>jar://$MAVEN_REPOSITORY$/org/springframework/cloud/spring-cloud-openfeign-core/2.2.1.RELEASE/spring-cloud-openfeign-core-2.2.1.RELEASE.jar!/org/springframework/cloud/openfeign/FeignClientProperties.class</url>
+          <line>26</line>
+          <properties class="org.springframework.cloud.openfeign.FeignClientProperties" method="&lt;init&gt;">
+            <option name="EMULATED" value="true" />
+          </properties>
+          <option name="timeStamp" value="4" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+  </component>
+</project>

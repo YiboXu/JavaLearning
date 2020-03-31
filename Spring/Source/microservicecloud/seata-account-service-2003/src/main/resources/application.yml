@@ -1,0 +1,35 @@
+server:
+  port: 2003
+
+spring:
+  application:
+    name: seata-account-service
+  datasource:
+    url: jdbc:mysql://localhost:3306/seata_account
+    username: root
+    password: 123456
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    type: com.alibaba.druid.pool.DruidDataSource
+    dbcp2:
+      min-idle: 5
+      initial-size: 5
+      max-total: 5
+      max-wait-millis: 200
+  cloud:
+    alibaba:
+      seata:
+        # 自定义事务组名称需要与file.conf里的service中的vgroup_mapping.my_test_tx_group = "fsp_tx_group"对应
+        tx-service-group: fsp_tx_group
+    nacos:
+      discovery:
+        server-addr: localhost:8848 #Nacos服务注册中心地址
+
+mybatis:
+  configLocation: classpath:mybatis/mybatis-config.xml
+  mapperLocations: classpath:mybatis/mapper/**/*.xml
+  typeAliasesPackage: tk.springlearning.springcloud.domain
+
+logging:
+  level:
+    io:
+      seata: info

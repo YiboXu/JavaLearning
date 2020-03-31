@@ -2,6 +2,7 @@ https://www.bilibili.com/video/av77706030/
 https://www.bilibili.com/video/av32637612?p=4
 https://www.bilibili.com/video/av77670328/
 https://www.bilibili.com/video/av78638752?p=1
+m.wang1314.com/doc/webapp/topic/20971999.html
 
 Dubbo和Spring cloud之间的区别
 - Dubbo用的是RPC来进行各个微服务之间的通信， 而Spring cloud是通过Restful API来进行为负值之间的通信
@@ -62,8 +63,10 @@ C (Consistency) 一致性
 A (Availability) 可用性
 P (Partition tolerance) 分区容错性
 
-zookeeper满足 CP， leader节点down掉后，会重新进行选举，一般持续30秒到2分钟，这个期间，服务不可用。但是zookeeper保证在任意时刻，俄格节点的数据是一致的.
-Eureka满足AP. 满足任意时刻，服务可用，但是不保证每个节点数据一致.
+zookeeper和Consul满足 CP， 各个微服务通过心跳来向服务注册服务器(zookeeper和Consul)报告自己可用，但是由于网络故障或延迟，有可能某些微服务本身是可用的，但是其心跳没有正常发送给服务注册服务器,
+这个时候，由于zookeeper和Consul满足CP，所以会将这些没有收到其心跳的服务器从可用服务器列表中去掉，保证一致性，但是同时也误杀了这些正常可用的服务，导致失去可用性
+注意，zookeeper里面，leader节点down掉后，会重新进行选举，一般持续30秒到2分钟，这个期间，服务不可用。
+Eureka满足AP. 跟zookeeper和Consul不一样，它就算没有收到微服务的心跳，也不会马上将其从可用微服务列表删除，目的就是为了保持微服务的可用性，但是里面可能确实存在一些不可用的服务器被保留下来，从而牺牲了一致性.
 
 
 网络摘抄理解：
@@ -117,6 +120,50 @@ RetryRule                会按照RoundRobinRule的策略获取服务，如果�
 BestAvailableRule        会先过滤掉由于多次访问故障而处于断路器跳闸状态的服务，然后选择一个并发量最小的服务
 
 ZoneAvoidanceRule        默认规则， 符合判断server所在区域的性能和server的可用性选择器
+
+服务器端负载均衡 Nginx
+
+nginx 是客户端所有请求统一交给 nginx，由 nginx 进行实现负载均衡请求转发，属于服务器端负载均衡。
+
+既请求由 nginx 服务器端进行转发。
+
+客户端负载均衡 Ribbon
+
+Ribbon 是从 eureka 注册中心服务器端上获取服务注册信息列表，缓存到本地，然后在本地实现轮询负载均衡策略。
+
+既在客户端实现负载均衡。
+
+** 应用场景的区别：**
+
+Nginx 适合于服务器端实现负载均衡 比如 Tomcat ，Ribbon 适合与在微服务中 RPC 远程调用实现本地服务负载均衡，比如 Dubbo、SpringCloud 中都是采用本地负载均衡。
+
+补充：ribbon和feign的区别（转）
+
+spring cloud的Netflix中提供了两个组件实现软负载均衡调用：ribbon和feign。
+
+Ribbon
+是一个基于 HTTP 和 TCP 客户端的负载均衡器
+它可以在客户端配置 ribbonServerList（服务端列表），然后轮询请求以实现均衡负载。
+
+Feign
+Spring Cloud Netflix 的微服务都是以 HTTP 接口的形式暴露的，所以可以用 Apache 的 HttpClient 或 Spring 的 RestTemplate 去调用，而 Feign 是一个使用起来更加方便的 HTTP 客戶端，使用起来就像是调用自身工程的方法，而感觉不到是调用远程方法。
+
+
+服务熔断
+服务降级
+服务限流
+
+Hystrix处理微服务请求流程：
+- 调用结果是否有缓存，如果有，直接范围缓存结果
+- 如果没有，查看微服务是否被熔断，如果是，执行服务降级fallback
+- 如果没有混村，而且没有熔断，就执行服务请求
+- 请求如果成功，就返回结果，并且更新调用记录(用来判断是否启动服务熔断)
+- 请求执行方法如果失败，就执行fallback,并且更新调用记录(用来判断是否启动服务熔断);如果没有fallback，返回报错结果
+
+对方服务(8001)超时，调用者(80)不能以自卡死等待，必须有服务降级
+对方服务(8001)down机了, 调用者(80)不能一直卡死等待，碧玺有服务降级
+对方服务(8001)ok, 调用者(80)自己出故障或有自我要求(自己的等待时间小于服务器返回结果所需时间)
+
 
 一 Idea创建多模块项目
 1. 创建一个Maven空project (不用archetype)
@@ -960,7 +1007,22 @@ spring:
 
 
 
+--consul
+docker run -p 8500:8500 consul:1.6.0
 
+http://localhost:8500/
+
+--nacos
+docker pull nacos/nacos-server
+
+启动镜像
+这里启动容器的时候参数配置我就不在详解了，不明白的话，评论区留言，有不会的问题一定要及时询问，期待你的评论呦！
+docker run --env MODE=standalone --name nacos -d -p 8848:8848 nacos/nacos-server
+
+
+http://192.168.247.131:8848/nacos/index.html
+
+nacos的默认端口号是8848，珠穆拉玛发的高度也是8848米呦！默认账号密码是nacos/nacos。至此安装已经结束。
 
 
 

@@ -1,0 +1,60 @@
+server:
+  port: 8401
+
+spring:
+  application:
+    name: microservicecloud-dept
+  datasource:
+    url: jdbc:mysql://localhost:3306/cloudDB09
+    username: root
+    password: 123456
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    type: com.alibaba.druid.pool.DruidDataSource
+    dbcp2:
+      min-idle: 5
+      initial-size: 5
+      max-total: 5
+      max-wait-millis: 200
+  cloud:
+    nacos:
+      discovery:
+        server-addr: localhost:8848 #Nacos服务注册中心地址
+    sentinel:
+      transport:
+        dashboard: localhost:8080 #配置Sentinel dashboard地址
+        port: 8719
+      #指定限流配置的存储位置，这样本微服务重启后会从nacos里面读取配置，从而避免了之前的配置丢失
+      #否则，微服务重启后，之前的配置都不在了，需要重新配置
+      #下面指定了本微服务启动的时候，从nacos(localhost:8848)里的ds1中读取groupdId=DEFAULT_GROUP
+      #且dataId=microservicecloud-dept8401的配置文件，读取后，配置到sentinel中
+      #[
+          #    {
+          #        "resource": "customerBlockHandler",
+          #        "limitApp" : "default",
+          #        "grade": 1,
+          #        "count" : 1,
+          #        "strategy": 0,
+          #        "controlBehavior" : 0,
+          #        "clusterMode": false
+          #    }
+      #]
+      datasource:
+        ds1:
+          nacos:
+            server-addr: localhost:8848
+            dataId: microservicecloud-dept8401
+            groupId: DEFAULT_GROUP
+            data-type: json
+            rule-type: flow
+
+mybatis:
+  config-location: classpath:mybatis/mybatis-config.xml
+  mapper-locations:
+    - classpath:mybatis/mapper/**/*.xml
+  type-aliases-package: tk.springlearning.springcloud.entities
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'

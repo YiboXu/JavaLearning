@@ -1,0 +1,27 @@
+server:
+  port: 83
+
+spring:
+  application:
+    name: microservicecloud-dept-consumer83
+  cloud:
+    nacos:
+      discovery:
+        server-addr: localhost:8848 # 注册中心
+    sentinel:
+      transport:
+        dashboard: localhost:8080 #配置Sentinel dashboard地址
+        port: 8719
+
+#消费者需要访问的微服务提供者的spring.application.name
+service-url:
+  nacos-dept-service: microservicecloud-dept
+
+consumer:
+  version: 1.0
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'

@@ -1,0 +1,37 @@
+server:
+  port: 8802
+
+spring:
+  application:
+    name: microservicecloud-stream-consumer
+  cloud:
+    stream:
+      binders: # 在此处配置要绑定的rabbitMQ的服务信息 (BindingServiceProperties.class)
+        defaultRabbit: # 表示定义的名称(自定义)，用于binding的整合
+          type: rabbit # 消息中间件类型
+          environment: # 设置rabbitMQ的相关环境配置
+            spring:
+              rabbitmq:
+                host: localhost
+                port: 5672
+                username: guest
+                password: guest
+      bindings: # 服务的整合处理
+        myInput: # 这个名字是一个通道的名称(自定义)
+          destination: studyExchange # 表示要使用的exchange名称定义(需要和microservicebloud-stream-rabbitmq-provider8801里application.yml里面保持一致)
+          content-type: application/json # 设置消息类型，本次为json，文本则设为text/plain
+          binder: defaultRabbit # 设置要绑定的消息服务的具体设置
+          group: spectrumrpcA # 不同的组存在重复消费，相同的组之间竞争消费。 (对应MQ里面的queue)
+                              # 加上group之后，还会自动进行消息持久化，就是说如果消费端意外down机，重启后会自动读取未处理过的消息来处理
+                              # 如果不加上group,就没有消息持久化，那么消费端down机后 到 重启服务可用这段时间的消息就会丢失
+                              # 所以group在这里解决了消息重复消费和消息丢失的问题
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:7001/eureka,http://eureka7002.com:7002/eureka,http://eureka7003.com:7003/eureka
+  instance:
+    lease-renewal-interval-in-seconds: 2 # 设置心跳的间隔时间，默认30
+    lease-expiration-duration-in-seconds: 5 # 超过5秒间隔，默认90
+    instance-id: receive-8802.com #主机名
+    prefer-ip-address: true # 显示ip

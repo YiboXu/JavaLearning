@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <annotationProcessing>
+      <profile name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <module name="cloudalibabasentinelservice8401" />
+        <module name="microservicecloudproviderdept8002" />
+        <module name="microservicecloudstreamrabbitmqconsumer8804" />
+        <module name="microservicecloudstreamrabbitmqconsumer8803" />
+        <module name="microservicecloudstreamrabbitmqconsumer8802" />
+        <module name="seatastorageservice2002" />
+        <module name="microservicecloudzuulgateway9527" />
+        <module name="microservicecloudapi" />
+        <module name="microservicecloudconsumerdeptfeignhystrix280" />
+        <module name="microservicecloudconfigdeptclient8001" />
+        <module name="microservicecloudeureka7003" />
+        <module name="microservicecloudeureka7002" />
+        <module name="microservicecloudeureka7001" />
+        <module name="cloudalibabaproviderdept9003" />
+        <module name="cloudalibabaproviderdept9002" />
+        <module name="cloudalibabaproviderdept9001" />
+        <module name="microservicecloudconfigclient3355" />
+        <module name="cloudalibabaproviderdeptsentinel8403" />
+        <module name="cloudalibabaproviderdeptsentinel8402" />
+        <module name="cloudalibabaproviderdeptsentinel8401" />
+        <module name="microservicecloudconsumerdeptfeign" />
+        <module name="seataaccountservice2003" />
+        <module name="microservicecloudstreamrabbitmqprovider8801" />
+        <module name="microservicecloudconsumerconsuldept80" />
+        <module name="seataorderservice2001" />
+        <module name="cloudalibabaconsumerdeptfeign82" />
+        <module name="microservicecloudconsumerdeptfeignhystrix80" />
+        <module name="cloudalibabaconsumerdeptribbon83" />
+        <module name="microservicecloudconsumerhystrixdashboard9001" />
+        <module name="microservicecloudproviderdepthystrix8001" />
+        <module name="microservicecloudconsumerzkdept80" />
+        <module name="microservicecloudproviderdept8005" />
+        <module name="microservicecloudproviderdept8004" />
+        <module name="microservicecloudproviderdept8003" />
+        <module name="microservicecloudconsumerdept80" />
+        <module name="microservicecloudproviderdept8001" />
+        <module name="microservicecloudconfig3344" />
+        <module name="microservicecloudconfigeurekaclient7001" />
+        <module name="cloudalibabaconsumerdept81" />
+        <module name="microservicecloudgatewaygateway9527" />
+      </profile>
+    </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="cloudalibaba-sentinel-service8401" target="1.8" />
+      <module name="cloudalibabasentinelservice8401" target="1.8" />
+    </bytecodeTargetLevel>
+  </component>
+</project>

@@ -1,0 +1,34 @@
+server:
+  port: 82
+
+spring:
+  application:
+    name: microservicecloud-dept-consumer82
+  cloud:
+    nacos:
+      discovery:
+        server-addr: localhost:8848 # 注册中心
+    sentinel:
+      transport:
+        dashboard: localhost:8080 #配置Sentinel dashboard地址
+        port: 8719
+
+#消费者需要访问的微服务提供者的spring.application.name
+service-url:
+  nacos-dept-service: microservicecloud-dept
+
+#开启feign对sentinel的支持,只有开启后，当所调用的其他微服务不可用的时候，
+#才会转交到@FeignClient(value="...",fallbackFactory=...)里的fallbackFactory去处理
+#否则，还是@SentinalResource定义的handler来处理
+feign:
+  sentinel:
+    enabled: true
+
+consumer:
+  version: 1.0
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'

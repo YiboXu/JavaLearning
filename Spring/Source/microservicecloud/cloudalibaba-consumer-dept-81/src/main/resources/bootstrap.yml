@@ -1,0 +1,15 @@
+spring:
+  application:
+    name: microservicecloud-dept-consumer81
+  cloud:
+    nacos:
+      discovery:
+        server-addr: localhost:8848 # 注册中心
+      config:
+        server-addr: localhost:8848 # 配置中心
+        file-extension: yml # 这里指定的文件格式需要和nacos上新建的配置文件后缀相同，否则读不到
+#        group: DEFAULT_GROUP
+#        namespace: 4ccc4c4c-51ec-4bd1-8280-9e70942c0d0c
+
+#配置文件匹配规则
+#  ${spring.application.name}-${spring.profile.active}.${spring.cloud.nacos.config.file-extension}

@@ -1,0 +1,13 @@
+server:
+  port: 81
+
+spring:
+  application:
+    name: microservicecloud-dept-consumer81
+
+#消费者需要访问的微服务提供者的spring.application.name
+service-url:
+  nacos-dept-service: microservicecloud-dept
+
+consumer:
+  version: 1.0

@@ -1,0 +1,7 @@
+tk\springlearning\springcloud\service\DeptClientServiceFallbackFactory.class
+tk\springlearning\springcloud\service\NacosDeptClientServiceFallbackFactory.class
+tk\springlearning\springcloud\service\NacosDeptClientService.class
+tk\springlearning\springcloud\service\DeptClientServiceFallbackFactory$1.class
+tk\springlearning\springcloud\service\DeptClientService.class
+tk\springlearning\springcloud\entities\Dept.class
+tk\springlearning\springcloud\service\NacosDeptClientServiceFallbackFactory$1.class
