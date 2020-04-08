@@ -254,3 +254,35 @@ StringBuffer就是为了解决大量拼接字符串时产生很多中间对象�
 在很多情况下我们的字符串拼接操作不需要线程安全，这时候StringBuilder登场了，StringBuilder是JDK1.5发布的，它和StringBuffer本质上没什么区别，就是去掉了保证线程安全的那部分，减少了开销。
 
 StringBuffer 和 StringBuilder 二者都继承了 AbstractStringBuilder ，底层都是利用可修改的char数组(JDK 9 以后是 byte数组)。
+
+StringBuffer 和 StringBuilder底层都是用的char[]来存储字符串:
+StringBuffer sb1 = new StringBuffer(); //char[] value = new char[16], 底层创建了一个长度是16的数组
+sb1.append('a'); //value[0]='a';
+sb1.append('b'); //value[0]='b';
+
+StringBuffer sb2 = new StringBuffer("abc"); //char[] value = new char["abc".length()+16];
+
+问题1: System.out.println(sb2.length)); // 3
+问题2: 扩容问题: 如果要添加的数据底层数组放不下了，那就需要扩容底层的数组.
+       默认情况下，扩容为原来容量的2倍+2,同时将原有数组中的元素复制到新数组中.
+       指导意义: 开发中建议使用 StringBuffer(int capacity)或StringBuilder(int capacity),从而避免容量扩容.
+
+四 字符串转换
+String -> char[]
+String x= "abc";
+char[] chars = x.toCharArray();
+
+char[] -> String
+String y = new String(chars);
+
+String -> byte[]
+String x ="abc";
+byte[] bytes1 = x.getBytes();   //使用默认字符集转码
+String x = "abc中国";
+byte[] bytes2 = x.getBytes("gbk")  //使用字符集gbk转码
+
+byte[] -> String
+String y = new String(bytes1);         //使用默认字符集解码
+String z = new String(bytes2,"gbk");   //使用字符集gbk解码
+
+一般转码和解码需要用相同的字符集，否则会出现乱码.

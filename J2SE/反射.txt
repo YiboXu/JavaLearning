@@ -1,0 +1,444 @@
+1. JVM加载器都是在需要某个class的时候才会将对应的.class文件加载进内存。(就是将字节文件翻译成代码放入内存，这样就可以对其进行调用）
+2. 对某个类的加载发生在第一次引用其静态成员(域或方法）的时候，构造器也是静态方法。
+3. 每个类加载到内存，都会有一个对应的Class对象。 得到这个Class对象的引用有2中方法:
+- 如果类本身没有实例化：Class.forName(strNameOfClass) 返回这个Class对象的引用。 
+  注意strNameOfClass要包含package name, 比如: typeinfo.toys.Shoots
+- 如果类本身已经实例化： 类实例.getClass()  返回Class对象的引用。
+4. 类字面常量
+FancyToy.class;  //返回的是Class对象。 等价于 Class.forName("FancyToy");
+类字面常量不仅可以应用于普通的类，也可以应用于接口，数组以及基本数据类型。另外，对于基本数据类型的包装器类，
+还有一个标准字段TYPE。TYPE字段是一个引用,指向对应的基本数据类型的Class对象。
+boolean.class    Boolean.TYPE
+char.class       Character.TYPE
+byte.class       Byte.TYPE
+short.class      Short.TYPE
+int.class        Integer.TYPE
+long.class       Long.TYPE
+float.class      Float.TYPE
+double.class     Double.TYPE
+void.class       Void.TYPE
+5 类的初始化
+在用到类中静态域或方法的时候会开始初始化类，顺序如下： （只会执行一次）
+父类静态域->子类的静态域   （包括静态初始化 static{}）
+在每次用到类实例的时候，会进行如下的初始化:
+父类非静态域及构造函数->子类非静态域及构造函数 （包括非静态初始化 {}）
+注意：访问类里面的静态常数域（并且是编译器常量）不会引起类的初始化(static final int x = 10),对于x的访问不会对类初始化。
+但是static final int staticFinal2 = ClassInitialization.rand.nextInt(1000); 则还是
+会引起静态初始化。因为它不是一个编译器常量。
+.class的访问不会引起类的初始化。
+Class.forName()会引起静态初始化
+6 检查实例是否属于某个类
+if(object instanceof ClassName)
+if(ClassObject.isInstance(object))  //if(Base.class.isInstance(object))
+7 boolean isAssignableFrom(Class<?> cls)
+Determines if the class or interface represented by this Class object is 
+either the same as, or is a superclass or superinterface of, 
+the class or interface represented by the specified Class parameter.  
+
+8 instanceof 和isInstance() 完全一致
+  instanceof 保持了类型的概念，它指的是"你是这个类吗，或者你是这个类的派生类吗",而如果用getClass()或.class来比较2个类，
+  那么久不会考虑继承，他们比较的这2个类的确切类型是否一致。
+class Base{}
+class Child extends Base{}
+
+Child c = new Child().
+
+c instanceof Base     // true
+c instanceof Child    // true
+c.getClass() == Base.class   //false
+c.getClass() == Child.class  //true
+
+9 后门
+A a = new A();
+Method g = a.getClass().getDeclaredMethod(methodName);
+g.setAccessible(true);
+g.invoke(a);
+
+通过这个代码，就可以访问A的所有方法，包括私有方法。
+
+一. 如果获取Class对象
+package tk.learning.reflect;
+
+import org.junit.Test;
+
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.annotation.ElementType;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.Properties;
+
+public class T1 {
+    @Test
+    public void test01() throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException, NoSuchFieldException {
+        Class clazz = Person.class;
+        //通过反射创建对象
+        Constructor constructor = clazz.getDeclaredConstructor(String.class, int.class);
+        Person person = (Person) constructor.newInstance("Billhu",37);
+        System.out.println(person);
+        //通过反射调用对象的指定属性和方法
+        Field age = clazz.getDeclaredField("age");
+        age.set(person,40);
+        System.out.println(person);
+
+        Method show = clazz.getMethod("show");
+        show.invoke(person);
+
+        //通过反射调用对象的私有构造器，方法和属性
+        Constructor constructor1 = clazz.getDeclaredConstructor(String.class);
+        constructor1.setAccessible(true);
+        Person person1 = (Person) constructor1.newInstance("sofica");
+        System.out.println(person1);
+        Field name = clazz.getDeclaredField("name");
+        name.setAccessible(true);
+        name.set(person1,"sofica-changed");
+        System.out.println(person1);
+
+        Method showNation = clazz.getDeclaredMethod("showNation",String.class);
+        showNation.setAccessible(true);
+        String result = (String) showNation.invoke(person1,"中国");
+        System.out.println(result);
+    }
+
+    @Test
+    public void test02() throws ClassNotFoundException {
+        //获取class类实例, 下面几种方式获取的Class对象都是同一个
+        //方式1: 调用运行时类的属性.class
+        Class<Person> clazz1 = Person.class;
+        System.out.println(clazz1);
+        //方式2: 通过运行时类的对象
+        Person person = new Person("bill",20);
+        Class clazz2 = person.getClass();
+        System.out.println(clazz2);
+        //方式3: 调用Class的静态方法, Class.forName(String classPath)
+        Class clazz3 = Class.forName("tk.learning.reflect.Person");
+        System.out.println(clazz3);
+        //方式4： 通过类加载器ClassLoader
+        ClassLoader classLoader = T1.class.getClassLoader();
+        Class clazz4 = classLoader.loadClass("tk.learning.reflect.Person");
+        System.out.println(clazz4);
+    }
+
+    /**
+     * 哪些类型可以有Class对象
+     * - class: 外部类，成员(成员内部类，静态内部类), 局部内部类，匿名内部类
+     * - interface:接口
+     * - []:数组
+     * - enum: 枚举
+     * - annotation: 注解 @interface
+     * - primitive type: 基本数据类型
+     * - void
+     */
+    @Test
+    public void test03(){
+        Class c1=Object.class;
+        Class c2=Comparable.class;
+        Class c3=String[].class;
+        Class c4=int[][].class;
+        Class c5= ElementType.class;
+        Class c6=Override.class;
+        Class c7=int.class;
+        Class c8=void.class;
+        Class c9=Class.class;
+
+        //只要数组的类型和维度是一样的，那么获取的Class就是同一个Class
+        int[] a = new int[10];
+        int[] b = new int[100];
+        Class ca = a.getClass();
+        Class cb = b.getClass();
+        System.out.println(ca == cb);
+    }
+
+    /**
+     * 类的加载过程
+     * 当程序主动使用某个类时, 如果该类还未倍加载到内存中，则系统会通过如下三个步骤来对该类进行初始化:
+     * 1. 类的加载(Load)
+     *    将类的class文件读入内存, 并为之创建一个java.lang.Class对象. 此过程由类加载器完成.
+     *    所有需要访问和使用类数据只能通过这个Class对象. 这个加载的过程需要类加载器参与.
+     * 2. 类的链接(Link)
+     *    将类的二进制数据合并到JVM的运行状态之中
+     *    -验证: 确保加载的类信息符合JVM规范， 例如: 以cafe开头，没有安全方面的问题
+     *    -准备: 正式为类变量(static)分配内存并设置类变量默认初始值的阶段, 这些内存都将在方法去中进行分配
+     *    -解析: 虚拟机常量池内的符号引用(常量名)替换为直接引用(地址)的过程.
+     * 3. 类的初始化(Initialize)
+     *    -执行类构造器<clinit>()方法的过程. 类构造器<clinit>()方法是由编译器自动收集类中所有类变量的赋值动作和静态代码块中的语句合并产生的.
+     *     类构造器是构造类信息的, 不是构造该类对象的构造器.
+     *    -当初始化一个类的时候, 如果发现其父类还没有进行初始化，则需要先触发其父类的初始化.
+     *    -虚拟机会保证一个类的<clinit>()方法在多线程环境中倍正确加锁和同步.
+     */
+    @Test
+    public void test04() throws IOException {
+        //对于自定义类，使用系统类加载器
+        //系统类加载器负责加载java -classpath或-D java.class.path所指定的目录下的类与jar
+        ClassLoader classLoader = T1.class.getClassLoader();
+        System.out.println(classLoader);
+
+        //获取扩展类加载器
+        //货站类加载器负责加载jre/lib/ext目录下的包或-D java.ext.dirs所指定的目录下的jar
+        ClassLoader classLoader1 = classLoader.getParent();
+        System.out.println(classLoader1);
+
+        //无法获取到引导类加载器，但是它是存在的.
+        //引导类加载器主要负责加载java的核心类库,无法用于加载自定义类
+        ClassLoader classLoader2 = classLoader1.getParent();
+        System.out.println(classLoader2);
+
+        //2种读取配置文件的方式
+        //方式1: FileReader
+        Properties properties = new Properties();
+        properties.load(new FileReader("application.properties"));
+
+        System.out.println(properties.getProperty("username"));
+        System.out.println(properties.get("password"));
+
+        //方式2: ClassLoader
+        ClassLoader classLoader3 = T1.class.getClassLoader();
+        InputStream is = classLoader3.getResourceAsStream("src\\application.properties");
+        System.out.println(is.available());
+        Properties properties1 = new Properties();
+        properties1.load(is);
+        System.out.println(properties1.getProperty("username"));
+        System.out.println(properties1.get("password"));
+    }
+
+    @Test
+    public void test05() throws IllegalAccessException, InstantiationException {
+        //newInstance()创建类实例
+        //要求: 1. 具有空参构造函数  2. 空参构造函数的权限要够
+        Class<Person> personClass = Person.class;
+        Person person = personClass.newInstance();
+        System.out.println(person);
+    }
+}
+
+二 获取了类对象后，如何获取类的结构信息
+package tk.learning.reflect;
+
+import org.junit.Test;
+
+import java.lang.reflect.*;
+import java.util.Arrays;
+
+public class T2 {
+    @Test
+    public void test01() throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException, NoSuchMethodException, InvocationTargetException, InstantiationException {
+        Class<Person> personClass = (Class<Person>) T2.class.getClassLoader().loadClass("tk.learning.reflect.Person");
+        //获取属性结构
+        //getFields() 获取运行时类和其父类中声明为public访问权限的属性
+        System.out.println("-----------getFields-------------------------");
+        Arrays.stream(personClass.getFields()).forEach(x->System.out.println(x));
+        System.out.println("-----------getDeclaredFields-------------------------");
+        //getFields() 获取运行时类中所有的属性,不包括父类中的属性
+        Arrays.stream(personClass.getDeclaredFields()).forEach(x->System.out.println(x));
+        System.out.println("-----------getModifiers-------------------------");
+        //getFields() 获取运行时类中所有的属性的修饰符
+        Arrays.stream(personClass.getDeclaredFields()).map(x-> Modifier.toString(x.getModifiers())).forEach(x->System.out.println(x));
+        System.out.println("-----------getType-------------------------");
+        //getFields() 获取运行时类中所有的属性的类型
+        Arrays.stream(personClass.getDeclaredFields()).map(x-> x.getType()).forEach(x->System.out.println(x));
+        System.out.println("-----------getName-------------------------");
+        //getFields() 获取运行时类中所有的属性名
+        Arrays.stream(personClass.getDeclaredFields()).map(x-> x.getName()).forEach(x->System.out.println(x));
+
+        //getFields() 获取运行时类和其父类中声明为public访问权限的方法
+        System.out.println("-----------getMethods-------------------------");
+        Arrays.stream(personClass.getMethods()).forEach(x->System.out.println(x));
+        System.out.println("-----------getDeclaredMethods-------------------------");
+        //getFields() 获取运行时类中所有的方法(不包含父类方法)
+        Arrays.stream(personClass.getDeclaredMethods()).forEach(x->System.out.println(x));
+        System.out.println("-----------getAnnotations-------------------------");
+        //getFields() 获取运行时类中所有的方法的注解
+        Arrays.stream(personClass.getDeclaredMethods()).map(x->x.getAnnotations()).forEach(x->System.out.println(Arrays.asList(x)));
+        System.out.println("-----------getModifiers-------------------------");
+        //getFields() 获取运行时类中所有的方法的修饰符
+        Arrays.stream(personClass.getDeclaredMethods()).map(x->Modifier.toString(x.getModifiers())).forEach(x->System.out.println(x));
+        System.out.println("-----------getReturnType-------------------------");
+        //getFields() 获取运行时类中所有的方法的返回类型
+        Arrays.stream(personClass.getDeclaredMethods()).map(x->x.getName()+"-"+x.getReturnType()).forEach(x->System.out.println(x));
+        System.out.println("-----------getParameters-------------------------");
+        //getFields() 获取运行时类中所有的方法的参数
+        Arrays.stream(personClass.getDeclaredMethods()).map(x->Arrays.asList(x.getParameters())).forEach(x->System.out.println(x));
+        System.out.println("-----------getExceptionTypes-------------------------");
+        //getFields() 获取运行时类中所有的方法的异常
+        Arrays.stream(personClass.getDeclaredMethods()).map(x->Arrays.asList(x.getExceptionTypes())).forEach(x->System.out.println(x));
+
+        System.out.println("-----------getConstructors-------------------------");
+        //getFields() 获取运行时类中所有声明为Public的构造器
+        Arrays.stream(personClass.getConstructors()).forEach(x->System.out.println(x));
+        System.out.println("-----------getDeclaredConstructors-------------------------");
+        //getFields() 获取运行时类中所有的构造器
+        Arrays.stream(personClass.getDeclaredConstructors()).forEach(x->System.out.println(x));
+
+        System.out.println("-----------getSuperclass-------------------------");
+        //getFields() 获取运行时类中所有父类
+        System.out.println(personClass.getSuperclass());
+        System.out.println("-----------getGenericSuperclass-------------------------");
+        //getFields() 获取运行时类中所有带泛型的父类
+        System.out.println(personClass.getGenericSuperclass());
+        //getFields() 获取运行时类中父类的泛型
+        Type type = personClass.getGenericSuperclass();
+        ParameterizedType parameterizedType = (ParameterizedType) type;
+        Arrays.stream(parameterizedType.getActualTypeArguments()).forEach(x->System.out.println(x));
+
+        System.out.println("-----------getInterfaces-------------------------");
+        //getFields() 获取运行时类中所有的接口
+        Arrays.stream(personClass.getInterfaces()).forEach(x->System.out.println(x));
+        System.out.println("-----------getInterfaces-------------------------");
+        //getFields() 获取运行时类的注解
+        Arrays.stream(personClass.getAnnotations()).forEach(x->System.out.println(x));
+
+        System.out.println("-----------get/set field value-------------------------");
+        //getFields() 获取运行时类中特定属性
+        Person person = new Person("billhu",37);
+        System.out.println(person);
+        Field field = personClass.getDeclaredField("age");
+        field.setAccessible(true);
+        field.set(person,40);
+        System.out.println(person);
+
+        System.out.println("-----------get/invoke method-------------------------");
+        //getFields() 获取运行时类中特定属性
+        Person person1 = new Person("billhu",37);
+        Method method1 = personClass.getDeclaredMethod("toString");
+        method1.setAccessible(true);
+        String result1 = (String) method1.invoke(person1);
+        System.out.println(result1);
+
+        Method method2 = personClass.getDeclaredMethod("showNation",String.class);
+        method2.setAccessible(true);
+        String result2 = (String) method2.invoke(person1,"中国");
+        System.out.println(result2);
+
+        //调用静态方法
+        Method method3 = personClass.getDeclaredMethod("boo",String.class);
+        method3.setAccessible(true);
+        method3.invoke(null,"中国");
+
+        //调用构造器
+        Person person2 = personClass.getDeclaredConstructor(String.class, int.class).newInstance("Billhu",40);
+        System.out.println(person2);
+    }
+}
+
+
+三. 反射应用(动态代理)
+package tk.spring.dynamicproxy;
+
+public interface Rent {
+    void rent();
+}
+
+
+----------------------------------------
+package tk.spring.dynamicproxy;
+
+public class Host implements Rent {
+
+    @Override
+    public void rent() {
+        System.out.println("房屋出租");
+    }
+}
+------------------------------------------
+package tk.spring.dynamicproxy;
+
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+
+public class ProxyInvocationHandle implements InvocationHandler {
+    private Object target;
+    public void setTarget(Object target){
+        this.target = target;
+    }
+
+    public Object getProxy(){
+        return Proxy.newProxyInstance(this.getClass().getClassLoader(),target.getClass().getInterfaces(),this);
+    }
+
+    /**
+     * @param proxy  代理类
+     * @param method 代理类调用被代理对象
+     * @param args   代理类调用的方法的参数
+     * @return
+     * @throws Throwable
+     */
+    @Override
+    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+        commondMethod1();
+        Object result = method.invoke(target,args);
+        commondMethod2();
+        return result;
+    }
+
+    /**
+     * 公共方法1
+     */
+    private void commondMethod1(){
+        System.out.println("调用公共方法1");
+    }
+
+    /**
+     * 公共方法2
+     */
+    private void commondMethod2(){
+        System.out.println("调用公共方法2");
+    }
+}
+---------------------------------------------
+package tk.spring.dynamicproxy;
+
+import tk.spring.staticproxy.service.UserService;
+import tk.spring.staticproxy.service.UserServiceImpl;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class Client{
+    public static void main(String[] args){
+        //一个动态代理类一般代理同一类业务
+        //只要有接口，我们就可以通过动态代理生成其的代理类
+        //但是适用的情景是这些不同的被代理类的方法都需要调用相同的公共方法
+        //比如这里的Host和UserServiceImpl的方法都会调用到commonMethod1和commonMethod2
+
+        //我们先为Host设置一个代理类，在其调用rent()前后调用commonMethod1和commonMethod2
+        Host host = new Host();
+        ProxyInvocationHandle pih = new ProxyInvocationHandle();
+        pih.setTarget(host);
+        Rent proxy = (Rent)pih.getProxy();
+        proxy.rent();
+
+        //切换被代理对象为ArrayList
+        //这里我们就通过动态代理类来在list.add()方法前后调用commonMethod1和commonMethod2
+        pih.setTarget(new ArrayList());
+        List listProxy = (List)pih.getProxy();
+        listProxy.add("abc");
+    }
+}
+
+
+机制讲解
+
+在Java的动态代理机制中，有两个重要的类或接口，一个是 InvocationHandler(Interface)、另一个则是 Proxy(Class)，这一个类和接口是实现我们动态代理所必须用到的。
+
+首先我们先来看看Java的API帮助文档是怎么样对这两个类进行描述的：
+
+InvocationHandler：
+
+    InvocationHandler is the interface implemented by the invocation handler of a proxy instance. 
+     
+    Each proxy instance has an associated invocation handler. When a method is invoked on a proxy instance, the method invocation is encoded and dispatched to the invoke method of its invocation handler.
+
+每一个动态代理类都必须要实现InvocationHandler这个接口，并且每个代理类的实例都关联到了一个handler，当我们通过代理对象调用一个方法的时候，这个方法的调用就会被转发为由InvocationHandler这个接口的 invoke 方法来进行调用。我们来看看InvocationHandler这个接口的唯一一个方法 invoke 方法：
+
+Object invoke(Object proxy, Method method, Object[] args) throws Throwable
+
+我们看到这个方法一共接受三个参数，那么这三个参数分别代表什么呢？
+
+    Object invoke(Object proxy, Method method, Object[] args) throws Throwable
+    proxy:　 - 指代我们所代理的那个真实对象
+    method:　- 指代的是我们所要调用真实对象的某个方法的Method对象
+    args:　　- 指代的是调用真实对象某个方法时接受的参数

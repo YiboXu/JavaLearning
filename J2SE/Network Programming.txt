@@ -1,0 +1,179 @@
+一 TCP
+Server:
+package tk.network.learning;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+/**
+ * @author Bill Hu
+ * @Description
+ * @create 2020-04-06 11:13 PM
+ */
+public class Server {
+    public static void main(String[] args) throws IOException {
+        try(ServerSocket serverSocket = new ServerSocket(8899);){
+            ExecutorService exec = Executors.newCachedThreadPool();
+            while(true){
+                try{
+                    Socket socket = serverSocket.accept();
+                    exec.submit(() -> {
+                        try(ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                            InputStream is = socket.getInputStream();
+                            OutputStream os = socket.getOutputStream()){
+                            byte[] message = new byte[1024];
+                            int len;
+                            while((len=is.read(message))!=-1) {
+                                baos.write(message, 0,len);
+                                baos.writeTo(System.out);
+                                baos.reset();
+                                //反馈消息给客户端
+                                os.write("*****Message received*******".getBytes());
+                            }
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }finally {
+                            if(socket != null){
+                                try {
+                                    socket.close();
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        }
+                    });
+                }catch (Exception e){}
+            }
+        }
+    }
+}
+
+
+client:
+package tk.network.learning;
+
+import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.InetAddress;
+import java.net.Socket;
+
+/**
+ * @author Bill Hu
+ * @Description
+ * @create 2020-04-06 11:15 PM
+ */
+public class Client {
+    public static void main(String[] args) throws IOException {
+        InetAddress inetAddress = InetAddress.getLocalHost();
+        try(Socket socket = new Socket(inetAddress,8899);
+            //InputStream is = socket.getInputStream();
+            InputStream is = new BufferedInputStream(System.in);
+            OutputStream os = socket.getOutputStream();
+            InputStream sis = socket.getInputStream()){
+            byte[] message = new byte[1024];
+            int len = 0;
+            while((len=is.read(message))!=-1) {
+                if(new String(message,0,len).equals("exit")){
+                    break;
+                }
+                os.write(message,0,len);
+                len=sis.read(message);
+                System.out.println(new String(message,0,len));
+            }
+        }
+    }
+}
+
+
+二 UDP
+package tk.network.learning;
+
+import org.junit.Test;
+
+import java.io.IOException;
+import java.net.*;
+
+/**
+ * @author Bill Hu
+ * @Description
+ * @create 2020-04-07 8:23 AM
+ */
+public class UDPTest1 {
+    @Test
+    public void sender() throws IOException {
+        InetAddress inetAddress = InetAddress.getLocalHost();
+        DatagramSocket datagramSocket = new DatagramSocket();
+        String message = "Message from UDP client";
+        DatagramPacket datagramPacket = new DatagramPacket(message.getBytes(),message.length(),inetAddress,9090);
+
+        datagramSocket.send(datagramPacket);
+
+        datagramSocket.close();
+    }
+
+    @Test
+    public void receiver() throws IOException {
+        DatagramSocket datagramSocket = new DatagramSocket(9090);
+        byte[] message = new byte[1024];
+        DatagramPacket datagramPacket = new DatagramPacket(message,0,message.length);
+        datagramSocket.receive(datagramPacket);
+
+        System.out.println(new String(message));
+    }
+}
+
+
+三 URL
+package tk.network.learning;
+
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+
+/**
+ * @author Bill Hu
+ * @Description
+ * @create 2020-04-07 8:40 AM
+ */
+public class URLTest {
+    public static void main(String[] args) throws IOException {
+        URL url = new URL("http://localhost:8080/img/favicon.ico");
+
+        System.out.println(url.getProtocol());
+        System.out.println(url.getHost());
+        System.out.println(url.getPort());
+        System.out.println(url.getFile());
+        System.out.println(url.getQuery());
+
+        //获取资源
+        HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
+        httpURLConnection.connect();
+        try(InputStream is = httpURLConnection.getInputStream();
+        FileOutputStream fos = new FileOutputStream("myimage.ico")){
+            byte[] buffer = new byte[1024];
+            int len;
+            while((len=is.read(buffer))!=-1){
+                fos.write(buffer,0,len);
+            }
+        }
+
+        httpURLConnection.disconnect();
+    }
+}
+/**
+ * http
+ * www.atguigu.com
+ * 9090
+ * /welcome?username=billhu&password=123
+ * username=billhu&password=123
+ */
