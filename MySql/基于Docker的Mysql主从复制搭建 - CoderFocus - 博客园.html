@@ -1,0 +1,1077 @@
+<!DOCTYPE html>
+<html lang="zh-cn"><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="never">
+    <meta property="og:description" content="为什么基于Docker搭建？ 资源有限 虚拟机搭建对机器配置有要求，并且安装mysql步骤繁琐 一台机器上可以运行多个Docker容器 Docker容器之间相互独立，有独立ip，互不冲突 Docker">
+    <meta http-equiv="Cache-Control" content="no-transform">
+    <meta http-equiv="Cache-Control" content="no-siteapp">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>基于Docker的Mysql主从复制搭建 - CoderFocus - 博客园</title>
+    
+    <link rel="stylesheet" href="%E5%9F%BA%E4%BA%8EDocker%E7%9A%84Mysql%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6%E6%90%AD%E5%BB%BA%20-%20CoderFocus%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/blog-common.css">
+    <link id="MainCss" rel="stylesheet" href="%E5%9F%BA%E4%BA%8EDocker%E7%9A%84Mysql%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6%E6%90%AD%E5%BB%BA%20-%20CoderFocus%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/bundle-custom.css">
+    <link type="text/css" rel="stylesheet" href="%E5%9F%BA%E4%BA%8EDocker%E7%9A%84Mysql%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6%E6%90%AD%E5%BB%BA%20-%20CoderFocus%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/custom.css">
+    <link id="mobile-style" media="only screen and (max-width: 767px)" type="text/css" rel="stylesheet" href="%E5%9F%BA%E4%BA%8EDocker%E7%9A%84Mysql%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6%E6%90%AD%E5%BB%BA%20-%20CoderFocus%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/bundle-custom-mobile.css">
+    
+    <link type="application/rss+xml" rel="alternate" href="https://www.cnblogs.com/songwenjie/rss">
+    <link type="application/rsd+xml" rel="EditURI" href="https://www.cnblogs.com/songwenjie/rsd.xml">
+    <link type="application/wlwmanifest+xml" rel="wlwmanifest" href="https://www.cnblogs.com/songwenjie/wlwmanifest.xml">
+    <script src="%E5%9F%BA%E4%BA%8EDocker%E7%9A%84Mysql%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6%E6%90%AD%E5%BB%BA%20-%20CoderFocus%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/amp4ads-host-v0.js"></script><script src="%E5%9F%BA%E4%BA%8EDocker%E7%9A%84Mysql%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6%E6%90%AD%E5%BB%BA%20-%20CoderFocus%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/pubads_impl_rendering_2020040702.js"></script><script async="" src="%E5%9F%BA%E4%BA%8EDocker%E7%9A%84Mysql%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6%E6%90%AD%E5%BB%BA%20-%20CoderFocus%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/analytics.js"></script><script src="%E5%9F%BA%E4%BA%8EDocker%E7%9A%84Mysql%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6%E6%90%AD%E5%BB%BA%20-%20CoderFocus%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/jquery-2.js"></script>
+    <script src="%E5%9F%BA%E4%BA%8EDocker%E7%9A%84Mysql%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6%E6%90%AD%E5%BB%BA%20-%20CoderFocus%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/blog-common.js"></script>
+    <script>
+        var currentBlogId = 343486;
+        var currentBlogApp = 'songwenjie';
+        var cb_enable_mathjax = false;
+        var isLogined = false;
+        var skinName = 'Custom';
+    </script>
+    
+    
+    
+<style type="text/css">.heart{width: 10px;height: 10px;position: fixed;background: #f00;transform: rotate(45deg);-webkit-transform: rotate(45deg);-moz-transform: rotate(45deg);}.heart:after,.heart:before{content: '';width: inherit;height: inherit;background: inherit;border-radius: 50%;-webkit-border-radius: 50%;-moz-border-radius: 50%;position: absolute;}.heart:after{top: -5px;}.heart:before{left: -5px;}</style><link rel="preload" href="%E5%9F%BA%E4%BA%8EDocker%E7%9A%84Mysql%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6%E6%90%AD%E5%BB%BA%20-%20CoderFocus%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/integrator.js" as="script"><script type="text/javascript" src="%E5%9F%BA%E4%BA%8EDocker%E7%9A%84Mysql%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6%E6%90%AD%E5%BB%BA%20-%20CoderFocus%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/integrator.js"></script><script src="%E5%9F%BA%E4%BA%8EDocker%E7%9A%84Mysql%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6%E6%90%AD%E5%BB%BA%20-%20CoderFocus%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/pubads_impl_2020040702.js" async=""></script></head>
+<body>
+    <a name="top"></a>
+    
+    
+<!--done-->
+<div id="home">
+<div id="header" style="display: block;">
+	<div id="blogTitle">
+        <a id="lnkBlogLogo" href="https://www.cnblogs.com/songwenjie/"><img id="blogLogo" src="%E5%9F%BA%E4%BA%8EDocker%E7%9A%84Mysql%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6%E6%90%AD%E5%BB%BA%20-%20CoderFocus%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/logo.gif" alt="返回主页"></a>		
+		
+<!--done-->
+<h1><a id="Header1_HeaderTitle" class="headermaintitle HeaderMainTitle" href="https://www.cnblogs.com/songwenjie/">CoderFocus</a>
+</h1>
+<h2>
+扎的越深，浮的越高。
+</h2>
+
+
+
+
+		
+	</div><!--end: blogTitle 博客的标题和副标题 -->
+	<div id="navigator">
+		
+<ul id="navList">
+<li><a id="blog_nav_sitehome" class="menu" href="https://www.cnblogs.com/">
+博客园</a>
+</li>
+<li>
+<a id="blog_nav_myhome" class="menu" href="https://www.cnblogs.com/songwenjie/">
+首页</a>
+</li>
+<li>
+
+
+</li>
+<li>
+<a id="blog_nav_contact" class="menu" href="https://msg.cnblogs.com/send/CoderFocus">
+联系</a></li>
+<li>
+<a id="blog_nav_rss" class="menu" href="https://www.cnblogs.com/songwenjie/rss/">
+订阅</a>
+<!--<partial name="./Shared/_XmlLink.cshtml" model="Model" /></li>--></li>
+<li>
+<a id="blog_nav_admin" class="menu" href="https://i.cnblogs.com/">
+管理</a>
+</li>
+</ul>
+
+
+		<div class="blogStats">
+			
+			<span id="stats_post_count">随笔 - 
+52&nbsp; </span>
+<span id="stats_article_count">文章 - 
+0&nbsp; </span>
+<span id="stats-comment_count">评论 - 
+190</span>
+
+			
+		</div><!--end: blogStats -->
+	</div><!--end: navigator 博客导航栏 -->
+</div><!--end: header 头部 -->
+
+<div id="main">
+	<div id="mainContent">
+	<div class="forFlow" style="margin: 0px auto; max-width: 960px;">
+		<div id="post_detail">
+    <!--done-->
+    <div id="topics">
+        <div class="post">
+            <h1 class="postTitle">
+                
+<a id="cb_post_title_url" class="postTitle2" href="https://www.cnblogs.com/songwenjie/p/9371422.html">基于Docker的Mysql主从复制搭建</a>
+
+            </h1>
+            <div class="clear"></div>
+            <div class="postBody">
+                
+<div id="cnblogs_post_body" class="blogpost-body cnblogs-markdown">
+    <h2 id="esa_index_0">为什么基于Docker搭建？</h2>
+<ul>
+<li>资源有限</li>
+<li>虚拟机搭建对机器配置有要求，并且安装mysql步骤繁琐</li>
+<li>一台机器上可以运行多个Docker容器</li>
+<li>Docker容器之间相互独立，有独立ip，互不冲突</li>
+<li>Docker使用步骤简便，启动容器在秒级别</li>
+</ul>
+<h2 id="esa_index_1">利用Docker搭建主从服务器</h2>
+<p>首先拉取docker镜像,我们这里使用5.7版本的mysql：</p>
+<p><code>docker pull mysql:5.7</code></p>
+<p>然后使用此镜像启动容器，这里需要分别启动主从两个容器</p>
+<p><strong>Master(主)：</strong></p>
+<p><code>docker run -p 3339:3306 --name mymysql -e MYSQL_ROOT_PASSWORD=123456 -d mysql:5.7</code></p>
+<p><strong>Slave(从)：</strong></p>
+<p><code>docker run -p 3340:3306 --name mymysql -e MYSQL_ROOT_PASSWORD=123456 -d mysql:5.7</code></p>
+<p>Master对外映射的端口是3339，Slave对外映射的端口是3340。因为docker容器是相互独立的，每个容器有其独立的ip，所以不
+同容器使用相同的端口并不会冲突。这里我们应该尽量使用mysql默认的3306端口，否则可能会出现无法通过ip连接docker容器内mysql的问
+题。</p>
+<p>使用<code>docker ps</code>命令查看正在运行的容器：</p>
+<p><img src="%E5%9F%BA%E4%BA%8EDocker%E7%9A%84Mysql%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6%E6%90%AD%E5%BB%BA%20-%20CoderFocus%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/5L4Adf7clg.png" alt="mark"></p>
+<p>此时可以使用Navicat等工具测试连接mysql</p>
+<p><img src="%E5%9F%BA%E4%BA%8EDocker%E7%9A%84Mysql%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6%E6%90%AD%E5%BB%BA%20-%20CoderFocus%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/GADD1hBeH7.png" alt="mark"></p>
+<h2 id="esa_index_2">配置Master(主)</h2>
+<p>通过<code>docker exec -it 627a2368c865 /bin/bash</code>命令进入到Master容器内部，也可以通过<code>docker exec -it mysql-master /bin/bash</code>命令进入。627a2368c865是容器的id,而mysql-master是容器的名称。</p>
+<p><code>cd /etc/mysql</code>切换到/etc/mysql目录下，然后<code>vi my.cnf</code>对my.cnf进行编辑。此时会报出<code>bash: vi: command not found</code>，需要我们在docker容器内部自行安装vim。使用<code>apt-get install vim</code>命令安装vim</p>
+<p>会出现如下问题：</p>
+<pre><code class="hljs groovy">Reading <span class="hljs-keyword">package</span> lists... Done
+Building dependency tree       
+Reading state information... Done
+<span class="hljs-string">E:</span> Unable to locate <span class="hljs-keyword">package</span> vim
+</code></pre>
+<p>执行<code>apt-get update</code>，然后再次执行<code>apt-get install vim</code>即可成功安装vim。然后我们就可以使用vim编辑my.cnf，在my.cnf中添加如下配置：</p>
+<pre><code class="hljs ini"><span class="hljs-section">[mysqld]</span>
+<span class="hljs-comment">## 同一局域网内注意要唯一</span>
+<span class="hljs-attr">server-id</span>=<span class="hljs-number">100</span>  
+<span class="hljs-comment">## 开启二进制日志功能，可以随便取（关键）</span>
+<span class="hljs-attr">log-bin</span>=mysql-bin
+</code></pre>
+<p>配置完成之后，需要重启mysql服务使配置生效。使用<code>service mysql restart</code>完成重启。重启mysql服务时会使得docker容器停止，我们还需要<code>docker start mysql-master</code>启动容器。</p>
+<p>下一步在Master数据库创建数据同步用户，授予用户 slave REPLICATION SLAVE权限和REPLICATION CLIENT权限，用于在主从库之间同步数据。</p>
+<p><code>CREATE USER 'slave'@'%' IDENTIFIED BY '123456'; </code></p>
+<p><code>GRANT REPLICATION SLAVE, REPLICATION CLIENT ON *.* TO 'slave'@'%';</code></p>
+<p><img src="%E5%9F%BA%E4%BA%8EDocker%E7%9A%84Mysql%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6%E6%90%AD%E5%BB%BA%20-%20CoderFocus%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/34Hjbf7Ck3.png" alt="mark"></p>
+<h2 id="esa_index_3">配置Slave(从)</h2>
+<p>和配置Master(主)一样，在Slave配置文件my.cnf中添加如下配置：</p>
+<pre><code class="hljs ini"><span class="hljs-section">[mysqld]</span>
+<span class="hljs-comment">## 设置server_id,注意要唯一</span>
+<span class="hljs-attr">server-id</span>=<span class="hljs-number">101</span>  
+<span class="hljs-comment">## 开启二进制日志功能，以备Slave作为其它Slave的Master时使用</span>
+<span class="hljs-attr">log-bin</span>=mysql-slave-bin   
+<span class="hljs-comment">## relay_log配置中继日志</span>
+<span class="hljs-attr">relay_log</span>=edu-mysql-relay-bin  
+</code></pre>
+<p>配置完成后也需要重启mysql服务和docker容器，操作和配置Master(主)一致。</p>
+<h2 id="esa_index_4">链接Master(主)和Slave(从)</h2>
+<p>在Master进入mysql，执行<code>show master status;</code></p>
+<p><img src="%E5%9F%BA%E4%BA%8EDocker%E7%9A%84Mysql%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6%E6%90%AD%E5%BB%BA%20-%20CoderFocus%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/Kjja2jAIm4.png" alt="mark"></p>
+<p>File和Position字段的值后面将会用到，在后面的操作完成之前，需要保证Master库不能做任何操作，否则将会引起状态变化，File和Position字段的值变化。</p>
+<p>在Slave 中进入 mysql，执行<code>change master to master_host='172.17.0.2', 
+master_user='slave', master_password='123456', master_port=3306, 
+master_log_file='mysql-bin.000001', master_log_pos= 2830, 
+master_connect_retry=30;</code></p>
+<p><strong>命令说明：</strong></p>
+<p><strong>master_host</strong> ：Master的地址，指的是容器的独立ip,可以通过<code>docker inspect --format='{{.NetworkSettings.IPAddress}}' 容器名称|容器id</code>查询容器的ip</p>
+<p><img src="%E5%9F%BA%E4%BA%8EDocker%E7%9A%84Mysql%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6%E6%90%AD%E5%BB%BA%20-%20CoderFocus%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/7cEC8DbFI1.png" alt="mark"></p>
+<p><strong>master_port</strong>：Master的端口号，指的是容器的端口号</p>
+<p><strong>master_user</strong>：用于数据同步的用户</p>
+<p><strong>master_password</strong>：用于同步的用户的密码</p>
+<p><strong>master_log_file</strong>：指定 Slave 从哪个日志文件开始复制数据，即上文中提到的 File 字段的值</p>
+<p><strong>master_log_pos</strong>：从哪个 Position 开始读，即上文中提到的 Position 字段的值</p>
+<p><strong>master_connect_retry</strong>：如果连接失败，重试的时间间隔，单位是秒，默认是60秒</p>
+<p>在Slave 中的mysql终端执行<code>show slave status \G;</code>用于查看主从同步状态。</p>
+<p><img src="%E5%9F%BA%E4%BA%8EDocker%E7%9A%84Mysql%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6%E6%90%AD%E5%BB%BA%20-%20CoderFocus%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/2kagID6a2K.png" alt="mark"></p>
+<p>正常情况下，SlaveIORunning 和 SlaveSQLRunning 都是No，因为我们还没有开启主从复制过程。使用<code>start slave</code>开启主从复制过程，然后再次查询主从同步状态<code>show slave status \G;</code>。</p>
+<p><img src="%E5%9F%BA%E4%BA%8EDocker%E7%9A%84Mysql%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6%E6%90%AD%E5%BB%BA%20-%20CoderFocus%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/FG2ja42l86.png" alt="mark"></p>
+<p>SlaveIORunning 和 SlaveSQLRunning 都是Yes，说明主从复制已经开启。此时可以测试数据同步是否成功。</p>
+<p><strong>主从复制排错：</strong></p>
+<p><img src="%E5%9F%BA%E4%BA%8EDocker%E7%9A%84Mysql%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6%E6%90%AD%E5%BB%BA%20-%20CoderFocus%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/bdcjbCF1Ii.png" alt="mark"></p>
+<p>使用<code>start slave</code>开启主从复制过程后，如果SlaveIORunning一直是Connecting，则说明主从复制一直处于连接状态，这种情况一般是下面几种原因造成的，我们可以根据 Last_IO_Error提示予以排除。</p>
+<ol>
+<li>
+<p>网络不通</p>
+<p>检查ip,端口</p>
+</li>
+<li>
+<p>密码不对</p>
+<p>检查是否创建用于同步的用户和用户密码是否正确</p>
+</li>
+<li>
+<p>pos不对</p>
+<p>检查Master的 Position</p>
+</li>
+</ol>
+<h2 id="esa_index_5">测试主从复制</h2>
+<p>测试主从复制方式就十分多了，最简单的是在Master创建一个数据库，然后检查Slave是否存在此数据库。</p>
+<p><strong>Master:</strong></p>
+<p><img src="%E5%9F%BA%E4%BA%8EDocker%E7%9A%84Mysql%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6%E6%90%AD%E5%BB%BA%20-%20CoderFocus%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/Kg1EB8f1HL.png" alt="mark"></p>
+<p><strong>Slave:</strong></p>
+<p><img src="%E5%9F%BA%E4%BA%8EDocker%E7%9A%84Mysql%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6%E6%90%AD%E5%BB%BA%20-%20CoderFocus%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/4Ibh3CF9D3.png" alt="mark"></p>
+<strong>
+</strong><div class="content"><strong>
+    <div>作者：<a style="color: red; font-family: 微软雅黑; text-decoration: none" href="http://songwenjie.cnblogs.com/" target="_blank">撸码那些事</a></div>
+ <div>微信公众号：
+<img src="%E5%9F%BA%E4%BA%8EDocker%E7%9A%84Mysql%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6%E6%90%AD%E5%BB%BA%20-%20CoderFocus%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/AFdec5f65k.jpg" title="关注公众号，获取最新更新"></div>   
+    </strong><div><strong>来源：<a style="color: red; font-family: &quot;Microsoft YaHei&quot;; text-decoration: none" href="http://songwenjie.cnblogs.com/" target="_blank">http://songwenjie.cnblogs.com/</a>
+    <div>声明：本文为博主学习感悟总结，水平有限，如果不当，欢迎指正。如果您认为还不错，不妨点击一下下方的<span onclick="Digg();">【<font color="red">推荐</font>】</span>按钮，谢谢支持。转载与引用请注明出处。</div>
+</strong>
+</div>
+</div>
+<div id="MySignature"></div>
+<div class="clear"></div>
+<div id="blog_post_info_block"><div id="BlogPostCategory">
+    分类: 
+            <a href="https://www.cnblogs.com/songwenjie/category/1268974.html" target="_blank">MySQL</a></div>
+
+
+    <div id="blog_post_info">
+<div id="green_channel">
+        <a href="javascript:void(0);" id="green_channel_digg" onclick="DiggIt(9371422,cb_blogId,1);green_channel_success(this,'谢谢推荐！');">好文要顶</a>
+        <a id="green_channel_follow" onclick="follow('87ccd643-b5bf-e611-845c-ac853d9f53ac');" href="javascript:void(0);">关注我</a>
+    <a id="green_channel_favorite" onclick="AddToWz(cb_entryId);return false;" href="javascript:void(0);">收藏该文</a>
+    <a id="green_channel_weibo" href="javascript:void(0);" title="分享至新浪微博" onclick="ShareToTsina()"><img src="%E5%9F%BA%E4%BA%8EDocker%E7%9A%84Mysql%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6%E6%90%AD%E5%BB%BA%20-%20CoderFocus%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/icon_weibo_24.png" alt=""></a>
+    <a id="green_channel_wechat" href="javascript:void(0);" title="分享至微信" onclick="shareOnWechat()"><img src="%E5%9F%BA%E4%BA%8EDocker%E7%9A%84Mysql%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6%E6%90%AD%E5%BB%BA%20-%20CoderFocus%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/wechat.png" alt=""></a>
+</div>
+<div id="author_profile">
+    <div id="author_profile_info" class="author_profile_info">
+            <a href="https://home.cnblogs.com/u/songwenjie/" target="_blank"><img src="%E5%9F%BA%E4%BA%8EDocker%E7%9A%84Mysql%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6%E6%90%AD%E5%BB%BA%20-%20CoderFocus%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/20180419003727.png" class="author_avatar" alt=""></a>
+        <div id="author_profile_detail" class="author_profile_info">
+            <a href="https://home.cnblogs.com/u/songwenjie/">CoderFocus</a><br>
+            <a href="https://home.cnblogs.com/u/songwenjie/followees/">关注 - 78</a><br>
+            <a href="https://home.cnblogs.com/u/songwenjie/followers/">粉丝 - 191</a>
+        </div>
+    </div>
+    <div class="clear"></div>
+    <div id="author_profile_honor"></div>
+    <div id="author_profile_follow">
+                <a href="javascript:void(0);" onclick="follow('87ccd643-b5bf-e611-845c-ac853d9f53ac');return false;">+加关注</a>
+    </div>
+</div>
+<div id="div_digg" style="width: 200px;">
+    <div class="diggit" onclick="votePost(9371422,'Digg')">
+        <span class="diggnum" id="digg_count">6</span>
+    </div>
+    <div class="buryit" onclick="votePost(9371422,'Bury')">
+        <span class="burynum" id="bury_count">0</span>
+    </div>
+    <div class="clear"></div>
+    <div class="diggword" id="digg_tips">
+    </div>
+</div>
+
+<script type="text/javascript">
+    currentDiggType = 0;
+</script></div>
+    <div class="clear"></div>
+    <div id="post_next_prev">
+
+    <a href="https://www.cnblogs.com/songwenjie/p/9185790.html" class="p_n_p_prefix">« </a> 上一篇：    <a href="https://www.cnblogs.com/songwenjie/p/9185790.html" title="发布于 2018-06-15 07:46">C#集合类型大揭秘</a>
+    <br>
+    <a href="https://www.cnblogs.com/songwenjie/p/9376719.html" class="p_n_p_prefix">» </a> 下一篇：    <a href="https://www.cnblogs.com/songwenjie/p/9376719.html" title="发布于 2018-07-30 08:05">MySQL主从复制——主库已有数据的解决方案</a>
+
+</div>
+</div>
+            </div>
+            <div class="postDesc">posted @ 
+<span id="post-date">2018-07-26 14:17</span>&nbsp;
+<a href="https://www.cnblogs.com/songwenjie/">CoderFocus</a>&nbsp;
+阅读(<span id="post_view_count">17808</span>)&nbsp;
+评论(<span id="post_comment_count">7</span>)&nbsp;
+<a href="https://i.cnblogs.com/EditPosts.aspx?postid=9371422" rel="nofollow">编辑</a>&nbsp;
+<a href="javascript:void(0)" onclick="AddToWz(9371422);return false;">收藏</a></div>
+        </div>
+	    
+	    
+    </div><!--end: topics 文章、评论容器-->
+</div>
+<script src="%E5%9F%BA%E4%BA%8EDocker%E7%9A%84Mysql%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6%E6%90%AD%E5%BB%BA%20-%20CoderFocus%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/highlight.js"></script>
+<script>markdown_highlight();</script>
+<script>
+    var allowComments = true, cb_blogId = 343486, cb_blogApp = 'songwenjie', cb_blogUserGuid = '87ccd643-b5bf-e611-845c-ac853d9f53ac';
+    var cb_entryId = 9371422, cb_entryCreatedDate = '2018-07-26 14:17', cb_postType = 1; 
+    loadViewCount(cb_entryId);
+</script><a name="!comments"></a>
+<div id="blog-comments-placeholder">
+
+<div id="comment_pager_top">
+    
+</div>
+
+<br>
+<div class="feedback_area_title">评论列表</div>
+<div class="feedbackNoItems"><div class="feedbackNoItems"></div></div>	
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+				<div class="feedbackManage">
+					&nbsp;&nbsp;
+
+<span class="comment_actions">
+    
+    
+    
+    
+</span>
+
+
+				</div>
+				
+<a href="#4029514" class="layer">#1楼</a>
+<a name="4029514" id="comment_anchor_4029514"></a>
+
+ 
+<span class="comment_date">2018-07-26 16:21</span>
+
+ 
+
+            <a id="a_comment_author_4029514" href="https://home.cnblogs.com/u/167991/" target="_blank">binbin0915</a>
+
+			</div>
+			<div class="feedbackCon">
+				
+<div class="esa-comment-avatar"><a target="_blank" href="https://home.cnblogs.com/u/167991/"><img src="%E5%9F%BA%E4%BA%8EDocker%E7%9A%84Mysql%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6%E6%90%AD%E5%BB%BA%20-%20CoderFocus%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/9371422_002.html"></a></div><div id="comment_body_4029514" data-format-type="Ubb" class="blog_comment_body cnblogs-ubb">
+    docker exe修改后的容器怎么保存??
+</div>
+        <div class="comment_vote">
+            <span class="comment_error" style="color: red"></span>
+            <a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(4029514, 'Digg', this.parentElement, false);">
+                支持(0)
+            </a>
+            <a href="javascript:void(0);" class="comment_burry" onclick="return voteComment(4029514, 'Bury', this.parentElement, false);">
+                反对(0)
+            </a>
+        </div>
+        
+
+			</div>
+		</div>
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+				<div class="feedbackManage">
+					&nbsp;&nbsp;
+
+<span class="comment_actions">
+    
+    
+    
+    
+</span>
+
+
+				</div>
+				
+<a href="#4288847" class="layer">#2楼</a>
+<a name="4288847" id="comment_anchor_4288847"></a>
+
+ 
+<span class="comment_date">2019-06-27 17:06</span>
+
+ 
+
+            <a id="a_comment_author_4288847" href="https://www.cnblogs.com/fuguang/" target="_blank">fuguang</a>
+
+			</div>
+			<div class="feedbackCon">
+				
+<div class="esa-comment-avatar"><a target="_blank" href="https://www.cnblogs.com/fuguang/"><img src="%E5%9F%BA%E4%BA%8EDocker%E7%9A%84Mysql%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6%E6%90%AD%E5%BB%BA%20-%20CoderFocus%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/9371422_002.html"></a></div><div id="comment_body_4288847" data-format-type="Ubb" class="blog_comment_body cnblogs-ubb">
+    very good！
+</div>
+        <div class="comment_vote">
+            <span class="comment_error" style="color: red"></span>
+            <a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(4288847, 'Digg', this.parentElement, false);">
+                支持(0)
+            </a>
+            <a href="javascript:void(0);" class="comment_burry" onclick="return voteComment(4288847, 'Bury', this.parentElement, false);">
+                反对(0)
+            </a>
+        </div>
+        
+
+			</div>
+		</div>
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+				<div class="feedbackManage">
+					&nbsp;&nbsp;
+
+<span class="comment_actions">
+    
+    
+    
+    
+</span>
+
+
+				</div>
+				
+<a href="#4306978" class="layer">#3楼</a>
+<a name="4306978" id="comment_anchor_4306978"></a>
+
+ 
+<span class="comment_date">2019-07-23 14:52</span>
+
+ 
+
+            <a id="a_comment_author_4306978" href="https://www.cnblogs.com/hehaoedu/" target="_blank">哎呦喂狗带</a>
+
+			</div>
+			<div class="feedbackCon">
+				
+<div class="esa-comment-avatar"><a target="_blank" href="https://www.cnblogs.com/hehaoedu/"><img src="%E5%9F%BA%E4%BA%8EDocker%E7%9A%84Mysql%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6%E6%90%AD%E5%BB%BA%20-%20CoderFocus%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/20190510111829.png"></a></div><div id="comment_body_4306978" data-format-type="Ubb" class="blog_comment_body cnblogs-ubb">
+    <a href="#4029514" title="查看所回复的评论" onclick="commentManager.renderComments(0,50,4029514);">@</a>
+binbin0915<br>:wq!
+</div>
+        <div class="comment_vote">
+            <span class="comment_error" style="color: red"></span>
+            <a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(4306978, 'Digg', this.parentElement, false);">
+                支持(0)
+            </a>
+            <a href="javascript:void(0);" class="comment_burry" onclick="return voteComment(4306978, 'Bury', this.parentElement, false);">
+                反对(0)
+            </a>
+        </div>
+        <span id="comment_4306978_avatar" style="display:none">
+            https://pic.cnblogs.com/face/1586434/20190510111829.png
+        </span>
+
+			</div>
+		</div>
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+				<div class="feedbackManage">
+					&nbsp;&nbsp;
+
+<span class="comment_actions">
+    
+    
+    
+    
+</span>
+
+
+				</div>
+				
+<a href="#4411379" class="layer">#4楼</a>
+<a name="4411379" id="comment_anchor_4411379"></a>
+
+ 
+<span class="comment_date">2019-11-01 10:26</span>
+
+ 
+
+            <a id="a_comment_author_4411379" href="https://home.cnblogs.com/u/1854337/" target="_blank">行走1101</a>
+
+			</div>
+			<div class="feedbackCon">
+				
+<div class="esa-comment-avatar"><a target="_blank" href="https://home.cnblogs.com/u/1854337/"><img src="%E5%9F%BA%E4%BA%8EDocker%E7%9A%84Mysql%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6%E6%90%AD%E5%BB%BA%20-%20CoderFocus%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/9371422_002.html"></a></div><div id="comment_body_4411379" data-format-type="Ubb" class="blog_comment_body cnblogs-ubb">
+    连接的时候Access denied，两台机器上的mysql容器地址都是172.17.0.2，这个有影响吗？<br>Access denied for user 'slave'@'172.17.0.2' (using password: YES)
+</div>
+        <div class="comment_vote">
+            <span class="comment_error" style="color: red"></span>
+            <a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(4411379, 'Digg', this.parentElement, false);">
+                支持(0)
+            </a>
+            <a href="javascript:void(0);" class="comment_burry" onclick="return voteComment(4411379, 'Bury', this.parentElement, false);">
+                反对(0)
+            </a>
+        </div>
+        
+
+			</div>
+		</div>
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+				<div class="feedbackManage">
+					&nbsp;&nbsp;
+
+<span class="comment_actions">
+    
+    
+    
+    
+</span>
+
+
+				</div>
+				
+<a href="#4444289" class="layer">#5楼</a>
+<a name="4444289" id="comment_anchor_4444289"></a>
+
+ 
+<span class="comment_date">2019-11-29 11:43</span>
+
+ 
+
+            <a id="a_comment_author_4444289" href="https://home.cnblogs.com/u/1466289/" target="_blank">jettycat945</a>
+
+			</div>
+			<div class="feedbackCon">
+				
+<div class="esa-comment-avatar"><a target="_blank" href="https://home.cnblogs.com/u/1466289/"><img src="%E5%9F%BA%E4%BA%8EDocker%E7%9A%84Mysql%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6%E6%90%AD%E5%BB%BA%20-%20CoderFocus%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/9371422_002.html"></a></div><div id="comment_body_4444289" data-format-type="Ubb" class="blog_comment_body cnblogs-ubb">
+    老哥牛逼，膜拜
+</div>
+        <div class="comment_vote">
+            <span class="comment_error" style="color: red"></span>
+            <a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(4444289, 'Digg', this.parentElement, false);">
+                支持(0)
+            </a>
+            <a href="javascript:void(0);" class="comment_burry" onclick="return voteComment(4444289, 'Bury', this.parentElement, false);">
+                反对(0)
+            </a>
+        </div>
+        
+
+			</div>
+		</div>
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+				<div class="feedbackManage">
+					&nbsp;&nbsp;
+
+<span class="comment_actions">
+    
+    
+    
+    
+</span>
+
+
+				</div>
+				
+<a href="#4475799" class="layer">#6楼</a>
+<a name="4475799" id="comment_anchor_4475799"></a>
+
+ 
+<span class="comment_date">2020-01-03 11:13</span>
+
+ 
+
+            <a id="a_comment_author_4475799" href="https://home.cnblogs.com/u/1914620/" target="_blank">勘破</a>
+
+			</div>
+			<div class="feedbackCon">
+				
+<div class="esa-comment-avatar"><a target="_blank" href="https://home.cnblogs.com/u/1914620/"><img src="%E5%9F%BA%E4%BA%8EDocker%E7%9A%84Mysql%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6%E6%90%AD%E5%BB%BA%20-%20CoderFocus%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/9371422_002.html"></a></div><div id="comment_body_4475799" data-format-type="Ubb" class="blog_comment_body cnblogs-ubb">
+    可以参考我的博客哦 有不懂的留言手把手教哦<br>个人博客地址：www.liyblog.top，
+</div>
+        <div class="comment_vote">
+            <span class="comment_error" style="color: red"></span>
+            <a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(4475799, 'Digg', this.parentElement, false);">
+                支持(0)
+            </a>
+            <a href="javascript:void(0);" class="comment_burry" onclick="return voteComment(4475799, 'Bury', this.parentElement, false);">
+                反对(0)
+            </a>
+        </div>
+        
+
+			</div>
+		</div>
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+				<div class="feedbackManage">
+					&nbsp;&nbsp;
+
+<span class="comment_actions">
+    
+    
+    
+    
+</span>
+
+
+				</div>
+				
+<a href="#4522887" class="layer">#7楼</a>
+<a name="4522887" id="comment_anchor_4522887"></a>
+
+        <span id="comment-maxId" style="display:none">4522887</span>
+        <span id="comment-maxDate" style="display:none">2020/3/16 下午1:12:52</span>
+ 
+<span class="comment_date">2020-03-16 13:12</span>
+
+ 
+
+            <a id="a_comment_author_4522887" href="https://www.cnblogs.com/codeggs/" target="_blank">codeJN</a>
+
+			</div>
+			<div class="feedbackCon">
+				
+<div class="esa-comment-avatar"><a target="_blank" href="https://www.cnblogs.com/codeggs/"><img src="%E5%9F%BA%E4%BA%8EDocker%E7%9A%84Mysql%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6%E6%90%AD%E5%BB%BA%20-%20CoderFocus%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/20200401220914.png"></a></div><div id="comment_body_4522887" data-format-type="Markdown" class="blog_comment_body cnblogs-markdown">
+    <p>老哥，这里多个空格.. 我copy的总是报错，搞了半天，仔细看才知道多了个空格，找死我了..哭哭<img src="%E5%9F%BA%E4%BA%8EDocker%E7%9A%84Mysql%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6%E6%90%AD%E5%BB%BA%20-%20CoderFocus%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/1745124-20200316131247998-1052119067.png" alt=""></p>
+
+</div>
+        <div class="comment_vote">
+            <span class="comment_error" style="color: red"></span>
+            <a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(4522887, 'Digg', this.parentElement, false);">
+                支持(0)
+            </a>
+            <a href="javascript:void(0);" class="comment_burry" onclick="return voteComment(4522887, 'Bury', this.parentElement, false);">
+                反对(0)
+            </a>
+        </div>
+        <span id="comment_4522887_avatar" style="display:none">
+            https://pic.cnblogs.com/face/1745124/20200401220914.png
+        </span>
+
+			</div>
+		</div>
+
+<div id="comment_pager_bottom">
+    
+</div>
+
+
+</div>
+<script>
+    var commentManager = new blogCommentManager();
+    commentManager.renderComments(0);
+</script>
+
+<div id="comment_form" class="commentform">
+    <a name="commentform"></a>
+    <div id="divCommentShow"></div>
+    <div id="comment_nav"><span id="span_refresh_tips"></span><a href="javascript:void(0);" onclick="return RefreshCommentList();" id="lnk_RefreshComments" runat="server" clientidmode="Static">刷新评论</a><a href="#" onclick="return RefreshPage();">刷新页面</a><a href="#top">返回顶部</a></div>
+    <div id="comment_form_container" style="visibility: visible;"><div class="login_tips">
+    注册用户登录后才能发表评论，请 
+    <a rel="nofollow" href="javascript:void(0);" class="underline" onclick="return login('commentform');">登录</a>
+     或 
+    <a rel="nofollow" href="javascript:void(0);" class="underline" onclick="return register();">注册</a>，
+    <a href="https://www.cnblogs.com/">访问</a> 网站首页。
+</div></div>
+    <div class="ad_text_commentbox" id="ad_text_under_commentbox"></div>
+    <div id="ad_t2"><a href="http://www.ucancode.com/index.htm" target="_blank" onclick="ga('send', 'event', 'Link', 'click', 'T2-ucancode')">【推荐】超50万行VC++源码: 大型组态工控、电力仿真CAD与GIS源码库</a><br><a href="https://cloud.tencent.com/act/seckill?fromSource=gwzcw.3498755.3498755.3498755&amp;utm_medium=cpc&amp;utm_id=gwzcw.3498755.3498755.3498755" target="_blank" onclick="ga('send', 'event', 'Link', 'click', 'T2-腾讯云')">【推荐】腾讯云产品限时秒杀，爆款1核2G云服务器99元/年！</a><br></div>
+    <div id="opt_under_post"></div>
+    <script async="async" src="%E5%9F%BA%E4%BA%8EDocker%E7%9A%84Mysql%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6%E6%90%AD%E5%BB%BA%20-%20CoderFocus%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/gpt.js"></script>
+    <script>
+        var googletag = googletag || {};
+        googletag.cmd = googletag.cmd || [];
+    </script>
+    <script>
+        googletag.cmd.push(function () {
+            googletag.defineSlot("/1090369/C1", [300, 250], "div-gpt-ad-1546353474406-0").addService(googletag.pubads());
+            googletag.defineSlot("/1090369/C2", [468, 60], "div-gpt-ad-1539008685004-0").addService(googletag.pubads());
+            googletag.pubads().enableSingleRequest();
+            googletag.enableServices();
+        });
+    </script>
+    <div id="cnblogs_c1" class="c_ad_block" style="">
+        <div id="div-gpt-ad-1546353474406-0" style="height:250px; width:300px;" data-google-query-id="CO6o8-_M5egCFcZ5vQodZW0Jnw"><div id="google_ads_iframe_/1090369/C1_0__container__" style="border: 0pt none;"><iframe id="google_ads_iframe_/1090369/C1_0" title="3rd party ad content" name="google_ads_iframe_/1090369/C1_0" scrolling="no" marginwidth="0" marginheight="0" style="border: 0px none; vertical-align: bottom;" srcdoc="" data-google-container-id="1" data-load-complete="true" width="300" height="250" frameborder="0"></iframe></div></div>
+    </div>
+    <div id="under_post_news"></div>
+    <div id="cnblogs_c2" class="c_ad_block" style="">
+        <div id="div-gpt-ad-1539008685004-0" style="height:60px; width:468px;" data-google-query-id="CLeL9e_M5egCFcZ5vQodZW0Jnw">
+            
+        <div id="google_ads_iframe_/1090369/C2_0__container__" style="border: 0pt none;"><iframe id="google_ads_iframe_/1090369/C2_0" title="3rd party ad content" name="google_ads_iframe_/1090369/C2_0" scrolling="no" marginwidth="0" marginheight="0" style="border: 0px none; vertical-align: bottom;" srcdoc="" data-google-container-id="2" sandbox="allow-forms allow-pointer-lock allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts allow-top-navigation-by-user-activation" data-load-complete="true" width="468" height="60" frameborder="0"></iframe></div></div>
+    </div>
+    <div id="under_post_kb"></div>
+    <div id="HistoryToday" class="c_ad_block"></div>
+    <script type="text/javascript">
+        fixPostBody();
+        deliverBigBanner();
+setTimeout(function() { incrementViewCount(cb_entryId); }, 50);        deliverAdT2();
+        deliverAdC1();
+        deliverAdC2();
+        loadNewsAndKb();
+        loadBlogSignature();
+LoadPostCategoriesTags(cb_blogId, cb_entryId);        LoadPostInfoBlock(cb_blogId, cb_entryId, cb_blogApp, cb_blogUserGuid);
+        GetPrevNextPost(cb_entryId, cb_blogId, cb_entryCreatedDate, cb_postType);
+        loadOptUnderPost();
+        GetHistoryToday(cb_blogId, cb_blogApp, cb_entryCreatedDate);
+    </script>
+</div>
+	</div><!--end: forFlow -->
+	</div><!--end: mainContent 主体内容容器-->
+
+	<div id="sideBar" style="display: none;">
+		<div id="sideBarMain">
+			
+<div id="sidebar_news" class="newsItem"><!--done-->
+<h3 class="catListTitle">公告</h3>
+
+<div id="blog-news">
+    <script type="text/javascript">window['__document_write_ajax_callbacks__']['4']();</script><script type="text/javascript">window['__document_write_ajax_callbacks__']['5']();</script><script>window['__document_write_ajax_callbacks__']['1']();</script>
+<script type="text/javascript">window['__document_write_ajax_callbacks__']['6']();</script><script type="text/javascript">window['__document_write_ajax_callbacks__']['2']();</script>
+    <div id="profile_block">
+        昵称：
+        <a href="https://home.cnblogs.com/u/songwenjie/">
+            CoderFocus
+        </a>
+        <br>
+        园龄：
+        <a href="https://home.cnblogs.com/u/songwenjie/" title="入园时间：2016-12-11">
+            3年4个月
+        </a>
+        <br>
+        粉丝：
+        <a href="https://home.cnblogs.com/u/songwenjie/followers/">
+            191
+        </a>
+        <br>
+        关注：
+        <a href="https://home.cnblogs.com/u/songwenjie/followees/">
+            78
+        </a>
+        <div id="p_b_follow">
+<a href="javascript:void(0)" onclick="follow('87ccd643-b5bf-e611-845c-ac853d9f53ac')">+加关注</a></div>
+        <script type="text/javascript">window['__document_write_ajax_callbacks__']['7']();</script><script>window['__document_write_ajax_callbacks__']['3']();</script>
+    </div>
+</div>
+
+</div>
+
+			<div id="blog-calendar" style="display:none"></div><script>loadBlogDefaultCalendar();</script>
+			
+			<div id="leftcontentcontainer">
+				<div id="blog-sidecolumn">
+<!-- 搜索 -->
+<div id="sidebar_search" class="sidebar-block">
+    
+</div>
+
+<!-- 常用链接 -->
+
+
+<!-- 最新随笔 -->
+
+
+
+<!-- 我的标签 -->
+<div id="sidebar_toptags" class="sidebar-block">
+    
+</div>
+
+<!-- 积分与排名 -->
+
+
+<!-- 随笔分类、随笔档案、文章分类、新闻分类、相册、链接 -->
+<div id="sidebar_categories">
+    
+        <div id="sidebar_postcategory" class="catListPostCategory sidebar-block">
+            <h3 class="catListTitle">
+                
+
+随笔分类
+
+
+
+            </h3>
+
+
+            <ul>
+
+                        <li>
+                            
+<a href="https://www.cnblogs.com/songwenjie/category/1201671.html" rel="" target="">
+    .NET(2)
+</a>
+ 
+
+                        </li>
+                        <li>
+                            
+<a href="https://www.cnblogs.com/songwenjie/category/1201670.html" rel="" target="">
+    C#(3)
+</a>
+ 
+
+                        </li>
+                        <li>
+                            
+<a href="https://www.cnblogs.com/songwenjie/category/1479225.html" rel="" target="">
+    Git
+</a>
+ 
+
+                        </li>
+                        <li>
+                            
+<a href="https://www.cnblogs.com/songwenjie/category/1479224.html" rel="" target="">
+    JavaScript(2)
+</a>
+ 
+
+                        </li>
+                        <li>
+                            
+<a href="https://www.cnblogs.com/songwenjie/category/1268974.html" rel="" target="">
+    MySQL(10)
+</a>
+ 
+
+                        </li>
+                        <li>
+                            
+<a href="https://www.cnblogs.com/songwenjie/category/1479226.html" rel="" target="">
+    Redis
+</a>
+ 
+
+                        </li>
+                        <li>
+                            
+<a href="https://www.cnblogs.com/songwenjie/category/1182670.html" rel="" target="">
+    SQL(5)
+</a>
+ 
+
+                        </li>
+                        <li>
+                            
+<a href="https://www.cnblogs.com/songwenjie/category/1182671.html" rel="" target="">
+    Websocket(1)
+</a>
+ 
+
+                        </li>
+                        <li>
+                            
+<a href="https://www.cnblogs.com/songwenjie/category/1208582.html" rel="" target="">
+    软件设计(14)
+</a>
+ 
+
+                        </li>
+                        <li>
+                            
+<a href="https://www.cnblogs.com/songwenjie/category/1201669.html" rel="" target="">
+    数据结构(7)
+</a>
+ 
+
+                        </li>
+
+            </ul>
+
+
+        </div>
+
+</div>
+
+<!-- 最新评论 -->
+
+
+
+
+<!-- 阅读排行榜 -->
+<div id="sidebar_topviewedposts" class="sidebar-block">
+    <div class="catListView">
+<h3 class="catListTitle">阅读排行榜</h3>
+	<div id="TopViewPostsBlock">
+        <ul style="word-break:break-all">
+                    <li>
+                        <a href="https://www.cnblogs.com/songwenjie/p/8575579.html">
+                            1. 原来你是这样的Websocket--抓包分析(46675)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/songwenjie/p/9014473.html">
+                            2. 分享一个开源的网盘下载工具BaiduPCS-Go(20792)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/songwenjie/p/8955856.html">
+                            3. 【图解数据结构】 二叉树遍历(19490)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/songwenjie/p/9371422.html">
+                            4. 基于Docker的Mysql主从复制搭建(17806)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/songwenjie/p/9185790.html">
+                            5. C#集合类型大揭秘(11316)
+                        </a>
+                    </li>
+        </ul>
+    </div>
+</div>
+
+
+</div>
+
+<!-- 评论排行榜 -->
+<div id="sidebar_topcommentedposts" class="sidebar-block">
+    <div class="catListFeedback">
+<h3 class="catListTitle">评论排行榜</h3>
+	<div id="TopFeedbackPostsBlock">
+        <ul style="word-break:break-all">
+                    <li>
+                        <a href="https://www.cnblogs.com/songwenjie/p/9185790.html">
+                            1. C#集合类型大揭秘(23)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/songwenjie/p/9000713.html">
+                            2. 我们为什么要学习？写给我的组员们(17)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/songwenjie/p/9414960.html">
+                            3. 数据库索引背后的数据结构(16)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/songwenjie/p/8878851.html">
+                            4. 【图解数据结构】 树(15)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/songwenjie/p/8657579.html">
+                            5. 【源码分析】你必须知道的string.IsNullOrEmpty &amp;&amp; string.IsNullOrWhiteSpace(10)
+                        </a>
+                    </li>
+        </ul>
+    </div>
+</div>
+
+
+</div>
+
+<!-- 推荐排行榜 -->
+<div id="sidebar_topdiggedposts" class="sidebar-block">
+    
+<div id="topdigg_posts_wrap">
+    <div class="catListView">
+        <h3 class="catListTitle">推荐排行榜</h3>
+        <div id="TopDiggPostsBlock">
+            <ul style="word-break: break-all">
+                        <li>
+                            <a href="https://www.cnblogs.com/songwenjie/p/9000713.html">
+                                1. 我们为什么要学习？写给我的组员们(69)
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://www.cnblogs.com/songwenjie/p/8878851.html">
+                                2. 【图解数据结构】 树(68)
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://www.cnblogs.com/songwenjie/p/8975365.html">
+                                3. 【封装那些事】 缺失封装(55)
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://www.cnblogs.com/songwenjie/p/9185790.html">
+                                4. C#集合类型大揭秘(54)
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://www.cnblogs.com/songwenjie/p/8678212.html">
+                                5. 【图解数据结构】 线性表(26)
+                            </a>
+                        </li>
+            </ul>
+        </div>
+    </div>
+</div>
+</div></div>
+                    <script>loadBlogSideColumn();</script>
+			</div>
+			
+		</div><!--end: sideBarMain -->
+	</div><!--end: sideBar 侧边栏容器 -->
+	<div class="clear"></div>
+	</div><!--end: main -->
+	<div class="clear"></div>
+	<div id="footer">
+		<!--done-->
+Copyright © 2020 CoderFocus
+<br><span id="poweredby">Powered by .NET Core on Kubernetes</span>
+
+
+
+	<div>            Powered By             <a href="https://www.cnblogs.com/" target="_blank">Cnblogs</a> |             <a href="https://github.com/esofar/cnblogs-theme-silence" target="_blank">Silence</a>             Theme By             <a href="https://www.cnblogs.com/esofar" target="_blank">Esofar</a></div></div><!--end: footer -->
+</div><!--end: home 自定义的最大容器 -->
+
+
+    
+
+</div><script type="text/javascript">
+
+    $.silence({
+        catalog: {
+            enable: true,
+            move: true,
+            index: true,
+            level1: 'h2',
+            level2: 'h3',
+            level3: 'h4',
+        }});
+
+//爱心特效
+(function(window,document,undefined){
+        var hearts = [];
+        window.requestAnimationFrame = (function(){
+                return window.requestAnimationFrame || 
+                           window.webkitRequestAnimationFrame ||
+                           window.mozRequestAnimationFrame ||
+                           window.oRequestAnimationFrame ||
+                           window.msRequestAnimationFrame ||
+                           function (callback){
+                                   setTimeout(callback,1000/60);
+                           }
+        })();
+        init();
+        function init(){
+                css(".heart{width: 10px;height: 10px;position: fixed;background: #f00;transform: rotate(45deg);-webkit-transform: rotate(45deg);-moz-transform: rotate(45deg);}.heart:after,.heart:before{content: '';width: inherit;height: inherit;background: inherit;border-radius: 50%;-webkit-border-radius: 50%;-moz-border-radius: 50%;position: absolute;}.heart:after{top: -5px;}.heart:before{left: -5px;}");
+                attachEvent();
+                gameloop();
+        }
+        function gameloop(){
+                for(var i=0;i<hearts.length;i++){
+                    if(hearts[i].alpha <=0){
+                            document.body.removeChild(hearts[i].el);
+                            hearts.splice(i,1);
+                            continue;
+                    }
+                    hearts[i].y--;
+                    hearts[i].scale += 0.004;
+                    hearts[i].alpha -= 0.013;
+                    hearts[i].el.style.cssText = "left:"+hearts[i].x+"px;top:"+hearts[i].y+"px;opacity:"+hearts[i].alpha+";transform:scale("+hearts[i].scale+","+hearts[i].scale+") rotate(45deg);background:"+hearts[i].color;
+            }
+            requestAnimationFrame(gameloop);
+        }
+        function attachEvent(){
+                var old = typeof window.onclick==="function" && window.onclick;
+                window.onclick = function(event){
+                        old && old();
+                        createHeart(event);
+                }
+        }
+        function createHeart(event){
+            var d = document.createElement("div");
+            d.className = "heart";
+            hearts.push({
+                    el : d,
+                    x : event.clientX - 5,
+                    y : event.clientY - 5,
+                    scale : 1,
+                    alpha : 1,
+                    color : randomColor()
+            });
+            document.body.appendChild(d);
+    }
+    function css(css){
+            var style = document.createElement("style");
+                style.type="text/css";
+                try{
+                    style.appendChild(document.createTextNode(css));
+                }catch(ex){
+                    style.styleSheet.cssText = css;
+                }
+                document.getElementsByTagName('head')[0].appendChild(style);
+    }
+        function randomColor(){
+                return "rgb("+(~~(Math.random()*255))+","+(~~(Math.random()*255))+","+(~~(Math.random()*255))+")";
+        }
+})(window,document);
+
+//页面放大110%
+//document.getElementsByTagName('body')[0].style.zoom=1.1;
+</script><div class="esa-catalog">                                     <div class="esa-catalog-tab"><h2>目录</h2></div>                                     <div class="esa-catalog-contents">                                         <div class="esa-catalog-title"><h2>目录</h2></div>                                         <a class="esa-catalog-close">X</a>                                     <ul><li class="li_h2" title="为什么基于Docker搭建？"><i id="esa_index_0"></i><a class="esa-anchor-link">1.&nbsp;为什么基于Docker搭建？</a></li><li class="li_h2" title="利用Docker搭建主从服务器"><i id="esa_index_1"></i><a class="esa-anchor-link">2.&nbsp;利用Docker搭建主从服务器</a></li><li class="li_h2" title="配置Master(主)"><i id="esa_index_2"></i><a class="esa-anchor-link">3.&nbsp;配置Master(主)</a></li><li class="li_h2" title="配置Slave(从)"><i id="esa_index_3"></i><a class="esa-anchor-link">4.&nbsp;配置Slave(从)</a></li><li class="li_h2" title="链接Master(主)和Slave(从)"><i id="esa_index_4"></i><a class="esa-anchor-link">5.&nbsp;链接Master(主)和Slave(从)</a></li><li class="li_h2" title="测试主从复制"><i id="esa_index_5"></i><a class="esa-anchor-link">6.&nbsp;测试主从复制</a></li></ul></div>                                 </div><script type="text/javascript">getFollowStatus('87ccd643-b5bf-e611-845c-ac853d9f53ac');</script></body></html>
