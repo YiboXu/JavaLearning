@@ -1,0 +1,93 @@
+package chap25;
+
+public abstract class UnitedNations {
+    public abstract void declareMessage(String message, Country country);
+}
+
+
+package chap25;
+
+public class SecurityCouncil extends UnitedNations {
+
+    private USA usa;
+    private Iraq iraq;
+
+    public SecurityCouncil(USA usa, Iraq iraq){
+        this.usa = usa;
+        this.iraq = iraq;
+    }
+
+    @Override
+    public void declareMessage(String message, Country country) {
+        if(country instanceof USA){
+            iraq.getMessage(message);
+        }else if(country instanceof Iraq){
+            usa.getMessage(message);
+        }
+    }
+}
+
+
+
+package chap25;
+
+public abstract class Country {
+    private UnitedNations mediator;
+
+    public UnitedNations getUnitedNations(){
+        return mediator;
+    }
+
+    public void setUnitedNations(UnitedNations mediator){
+        this.mediator = mediator;
+    }
+}
+
+
+
+package chap25;
+
+public class Iraq extends Country {
+
+    public void getMessage(String message) {
+        System.out.println("Iraq gets the message: "+message);
+    }
+
+    public void declareMessage(String message){
+        this.getUnitedNations().declareMessage(message,this);
+    }
+}
+
+
+
+package chap25;
+
+public class USA extends Country {
+
+
+    public void getMessage(String message) {
+        System.out.println("USA gets the message: "+message);
+    }
+
+    public void declareMessage(String message){
+        this.getUnitedNations().declareMessage(message,this);
+    }
+}
+
+
+
+package chap25;
+
+public class Client {
+    public static void main(String[] args){
+        USA usa = new USA();
+        Iraq iraq = new Iraq();
+
+        SecurityCouncil securityCouncil = new SecurityCouncil(usa, iraq);
+        usa.setUnitedNations(securityCouncil);
+        iraq.setUnitedNations(securityCouncil);
+
+        usa.declareMessage("I want to fight you!");
+        iraq.declareMessage("Come on, please!");
+    }
+}

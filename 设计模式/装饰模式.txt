@@ -1,0 +1,103 @@
+﻿package chap6;
+
+public interface Person {
+    public void run();
+}
+
+
+
+package chap6;
+
+public class Man implements Person {
+    @Override
+    public void run() {
+        System.out.println("Man is running!");
+    }
+}
+
+
+
+package chap6;
+
+public class Woman implements Person {
+    @Override
+    public void run() {
+        System.out.println("Woman is running!");
+    }
+}
+
+
+
+
+package chap6;
+
+public abstract class ClothPerson implements Person {
+    private Person person;
+
+    public ClothPerson(Person person){
+        this.person = person;
+    }
+
+    @Override
+    public void run() {
+        person.run();
+    }
+}
+
+
+
+
+package chap6;
+
+public class CoatPerson extends ClothPerson {
+    public CoatPerson(Person person) {
+        super(person);
+    }
+
+    public void run(){
+        System.out.print("Coat ");
+        super.run();
+    }
+}
+
+
+
+
+package chap6;
+
+public class TShirtPerson extends ClothPerson {
+    public TShirtPerson(Person person) {
+        super(person);
+    }
+
+    public void run(){
+        System.out.print("TShirt ");
+        super.run();
+    }
+}
+
+
+
+
+package chap6;
+
+public class Client {
+    public static void main(String[] args){
+	//组装一个穿T-Shirt和coat的男人
+        Person man = new Man();         
+        TShirtPerson tshirt = new TShirtPerson(man);
+        CoatPerson coat = new CoatPerson(tshirt);
+
+        coat.run();
+
+	//组装一个穿coat和T-Shirt的女人
+        Person woman = new Woman();
+        CoatPerson wcoat = new CoatPerson(woman);
+        TShirtPerson wtshirt = new TShirtPerson(wcoat);
+
+        wtshirt .run();
+    }
+}
+
+
+java里的IO用的就是装饰模式.

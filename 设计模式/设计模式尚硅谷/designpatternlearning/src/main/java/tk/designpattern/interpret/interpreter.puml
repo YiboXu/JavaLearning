@@ -1,0 +1,37 @@
+@startuml
+
+class client{}
+
+class Calculator{
+ - Expression expression;
+ + Expression getExpression();
+}
+
+abstract class Expression{
+ + int interpret(HashMap<String,Integer> var);
+}
+
+class VarExpression extends Expression{
+ - String varName
+ + int interpret(HashMap<String,Integer> var);
+}
+
+abstract class SymbolExpression extends Expression{
+ - Expression left;
+ - Expression right;
+ + Expression getLeft();
+ + Expression getRight();
+ + int interpret(HashMap<String,Integer> var);
+}
+
+class SubExpression extends SymbolExpression{
+ + int interpret(HashMap<String,Integer> var);
+}
+
+class AddExpression extends SymbolExpression{
+ + int interpret(HashMap<String,Integer> var);
+}
+
+Calculator o- Expression
+Calculator <-- Client
+@enduml

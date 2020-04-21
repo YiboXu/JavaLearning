@@ -1,0 +1,51 @@
+@startuml
+
+abstract class Pizza{
+    - String name;
+    + String getName()
+    + abstract void prepare();
+    + void bake()
+    + void cute()
+    + void box()
+    + String toString()
+}
+
+together {
+    class ChinaMilkPizza{
+        + void prepare()
+    }
+    class ChinaCheesePizza{
+        + void prepare()
+    }
+    class JapanMilkPizza{
+        + void prepare()
+    }
+    class JapanCheesePizza{
+        + void prepare()
+    }
+}
+
+together {
+    class ChinaPizzaFactory{
+         # Pizza createPizza(String orderType)
+    }
+    class JapanPizzaFactory{
+         # Pizza createPizza(String orderType)
+    }
+}
+
+abstract class PizzaFactory {
+    + Pizza orderPizza(String type)
+}
+
+Pizza <|-- ChinaMilkPizza
+Pizza <|-- ChinaCheesePizza
+Pizza <|-- JapanMilkPizza
+Pizza <|-- JapanCheesePizza
+ChinaMilkPizza <|-- ChinaPizzaFactory
+ChinaCheesePizza <|-- ChinaPizzaFactory
+JapanMilkPizza <|-- JapanPizzaFactory
+JapanCheesePizza <|-- JapanPizzaFactory
+ChinaPizzaFactory <|-- PizzaFactory
+JapanPizzaFactory  <|-- PizzaFactory
+@enduml

@@ -1,0 +1,23 @@
+@startuml
+
+    interface PhoneCharging {
+        int output5();
+    }
+
+    class VoltageAdapter extends Voltage220 implements PhoneCharging{
+        + int output5()
+    }
+
+    class Voltage220 {
+        + int output220()
+    }
+
+class Phone {
+    - PhoneCharging phoneCharging;
+    + Phone(PhoneCharging phoneCharging)
+    + void charging()
+}
+
+Phone o- PhoneCharging
+
+@enduml

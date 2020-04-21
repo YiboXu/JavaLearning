@@ -1,0 +1,38 @@
+@startuml
+
+abstract class FlyStrategy{
+  + void fly();
+}
+abstract class SwimStrategy{
+  + void swim();
+}
+
+class CannotFly extends FlyStrategy{
+  + void fly();
+}
+class GoodFly extends FlyStrategy{
+  + void fly();
+}
+class BadFly extends FlyStrategy{
+  + void fly();
+}
+
+class CannotSwim extends SwimStrategy{
+  + void swim();
+}
+class GoodSwim extends SwimStrategy{
+  + void swim();
+}
+class BadSwim extends SwimStrategy{
+  + void swim();
+}
+
+abstract class Duck{
+  - FlyStrategy flyStrategy;
+  - SwimStrategy swimStrategy;
+  + void getInfo();
+}
+
+Duck o-- FlyStrategy
+Duck o-- SwimStrategy
+@enduml

@@ -1,0 +1,35 @@
+@startuml
+
+abstract class Pizza{
+    - String name;
+    + String getName()
+    + abstract void prepare();
+    + void bake()
+    + void cute()
+    + void box()
+    + String toString()
+}
+
+class ChinaPizza{
+    + void prepare()
+}
+class JapanPizza{
+    + void prepare()
+}
+
+class PizzaFactory {
+    + Pizza orderPizza(String type)
+}
+
+class OrderService {
+    - PizzaFactory pizzaFactory
+    + void setPizzaFactory(PizzaFactory pizzaFactory)
+    + Pizza getPizza(String type)
+}
+
+Pizza <|-- ChinaPizza
+Pizza <|-- JapanPizza
+Pizza <-- PizzaFactory
+Pizza <-- OrderService
+OrderService o– PizzaFactory
+@enduml

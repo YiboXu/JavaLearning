@@ -1,0 +1,66 @@
+package chap12;
+
+public class SubSystemOne {
+    public void methodA(){
+        System.out.println("methodA in SubSystemOne");
+    }
+}
+
+
+package chap12;
+
+public class SubSystemTwo {
+    public void methodB(){
+        System.out.println("methodB in SubSystemTwo");
+    }
+}
+
+
+package chap12;
+
+public class SubSystemThree {
+    public void methodC(){
+        System.out.println("methodC in SubSystemThree");
+    }
+}
+
+
+
+package chap12;
+
+public class Facade {
+    private SubSystemOne subSystemOne;
+    private SubSystemTwo subSystemTwo;
+    private SubSystemThree subSystemThree;
+
+    public Facade(){
+        subSystemOne = new SubSystemOne();
+        subSystemTwo = new SubSystemTwo();
+        subSystemThree = new SubSystemThree();
+    }
+
+    public void Method1(){
+        System.out.println("Method1() in Facade");
+        subSystemOne.methodA();
+        subSystemTwo.methodB();
+    }
+
+    public void Method2(){
+        System.out.println("Method2() in Facade");
+        subSystemOne.methodA();
+        subSystemTwo.methodB();
+        subSystemThree.methodC();
+    }
+}
+
+
+
+package chap12;
+
+public class Client {
+    public static void main(String[] args){
+        Facade facade = new Facade();
+        facade.Method1();
+        facade.Method2();
+    }
+}

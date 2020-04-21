@@ -1,0 +1,105 @@
+﻿备忘录模式比较适用于功能比较复杂的，但需要维护或记录属性历史的类，或者需要保存的属性只是众多属性中的一小部分时。
+
+package chap18;
+
+public class GameRole {
+    private double health;
+    private double attack;
+    private double defence;
+
+    public GameRole(){
+        health = 100;
+        attack = 100;
+        defence= 100;
+    }
+
+    public GameRoleMemo saveMemo(){
+        System.out.println("GameRole is saving state!");
+        return new GameRoleMemo(this.health,this.attack,this.defence);
+    }
+
+    public void restoreMemo(GameRoleMemo memo){
+        System.out.println("GameRole is restoring state!");
+        this.health = memo.getHealth();
+        this.attack = memo.getAttack();
+        this.defence = memo.getDefence();
+    }
+
+    public void attackBoss(){
+        System.out.println("I am attacking Boss!");
+        this.health = this.health * 0.5;
+        this.attack = this.attack * 0.8;
+        this.defence = this.defence * 0.5;
+    }
+
+    public String toString(){
+        return "GameRole state: health-"+this.health+" attack-"+this.attack+" defence-"+this.defence;
+    }
+
+    public void displayState(){
+        System.out.println(this);
+    }
+}
+
+
+
+package chap18;
+
+public class GameRoleMemo {
+    private double health;
+    private double attack;
+    private double defence;
+
+    public GameRoleMemo(double health, double attack, double defence){
+        this.health = health;
+        this.attack = attack;
+        this.defence = defence;
+    }
+
+    public double getHealth(){
+        return this.health;
+    }
+
+    public double getAttack(){
+        return this.attack;
+    }
+
+    public double getDefence(){
+        return this.defence;
+    }
+}
+
+
+
+package chap18;
+
+public class GameRoleStateCareTaker {
+    private GameRoleMemo memo;
+
+    public GameRoleStateCareTaker(GameRoleMemo memo){
+        this.memo = memo;
+    }
+
+    public GameRoleMemo getMemo(){
+        return memo;
+    }
+}
+
+
+
+package chap18;
+
+public class Client {
+    public static void main(String[] args){
+        GameRole role1 = new GameRole();
+        role1.displayState();
+
+        GameRoleStateCareTaker memoCareTaker = new GameRoleStateCareTaker(role1.saveMemo());
+
+        role1.attackBoss();
+        role1.displayState();
+
+        role1.restoreMemo(memoCareTaker.getMemo());
+        role1.displayState();
+    }
+}

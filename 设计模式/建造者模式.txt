@@ -1,0 +1,112 @@
+﻿建造者模式是在当创建复杂对象的算法应该独立于该对象的组成部分以及他们的装配方式时使用的模式。
+
+package chap13;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class Product {
+    List<String> parts = new ArrayList<String>();
+
+    public void addPart(String part){
+        parts.add(part);
+    }
+
+    public void show(){
+        System.out.println("----------Product creation-------");
+        for (String part:parts) {
+            System.out.println(part);
+        }
+    }
+}
+
+
+package chap13;
+
+public abstract class Builder {
+    public abstract void buildPartA();
+    public abstract void buildPartB();
+    public abstract Product getProduct();
+}
+
+
+
+package chap13;
+
+public class ConcreteBuilderA extends Builder {
+    private Product product = new Product();
+
+    @Override
+    public void buildPartA() {
+        product.addPart("PartA");
+    }
+
+    @Override
+    public void buildPartB() {
+        product.addPart("PartB");
+    }
+
+    @Override
+    public Product getProduct() {
+        return product;
+    }
+}
+
+
+
+package chap13;
+
+public class ConcreteBuilderB extends Builder{
+    private Product product = new Product();
+
+    @Override
+    public void buildPartA() {
+        product.addPart("PartAA");
+    }
+
+    @Override
+    public void buildPartB() {
+        product.addPart("PartBB");
+    }
+
+    @Override
+    public Product getProduct() {
+        return product;
+    }
+}
+
+
+
+package chap13;
+
+public class Director {
+    private Builder builder;
+
+    public Director(Builder builder){
+        this.builder = builder;
+        builder.buildPartA();
+        builder.buildPartB();
+    }
+
+    public Product getProduct(){
+        return builder.getProduct();
+    }
+}
+
+
+
+package chap13;
+
+public class Client {
+    public static void main(String[] args){
+        ConcreteBuilderA builderA = new ConcreteBuilderA();
+        ConcreteBuilderB builderB = new ConcreteBuilderB();
+
+        Product productA = new Director(builderA).getProduct();
+        Product productB = new Director(builderB).getProduct();
+
+        productA.show();
+        productB.show();
+    }
+}
+

@@ -1,0 +1,44 @@
+@startuml
+
+interface PersonService {
+    void save(Object entity);
+    void delete(Object id);
+}
+
+abstract class DaoSupport{
+ + void save(Object entity)
+ + void delete(Object id)
+}
+
+class PersonServiceBean {
+  - PersonDao personDao
+  - Department department
+  + void save()
+  + IDCard getIDCard(Integer id)
+  + void modify()
+}
+
+class Head{}
+class IDCard{
+- Person person
++ void setPerson(Person person)
+}
+class Person{
+- IDCard iDcard
++ void setIdCard(IDCard idCard)
+}
+class PersonDao{}
+class Department{}
+
+PersonService <|-- PersonServiceBean
+DaoSupport <|-- PersonServiceBean
+PersonServiceBean ..> PersonDao
+PersonServiceBean ..> IDCard
+PersonServiceBean ..> Person
+PersonServiceBean *.. Department
+
+Person "1" -o "1" IDCard
+IDCard "1" -o "1" Person
+
+Head ..* Person
+@enduml

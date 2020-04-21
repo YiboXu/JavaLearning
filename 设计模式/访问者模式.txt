@@ -1,0 +1,136 @@
+﻿访问者模式适用于数据结构相对稳定的系统。 比如这里的Person类，只会分为男人和女人，不会再有新的种类。
+
+这样就可以针对男人，女人对success， marry的不同反应来构造对应的类，将来如果需要增加针对小孩的反应，只用新增一个child类，在里面
+实现针对男人，女人的反应即可，不用对人类这个类做修改，这样就符合 开放-封闭 原则。
+
+访问者模式的有点就是增加新的操作很容易，因为增加新的操作就意味着增加一个新的访问者。访问者模式将有关的行为几种到一个访问者对象中。
+
+
+访问者模式的缺点其实也就是使得增加新的数据结构变得困难。  比如这里想增加一个黄种人，那么不管要增加黄种人的类，还要讲对应的访问者里面
+都添加对黄种人的操作方法。
+
+所以大多时候我们并不需要访问者模式，因为我们很难找到数据结构不变化的情况，但当你需要访问者模式时，那就是真的需要它了。 
+
+package chap28;
+
+public abstract class Person {
+    private String name;
+    public Person(String name){
+        this.name = name;
+    }
+
+    public abstract void accept(Visitor visitor);
+}
+
+
+package chap28;
+
+public class Man extends Person {
+    public Man(String name) {
+        super(name);
+    }
+
+    @Override
+    public void accept(Visitor visitor) {
+        visitor.visitMan();
+    }
+}
+
+
+package chap28;
+
+public class Woman extends Person {
+    public Woman(String name) {
+        super(name);
+    }
+
+    @Override
+    public void accept(Visitor visitor) {
+        visitor.visitWoman();
+    }
+}
+
+
+
+package chap28;
+
+public interface Visitor {
+    public void visitMan();
+    public void visitWoman();
+}
+
+
+
+package chap28;
+
+public class Success implements Visitor {
+    @Override
+    public void visitMan() {
+        System.out.println("Man success!");
+    }
+
+    @Override
+    public void visitWoman() {
+        System.out.println("Woman success!");
+    }
+}
+
+
+
+package chap28;
+
+public class Marry implements Visitor {
+    @Override
+    public void visitMan() {
+        System.out.println("Man marry!");
+    }
+
+    @Override
+    public void visitWoman() {
+        System.out.println("Woman marry!");
+    }
+}
+
+
+
+package chap28;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class ObjectStructure {
+    private List<Person> persons = new ArrayList<Person>();
+
+    public void attach(Person p){
+        persons.add(p);
+    }
+
+    public void detach(Person p){
+        persons.remove(p);
+    }
+
+    public void action(Visitor visitor){
+        for(Person p:persons){
+            p.accept(visitor);
+        }
+    }
+}
+
+
+
+package chap28;
+
+public class Client {
+
+    public static void main(String[] args){
+        ObjectStructure list = new ObjectStructure();
+        Man man = new Man("BillHu");
+        Woman woman = new Woman("Sofia");
+
+        list.attach(man);
+        list.attach(woman);
+
+        list.action(new Success());
+        list.action(new Marry());
+    }
+}

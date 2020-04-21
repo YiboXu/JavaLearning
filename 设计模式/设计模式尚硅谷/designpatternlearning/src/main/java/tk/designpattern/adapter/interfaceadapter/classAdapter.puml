@@ -1,0 +1,24 @@
+@startuml
+
+    interface Adapter {
+      + int phoneCharging();
+      + int computerCharging();
+      + int padCharging();
+    }
+
+    class VoltageAdapter implements Adapter{
+         + int phoneCharging();
+         + int computerCharging();
+         + int padCharging();
+    }
+
+class Phone {
+    - VoltageAdapter voltageAdapter
+    + Phone(VoltageAdapter voltageAdapter)
+    + void charging()
+}
+
+Phone <|- VoltageAdapter
+
+
+@enduml

@@ -1,0 +1,144 @@
+package chap22;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public abstract class Phone {
+
+    private List<PhoneSoft> softList = new ArrayList<PhoneSoft>();
+    private String brand;
+    public Phone(String brand){
+        this.brand = brand;
+    }
+
+    public List<PhoneSoft> getSoftList(){
+        return softList;
+    }
+
+    public void addSoft(PhoneSoft soft){
+        softList.add(soft);
+    }
+
+    public abstract void run();
+}
+
+
+
+package chap22;
+
+import java.util.List;
+
+public class HuaWeiPhone extends Phone {
+    public HuaWeiPhone() {
+        super("HuaWei");
+    }
+
+    @Override
+    public void run() {
+        List<PhoneSoft> softList = this.getSoftList();
+        for(PhoneSoft soft:softList){
+            soft.run();
+        }
+    }
+}
+
+
+
+package chap22;
+
+import java.util.List;
+
+public class XiaoMiPhone extends Phone{
+    public XiaoMiPhone() {
+        super("XiaoMi");
+    }
+
+    @Override
+    public void run() {
+        List<PhoneSoft> softList = this.getSoftList();
+        for(PhoneSoft soft:softList){
+            soft.run();
+        }
+    }
+}
+
+
+
+package chap22;
+
+public abstract class PhoneSoft {
+    private String name;
+    public PhoneSoft(String name){
+        this.name = name;
+    }
+
+    public String toString(){
+        return name;
+    }
+
+    public abstract void run();
+}
+
+
+
+package chap22;
+
+public class HuaWeiGame1 extends PhoneSoft {
+    public HuaWeiGame1(String name) {
+        super(name);
+    }
+
+    @Override
+    public void run() {
+        System.out.println("Running HuaWeiGame1: "+this);
+    }
+}
+
+
+
+package chap22;
+
+public class XiaoMiGame1 extends PhoneSoft {
+    public XiaoMiGame1(String name) {
+        super(name);
+    }
+
+    @Override
+    public void run() {
+        System.out.println("Running XiaoMiGame1: "+this);
+    }
+}
+
+
+
+package chap22;
+
+public class ContactAddress extends PhoneSoft {
+    public ContactAddress(String name) {
+        super(name);
+    }
+
+    @Override
+    public void run() {
+        System.out.println("Running ContactAddress: "+this);
+    }
+}
+
+
+
+package chap22;
+
+public class Client {
+    public static void main(String[] args){
+        HuaWeiPhone huawei = new HuaWeiPhone();
+        XiaoMiPhone xiaomi = new XiaoMiPhone();
+
+        huawei.addSoft(new HuaWeiGame1("!Hen Dou Luo!"));
+        xiaomi.addSoft(new XiaoMiGame1("!CS1029!"));
+        huawei.addSoft(new ContactAddress("!Contact!"));
+        xiaomi.addSoft(new ContactAddress("!Contact!"));
+
+        huawei.run();
+        xiaomi.run();
+    }
+}

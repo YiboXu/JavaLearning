@@ -1,0 +1,135 @@
+﻿状态模式主要解决的是当控制一个对象状态转换的条件表达式过于复杂时的情况。把状态的判断逻辑转移到表示不同状态的一系列类当中，
+可以把复杂的判断逻辑简化。 当然，如果这个状态判断很简单，那就没有必要用状态模式了。
+
+package chap16;
+
+public interface State {
+    public void work(Task task);
+}
+
+
+package chap16;
+
+public class Task {
+    private double hour;
+    private State currentState;
+    private boolean finished;
+
+    public Task(){
+        //set initial state
+        currentState = new MorningState();
+    }
+
+    public State setState(State state){
+        this.currentState = state;
+        return state;
+    }
+
+    public void work(){
+        currentState.work(this);
+    }
+
+    public double getHour(){
+        return hour;
+    }
+
+    public void setHour(double hour){
+        this.hour = hour;
+    }
+}
+
+
+
+package chap16;
+
+public class MorningState implements State {
+    @Override
+    public void work(Task task) {
+        if(task.getHour() < 12)
+            System.out.println("Current state is MorningStage!");
+        else {
+            task.setState(new NoonState());
+            task.work();
+        }
+    }
+}
+
+
+
+package chap16;
+
+public class NoonState implements State {
+    @Override
+    public void work(Task task) {
+        if(task.getHour() < 13)
+            System.out.println("Current state is NoonState!");
+        else {
+            task.setState(new AfternoonState());
+            task.work();
+        }
+    }
+}
+
+
+
+package chap16;
+
+public class AfternoonState implements State {
+    @Override
+    public void work(Task task) {
+        if(task.getHour() < 18)
+            System.out.println("Current state is AfternoonState!");
+        else{
+            task.setState(new EveningState());
+            task.work();
+        }
+    }
+}
+
+
+
+package chap16;
+
+public class EveningState implements State {
+    @Override
+    public void work(Task task) {
+        if(task.getHour() < 21)
+            System.out.println("Current State is EveningState!");
+        else{
+            task.setState(new RestState());
+            task.work();
+        }
+    }
+}
+
+
+
+package chap16;
+
+public class RestState implements State {
+    @Override
+    public void work(Task task) {
+        System.out.println("Current state is RestState!");
+        System.out.println("State life cycle is ended!");
+    }
+}
+
+
+
+package chap16;
+
+public class Client {
+    public static void main(String[] args){
+        Task task = new Task();
+        task.setHour(10);
+        task.work();
+        task.setHour(12.30);
+        task.work();
+        task.setHour(15);
+        task.work();
+        task.setHour(19);
+        task.work();
+        task.setHour(22);
+        task.work();
+    }
+}

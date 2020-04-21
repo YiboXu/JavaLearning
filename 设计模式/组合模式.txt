@@ -1,0 +1,161 @@
+﻿当你发现需求中是体现部分与整体层次的结构时，以及你希望用户可以忽略组合对象与单个对象的不同，统一的使用组合结构中的所有对象时，
+就应该考虑组合模式了.
+
+组合模式这样定就定义了包含人力资源部和财务部这些基本对象和分公司，办事处等组合对象的类层次结构。
+基本对象可以被组合成更复杂的组合对象，而这个组合对象又可以被组合，这样不断的递归下去，客户代码中，任何用到基本对象的地方都可以
+使用组合对象了.
+
+package chap19;
+
+public abstract class Company {
+    public String name;
+    public Company(String name){
+        this.name = name;
+    }
+
+    public abstract void add(Company c);
+    public abstract void remove(Company c);
+    public abstract void display(int depth);
+    public abstract void lineOfDuty();
+
+    public String toString(){
+        return name;
+    }
+}
+
+
+package chap19;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class ConcreteCompany extends Company {
+    private List<Company> companyList = new ArrayList<Company>();
+
+    public ConcreteCompany(String name) {
+        super(name);
+    }
+
+    @Override
+    public void add(Company c) {
+        companyList.add(c);
+    }
+
+    @Override
+    public void remove(Company c) {
+        companyList.remove(c);
+    }
+
+    @Override
+    public void display(int depth) {
+        for(int i=0;i<depth;i++)
+            System.out.print("-");
+
+        System.out.println(this);
+
+        for(Company c:companyList){
+            c.display(depth+2);
+        }
+    }
+
+    @Override
+    public void lineOfDuty() {
+        for(Company c:companyList){
+            c.lineOfDuty();
+        }
+    }
+}
+
+
+
+package chap19;
+
+public class HRDepartment extends Company {
+    public HRDepartment(String name) {
+        super(name);
+    }
+
+    @Override
+    public void add(Company c) {
+
+    }
+
+    @Override
+    public void remove(Company c) {
+
+    }
+
+    @Override
+    public void display(int depth) {
+        for(int i=0;i<depth;i++)
+            System.out.print("-");
+
+        System.out.println(this);
+    }
+
+    @Override
+    public void lineOfDuty() {
+        System.out.println(this + ": Employee hire and manage");
+    }
+}
+
+
+
+package chap19;
+
+public class FinanceDepartment extends Company {
+    public FinanceDepartment(String name) {
+        super(name);
+    }
+
+    @Override
+    public void add(Company c) {
+
+    }
+
+    @Override
+    public void remove(Company c) {
+
+    }
+
+    @Override
+    public void display(int depth) {
+        for(int i=0;i<depth;i++)
+            System.out.print("-");
+
+        System.out.println(this);
+    }
+
+    @Override
+    public void lineOfDuty() {
+        System.out.println(this + ": Company finance manage");
+    }
+}
+
+
+
+package chap19;
+
+public class Client {
+    public static void main(String[] args){
+        Company root = new ConcreteCompany("IBM");
+        root.add(new HRDepartment("IBM HR Department"));
+        root.add(new FinanceDepartment("IBM Finance Department"));
+
+        Company wuhan = new ConcreteCompany("IBM WuHan");
+        wuhan.add(new HRDepartment("IBM WuHan HR Department"));
+        wuhan.add(new FinanceDepartment("IBM WuHan Finance Department"));
+        root.add(wuhan);
+
+        Company wuhanIssc = new ConcreteCompany("WuHan ISSC");
+        wuhanIssc.add(new HRDepartment("WuHan ISSC HR Department"));
+        wuhanIssc.add(new FinanceDepartment("WuHan ISSC Finance Department"));
+        wuhan.add(wuhanIssc);
+
+        System.out.println("Company structure:");
+        root.display(1);
+
+        System.out.println("Company duty:");
+        root.lineOfDuty();
+    }
+}

@@ -1,0 +1,107 @@
+﻿策略模式是通过给一个类传入不同的参数，来对通一个操作进行不同的算法处理(策略）。
+工厂模式则是通过传入不同的参数来返回不同的类实例来进行后续不同的操作。
+2者有一些不一样，但是可以一起使用。
+
+package chap2;
+
+package chap2;
+
+import java.util.Scanner;
+
+public class Client1 {
+    public static void main(String[] args){
+        System.out.println("Please select the active:");
+        System.out.println("1. Normal");
+        System.out.println("2. Rebate 0.8");
+        System.out.println("3. Limit 300 return 50");
+
+        Scanner sc = new Scanner(System.in);
+        int opt = sc.nextInt();
+
+        CashContext cashContext = new CashContext(opt);   ===>通过传入不同的参数来选择业务逻辑的执行策略
+
+        System.out.println("Please enter your price:");
+        double price = sc.nextDouble();
+
+        System.out.println("Final price is: "+cashContext.getPrice(price));
+    }
+}
+
+
+public class CashContext {
+    private CashSuper cashSuper;
+
+    public CashContext(int opt){       
+        switch(opt){         ====>工厂模式
+            case 1:
+                cashSuper = new CashNormal();
+                break;
+            case 2:
+                cashSuper = new CashRebate(0.8);
+                break;
+            case 3:
+                cashSuper = new CashReturn(300,50);
+                break;
+        }
+    }
+
+    public double getPrice(double price){
+        return cashSuper.acceptCash(price);
+    }
+}
+
+
+package chap2;
+
+public interface CashSuper {
+    double acceptCash(double price);
+}
+
+
+package chap2;
+
+public class CashNormal implements CashSuper {
+    @Override
+    public double acceptCash(double price) {
+        return price;
+    }
+}
+
+
+
+package chap2;
+
+public class CashRebate implements CashSuper {
+    private double rate;
+
+    public CashRebate(double rate){
+        this.rate = rate;
+    }
+
+    @Override
+    public double acceptCash(double price) {
+        return price * rate;
+    }
+}
+
+
+package chap2;
+
+public class CashReturn implements CashSuper {
+    private int limit;
+    private int discountAmt;
+
+    public CashReturn(int limit, int discountAmt){
+        this.limit = limit;
+        this.discountAmt = discountAmt;
+    }
+
+    @Override
+    public double acceptCash(double price) {
+        if(price < limit)
+            return price;
+        else{
+            return price - Math.floor(price/limit)*discountAmt;
+        }
+    }
+}

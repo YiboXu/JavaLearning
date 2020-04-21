@@ -1,0 +1,55 @@
+@startuml
+together {
+    class HouseDirector {
+        - HouseBuilder houseBuilder;
+
+        + HouseDirector()
+        + HouseDirector(HouseBuilder houseBuilder)
+        + void setHouseBuilder(HouseBuilder houseBuilder)
+        + House contructHouse()
+    }
+
+    abstract class HouseBuilder {
+        # House house
+        + abstract void buildBasic();
+        + abstract void buildWalls();
+        + abstract void buildRoof();
+
+        + House build()
+    }
+
+    class House {
+        - String basicPart;
+        - String walls;
+        - String roof;
+
+        + House()
+        + String getBasicPart()
+        + void setBasicPart(String basicPart)
+        + String getWalls()
+        + void setWalls(String walls)
+        + String getRoof()
+        + void setRoof(String roof)
+        + String toString()
+    }
+}
+
+together {
+    class CommonHouseBuilder{
+        + void buildBasic()
+        + void buildWalls()
+        + void buildRoof()
+    }
+    class HighBuildingHouseBuilder{
+         + void buildBasic()
+         + void buildWalls()
+         + void buildRoof()
+     }
+}
+
+HouseDirector o- HouseBuilder
+HouseBuilder *- House
+HouseBuilder <|- CommonHouseBuilder
+HouseBuilder <|- HighBuildingHouseBuilder
+
+@enduml

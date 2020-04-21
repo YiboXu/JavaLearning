@@ -1,0 +1,54 @@
+@startuml
+abstract class OriginationComponent {
+    private String name;
+    private String description;
+
+    + OriginationComponent(String name, String description)
+    + void add (OriginationComponent originationComponent)
+    + void remove (OriginationComponent originationComponent)
+    + String getName()
+    + void setName(String name)
+    + String getDescription()
+    + void setDescription(String description)
+    + String toString()
+
+    + abstract void print();
+}
+
+class University extends OriginationComponent {
+    + University(String name, String description)
+    + void add (OriginationComponent originationComponent)
+    + void remove (OriginationComponent originationComponent)
+    + String getName()
+    + void setName(String name)
+    + String getDescription()
+    + void setDescription(String description)
+    + String toString()
+    + void print();
+}
+
+class College extends OriginationComponent {
+    + College(String name, String description)
+    + void add (OriginationComponent originationComponent)
+    + void remove (OriginationComponent originationComponent)
+    + String getName()
+    + void setName(String name)
+    + String getDescription()
+    + void setDescription(String description)
+    + String toString()
+    + void print();
+}
+
+class Department extends OriginationComponent {
+    + Department(String name, String description)
+    + String getName()
+    + void setName(String name)
+    + String getDescription()
+    + void setDescription(String description)
+    + String toString()
+    + void print();
+}
+
+University o- College
+College o- Department
+@enduml

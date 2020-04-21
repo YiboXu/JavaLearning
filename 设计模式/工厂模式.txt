@@ -1,0 +1,181 @@
+﻿
+通过一个类，来获取对应类的实例，这就是工厂模式， 然后工厂模式还分为简单工厂模式和工厂模式。
+
+我们先来看简单工厂模式：
+
+package chap1;
+
+import java.util.Scanner;
+
+public class Calculator2 {
+    public static void main(String[] args){
+        Scanner sc = new Scanner(System.in);
+        System.out.println("Please enter number 1: ");
+        double num1 = sc.nextDouble();
+        System.out.println("Please enter number 2: ");
+        double num2 = sc.nextDouble();
+
+        System.out.println("Please enter ops: ");
+        String ops = sc.next();
+
+        if(ops.length()==1){     ====>通过OperationFactory.createOperation来获取需要的类，这就是工厂模式.
+            System.out.println(OperationFactory.createOperation(num1,num2,ops.charAt(0)).calculate());
+        }
+    }
+}
+
+class BaseOperation{
+    protected double num1;
+    protected double num2;
+
+    public BaseOperation(double num1, double num2){
+        this.num1 = num1;
+        this.num2 = num2;
+    }
+
+    public double calculate(){
+        return 0;
+    }
+}
+
+class AddOperation extends BaseOperation{
+    AddOperation(double num1, double num2){
+        super(num1,num2);
+    }
+
+    public double calculate(){
+        return num1 + num2;
+    }
+}
+
+class SubOperation extends BaseOperation{
+    SubOperation(double num1, double num2){
+        super(num1,num2);
+    }
+
+    public double calculate(){
+        return num1 - num2;
+    }
+}
+
+class MulOperation extends BaseOperation{
+    MulOperation(double num1, double num2){
+        super(num1,num2);
+    }
+
+    public double calculate(){
+        return num1 * num2;
+    }
+}
+
+class DivOperation extends BaseOperation{
+    DivOperation(double num1, double num2){
+        super(num1,num2);
+    }
+
+    public double calculate(){
+        if(num2 != 0)
+            return num1 / num2;
+        else
+            throw new RuntimeException("Zero num2 in DivOperation!");
+    }
+}
+
+class OperationFactory{
+    public static BaseOperation createOperation(double num1, double num2, char ops){
+        switch(ops){
+            case '+':
+                return new AddOperation(num1, num2);
+            case '-':
+                return new SubOperation(num1, num2);
+            case '*':
+                return new MulOperation(num1, num2);
+            case '/':
+                return new DivOperation(num1, num2);
+            default:
+                throw new RuntimeException("Invalid ops: "+ ops);
+        }
+    }
+}
+
+
+我们再来看工厂模式：
+package chap8;
+
+public class LeiFeng {
+    public void sweep(){
+        System.out.println("sweeping");
+    }
+
+    public void wash(){
+        System.out.println("wash");
+    }
+
+    public void buyRice(){
+        System.out.println("buyRice");
+    }
+}
+
+
+package chap8;
+
+public interface IFactory {
+    public LeiFeng createLeiFeng();
+}
+
+
+package chap8;
+
+public class UnderGraduate extends LeiFeng {
+}
+
+
+package chap8;
+
+public class Volunteer extends LeiFeng {
+}
+
+
+package chap8;
+
+public class UnderGraduateFactory implements IFactory {
+    @Override
+    public LeiFeng createLeiFeng() {
+        return new UnderGraduate();
+    }
+}
+
+
+package chap8;
+
+public class VolunteerFactory implements IFactory {
+    @Override
+    public LeiFeng createLeiFeng() {
+        return new Volunteer();
+    }
+}
+
+
+package chap8;
+
+public class Client {
+    public static void main(String[] args){
+        IFactory factory = new UnderGraduateFactory();
+        LeiFeng leifeng = factory.createLeiFeng();
+
+        leifeng.sweep();
+        leifeng.wash();
+        leifeng.buyRice();
+    }
+}
+
+
+简单工厂模式和工厂模式的区别：
+当需要增加一种实例类型的时候，简单工厂模式不仅需要新增这个实例类型的类，还需要更改工厂的逻辑判断分支(就是那些switch case)，
+但是工厂模式不需要，它仅仅需要需要新增这个实例类型的类及其子工厂， 至于这个何时用这个新增的类型，需要由客户端来决定。
+
+工厂方法模式实现时，客户端需要决定实例化哪一个工厂来实现业务逻辑，选择判断的问题还是存在，也就是说，工厂方法把简单工厂的内部逻辑
+判断移到了客户端代码来进行。你想要加功能，本来是改工厂类的，而现在是修改客户端，从而使工厂类实现了扩展-封闭原则.
+
+因为工厂类一般被多个客户端所用，所以如果只扩展工厂类而封闭对其的更改，这样受影响的客户端就很少，需要新工厂类的就修改自己的客户端，
+从而应用更加稳定。

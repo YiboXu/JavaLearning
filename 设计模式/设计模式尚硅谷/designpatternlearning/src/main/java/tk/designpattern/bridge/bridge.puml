@@ -1,0 +1,43 @@
+@startuml
+enum PhoneType{
+    FOLDED,
+    UPRIGHT,
+    SLIDE;
+}
+
+enum PhoneBrand implements Brand {
+    HUAWEI("HuaWeiPhone"),
+    XIAOMI("XiaoMiPhone"),
+    APPLE("IPHONE"),
+    VIVO("VivoPhone");
+
+    - String brandName;
+    + String toString()
+    + void call()
+    + String getBrandName()
+}
+
+abstract class Phone {
+    - Brand brand;
+    + Phone(Brand brand)
+    + void call()
+    + String toString()
+
+    + abstract PhoneType getPhoneType();
+}
+
+class FoldedPhone extends Phone {
+    + FoldedPhone(Brand brand)
+    + PhoneType getPhoneType()
+}
+
+class SlidePhone extends Phone {
+    + SlidePhone(Brand brand)
+    + PhoneType getPhoneType()
+}
+
+Phone o- PhoneBrand
+PhoneType <- FoldedPhone
+PhoneType <- SlidePhone
+
+@enduml

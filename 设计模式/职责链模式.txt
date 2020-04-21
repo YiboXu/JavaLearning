@@ -1,0 +1,141 @@
+﻿职责链模式， 当客户提交一个请求时，请求是沿着链传递直至有一个对象能处理它为止。
+
+package chap24;
+
+public abstract class Manager {
+    private String name;
+    private Manager supervisor;
+
+    public Manager(String name){
+        this.name = name;
+    }
+
+    public void setSupervisor(Manager supervisor){
+        this.supervisor = supervisor;
+    }
+
+    public Manager getSupervisor(){
+        return supervisor;
+    }
+
+    public String toString(){
+        return name;
+    }
+
+    public abstract void handleRequest(Request request);
+}
+
+
+
+package chap24;
+
+public class Leader extends Manager {
+    public Leader(String name) {
+        super(name);
+    }
+
+    @Override
+    public void handleRequest(Request request) {
+        if(request.getType()=="vacation" && request.getNumber()<=3){
+            System.out.println(request.getContent()+" is approved by "+this+"!");
+        }else{
+            this.getSupervisor().handleRequest(request);
+        }
+    }
+}
+
+
+
+package chap24;
+
+public class PM extends Manager {
+    public PM(String name) {
+        super(name);
+    }
+
+    @Override
+    public void handleRequest(Request request) {
+        if(request.getType()=="vacation"){
+            System.out.println(request.getContent()+" is approved by "+this+"!");
+        }else{
+            this.getSupervisor().handleRequest(request);
+        }
+    }
+}
+
+
+
+package chap24;
+
+public class Boss extends Manager {
+    public Boss(String name) {
+        super(name);
+    }
+
+    @Override
+    public void handleRequest(Request request) {
+        if(request.getType()=="salary" && request.getNumber()<=1000){
+            System.out.println(request.getContent()+" is approved by "+this+"!");
+        }else if(request.getType()=="separation"){
+            System.out.println(request.getContent()+" is approved by "+this+"!");
+        }
+        else{
+            System.out.println(request.getContent()+" is rejected by "+this+"!");
+        }
+    }
+}
+
+
+
+package chap24;
+
+public class Request {
+    private String type;
+    private int number;
+    private String content;
+
+    public Request(String type, int number, String content){
+        this.type = type;
+        this.number = number;
+        this.content = content;
+    }
+
+    public String getType(){
+        return type;
+    }
+
+    public int getNumber(){
+        return number;
+    }
+
+    public String getContent(){
+        return content;
+    }
+}
+
+
+
+package chap24;
+
+public class Client {
+    public static void main(String[] args){
+        Leader leader = new Leader("BillHu");
+        PM pm = new PM("Lucy");
+        Boss boss = new Boss("Jason");
+
+        leader.setSupervisor(pm);
+        pm.setSupervisor(boss);
+
+        Request vacation1 = new Request("vacation",2,"2 days vacations");
+        Request vacation2 = new Request("vacation",5,"5 days vacations");
+        Request salary1 = new Request("salary",200,"Add 200 salary");
+        Request salary2 = new Request("salary",2000,"Add 2000 salary");
+        Request separation = new Request("separation",0,"Leave company");
+
+        leader.handleRequest(vacation1);
+        leader.handleRequest(vacation2);
+        leader.handleRequest(salary1);
+        leader.handleRequest(salary2);
+        leader.handleRequest(separation);
+    }
+}

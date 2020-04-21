@@ -1,0 +1,40 @@
+@startuml
+
+class Context{
+ - State state;
+}
+
+abstract class State{
+ + void pay(Context context);
+ + void roll(Context context);
+ + void getGift(Context context);
+}
+
+class ReadyForPay extends State{
+ + void pay(Context context);
+ + void roll(Context context);
+ + void getGift(Context context);
+}
+class ReadyForRoll extends State{
+ + void pay(Context context);
+ + void roll(Context context);
+ + void getGift(Context context);
+}
+class ReadyForGetGift extends State{
+ + void pay(Context context);
+ + void roll(Context context);
+ + void getGift(Context context);
+}
+class NoMoney extends State{
+ + void pay(Context context);
+ + void roll(Context context);
+ + void getGift(Context context);
+}
+class NoGift extends State{
+ + void pay(Context context);
+ + void roll(Context context);
+ + void getGift(Context context);
+}
+
+Context o-- State
+@enduml

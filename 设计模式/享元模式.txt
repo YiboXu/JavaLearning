@@ -1,0 +1,91 @@
+﻿如果一个应用程序使用了大量的对象，而大量的这些对象造成了很大的存储开销时，就应该考虑使用享元模式。 
+还有就是对象的大多数状态可以外部状态，如果删除对象的外部状态，阿么可以用相对较少的共享对象取代很多组对象，这是也可以考虑使用
+享元模式.
+
+package chap26;
+
+public class User {
+    private String name;
+
+    public User(String name){
+        this.name = name;
+    }
+
+    public String toString(){
+        return name;
+    }
+}
+
+
+
+package chap26;
+
+public abstract class WebSite {
+    public abstract void use(User user);
+}
+
+
+
+
+package chap26;
+
+public class ConcreteWebSite extends WebSite {
+    private String name;
+    public ConcreteWebSite(String name){
+        super();
+        this.name = name;
+        System.out.println("WebSite "+name+" is initialized!");
+    }
+
+    @Override
+    public void use(User user) {
+        System.out.println("WebSite: "+name+", User: "+user);
+    }
+}
+
+
+
+
+package chap26;
+
+import java.util.HashMap;
+import java.util.Hashtable;
+
+public class WebSiteFactory {
+    private HashMap<String, WebSite> webSites = new HashMap<String, WebSite>();
+
+    public WebSite getWebSite(String name){
+        if(webSites.containsKey(name)){
+            return webSites.get(name);
+        }else{
+            WebSite webSite = new ConcreteWebSite(name);
+            webSites.put(name, webSite);
+            return webSite;
+        }
+    }
+
+    public int getWebSiteCount(){
+        return webSites.size();
+    }
+}
+
+
+
+package chap26;
+
+public class Client {
+    public static void main(String[] args){
+        WebSiteFactory factory = new WebSiteFactory();
+        WebSite productShow = factory.getWebSite("ProductShow");
+        WebSite weibo = factory.getWebSite("WeiBo");
+
+        User billhu = new User("BillHu");
+        User sofia = new User("Sofia");
+
+        productShow.use(billhu);
+        productShow.use(sofia);
+        weibo.use(billhu);
+        weibo.use(sofia);
+
+    }
+}

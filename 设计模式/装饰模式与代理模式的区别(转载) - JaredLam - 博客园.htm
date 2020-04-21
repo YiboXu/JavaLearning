@@ -1,0 +1,1719 @@
+<!DOCTYPE html>
+<html lang="zh-cn"><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="origin">
+    <meta property="og:description" content="学习AOP时，教材上面都说使用的是动态代理，可是在印象中代理模式一直都是控制访问什么的，怎么又动态增加行为了，动态增加行为不是装饰器模式吗？于是 找了很多资料，想弄清楚这两者之间到底有什么区别。结果发">
+    <meta http-equiv="Cache-Control" content="no-transform">
+    <meta http-equiv="Cache-Control" content="no-siteapp">
+    <title>装饰模式与代理模式的区别(转载) - JaredLam - 博客园</title>
+    
+    <link rel="stylesheet" href="%E8%A3%85%E9%A5%B0%E6%A8%A1%E5%BC%8F%E4%B8%8E%E4%BB%A3%E7%90%86%E6%A8%A1%E5%BC%8F%E7%9A%84%E5%8C%BA%E5%88%AB(%E8%BD%AC%E8%BD%BD)%20-%20JaredLam%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/blog-common.css">
+    <link id="MainCss" rel="stylesheet" href="%E8%A3%85%E9%A5%B0%E6%A8%A1%E5%BC%8F%E4%B8%8E%E4%BB%A3%E7%90%86%E6%A8%A1%E5%BC%8F%E7%9A%84%E5%8C%BA%E5%88%AB(%E8%BD%AC%E8%BD%BD)%20-%20JaredLam%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/bundle-loveisintheair.css">
+    
+    <link id="mobile-style" media="only screen and (max-width: 767px)" type="text/css" rel="stylesheet" href="%E8%A3%85%E9%A5%B0%E6%A8%A1%E5%BC%8F%E4%B8%8E%E4%BB%A3%E7%90%86%E6%A8%A1%E5%BC%8F%E7%9A%84%E5%8C%BA%E5%88%AB(%E8%BD%AC%E8%BD%BD)%20-%20JaredLam%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/bundle-loveisintheair-mobile.css">
+    
+    <link type="application/rss+xml" rel="alternate" href="https://www.cnblogs.com/jaredlam/rss">
+    <link type="application/rsd+xml" rel="EditURI" href="https://www.cnblogs.com/jaredlam/rsd.xml">
+    <link type="application/wlwmanifest+xml" rel="wlwmanifest" href="https://www.cnblogs.com/jaredlam/wlwmanifest.xml">
+    <script src="%E8%A3%85%E9%A5%B0%E6%A8%A1%E5%BC%8F%E4%B8%8E%E4%BB%A3%E7%90%86%E6%A8%A1%E5%BC%8F%E7%9A%84%E5%8C%BA%E5%88%AB(%E8%BD%AC%E8%BD%BD)%20-%20JaredLam%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/amp4ads-host-v0.js"></script><script src="%E8%A3%85%E9%A5%B0%E6%A8%A1%E5%BC%8F%E4%B8%8E%E4%BB%A3%E7%90%86%E6%A8%A1%E5%BC%8F%E7%9A%84%E5%8C%BA%E5%88%AB(%E8%BD%AC%E8%BD%BD)%20-%20JaredLam%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/pubads_impl_rendering_2019091201.js"></script><script async="" src="%E8%A3%85%E9%A5%B0%E6%A8%A1%E5%BC%8F%E4%B8%8E%E4%BB%A3%E7%90%86%E6%A8%A1%E5%BC%8F%E7%9A%84%E5%8C%BA%E5%88%AB(%E8%BD%AC%E8%BD%BD)%20-%20JaredLam%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/analytics.js"></script><script type="text/javascript" src="%E8%A3%85%E9%A5%B0%E6%A8%A1%E5%BC%8F%E4%B8%8E%E4%BB%A3%E7%90%86%E6%A8%A1%E5%BC%8F%E7%9A%84%E5%8C%BA%E5%88%AB(%E8%BD%AC%E8%BD%BD)%20-%20JaredLam%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/encoder.js"></script><script src="%E8%A3%85%E9%A5%B0%E6%A8%A1%E5%BC%8F%E4%B8%8E%E4%BB%A3%E7%90%86%E6%A8%A1%E5%BC%8F%E7%9A%84%E5%8C%BA%E5%88%AB(%E8%BD%AC%E8%BD%BD)%20-%20JaredLam%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/jquery-2.js"></script>
+    <script src="%E8%A3%85%E9%A5%B0%E6%A8%A1%E5%BC%8F%E4%B8%8E%E4%BB%A3%E7%90%86%E6%A8%A1%E5%BC%8F%E7%9A%84%E5%8C%BA%E5%88%AB(%E8%BD%AC%E8%BD%BD)%20-%20JaredLam%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/blog-common.js"></script>
+    <script>
+        var currentBlogId = 100417;
+        var currentBlogApp = 'jaredlam';
+        var cb_enable_mathjax = false;
+        var isLogined = false;
+    </script>
+    
+    
+    
+<link rel="preload" href="%E8%A3%85%E9%A5%B0%E6%A8%A1%E5%BC%8F%E4%B8%8E%E4%BB%A3%E7%90%86%E6%A8%A1%E5%BC%8F%E7%9A%84%E5%8C%BA%E5%88%AB(%E8%BD%AC%E8%BD%BD)%20-%20JaredLam%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/integrator.js" as="script"><script type="text/javascript" src="%E8%A3%85%E9%A5%B0%E6%A8%A1%E5%BC%8F%E4%B8%8E%E4%BB%A3%E7%90%86%E6%A8%A1%E5%BC%8F%E7%9A%84%E5%8C%BA%E5%88%AB(%E8%BD%AC%E8%BD%BD)%20-%20JaredLam%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/integrator.js"></script><script src="%E8%A3%85%E9%A5%B0%E6%A8%A1%E5%BC%8F%E4%B8%8E%E4%BB%A3%E7%90%86%E6%A8%A1%E5%BC%8F%E7%9A%84%E5%8C%BA%E5%88%AB(%E8%BD%AC%E8%BD%BD)%20-%20JaredLam%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/pubads_impl_2019091201.js" async=""></script></head>
+<body>
+    <a name="top"></a>
+    
+    
+<!--done-->
+<center>
+<div id="home">
+<div id="header">
+	<div id="blogTitle">
+	<a href="https://www.cnblogs.com/jaredlam/"><img id="blogLogo" src="%E8%A3%85%E9%A5%B0%E6%A8%A1%E5%BC%8F%E4%B8%8E%E4%BB%A3%E7%90%86%E6%A8%A1%E5%BC%8F%E7%9A%84%E5%8C%BA%E5%88%AB(%E8%BD%AC%E8%BD%BD)%20-%20JaredLam%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/logo.gif" alt=""></a>			
+		
+<!--done-->
+<h1><a id="Header1_HeaderTitle" class="headermaintitle HeaderMainTitle" href="https://www.cnblogs.com/jaredlam/">Jared's Thinking Tree</a>
+</h1>
+<h2>
+
+</h2>
+
+
+
+
+		
+	</div><!--end: blogTitle 博客的标题和副标题 -->
+	<div id="navigator">
+		
+<ul id="navList">
+	<li><a id="blog_nav_sitehome" class="menu" href="https://www.cnblogs.com/">
+博客园</a>
+</li>
+	<li>
+<a id="blog_nav_myhome" class="menu" href="https://www.cnblogs.com/jaredlam/">
+首页</a>
+</li>
+	<li>
+
+<a id="blog_nav_newpost" class="menu" href="https://i.cnblogs.com/EditPosts.aspx?opt=1">
+新随笔</a>
+</li>
+	<li>
+<a id="blog_nav_contact" class="menu" href="https://msg.cnblogs.com/send/JaredLam">
+联系</a></li>
+	<li>
+<a id="blog_nav_admin" class="menu" href="https://i.cnblogs.com/">
+管理</a>
+</li>
+	<li>
+<a id="blog_nav_rss" class="menu" href="https://www.cnblogs.com/jaredlam/rss/">
+订阅</a>
+	
+<a id="blog_nav_rss_image" href="https://www.cnblogs.com/jaredlam/rss/">
+    <img src="%E8%A3%85%E9%A5%B0%E6%A8%A1%E5%BC%8F%E4%B8%8E%E4%BB%A3%E7%90%86%E6%A8%A1%E5%BC%8F%E7%9A%84%E5%8C%BA%E5%88%AB(%E8%BD%AC%E8%BD%BD)%20-%20JaredLam%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/xml.gif" alt="订阅">
+</a></li>
+</ul>
+
+
+		<div class="blogStats">
+			
+			<!--done-->
+随笔- 
+11&nbsp;
+文章- 
+0&nbsp;
+评论- 
+21&nbsp;
+
+
+
+			
+		</div><!--end: blogStats -->
+	</div><!--end: navigator 博客导航栏 -->
+</div><!--end: header 头部 -->
+
+<div class="clear"></div>
+	<div id="topicList">
+		<div id="post_detail">
+<!--done-->
+<div id="topics">
+	<div class="post">
+		<h1 class="postTitle">
+			
+<a id="cb_post_title_url" class="postTitle2" href="https://www.cnblogs.com/jaredlam/archive/2011/11/08/2241089.html">装饰模式与代理模式的区别(转载)</a>
+
+		</h1>
+		<div class="clear"></div>
+		<div class="postBody">
+			
+<div id="cnblogs_post_body" class="blogpost-body ">
+    <p>&nbsp;&nbsp;&nbsp;&nbsp; 
+学习AOP时，教材上面都说使用的是动态代理，可是在印象中代理模式一直都是控制访问什么的，怎么又动态增加行为了，动态增加行为不是装饰器模式吗？于是
+ 
+找了很多资料，想弄清楚这两者之间到底有什么区别。结果发现这一篇英文文章讲的很清晰，就翻译一下，供参
+考。&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 首先，让我们先看一下下面的这两个UML类图，他们分别描述了装饰器模式和代理模式的基本实现。</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <img src="%E8%A3%85%E9%A5%B0%E6%A8%A1%E5%BC%8F%E4%B8%8E%E4%BB%A3%E7%90%86%E6%A8%A1%E5%BC%8F%E7%9A%84%E5%8C%BA%E5%88%AB(%E8%BD%AC%E8%BD%BD)%20-%20JaredLam%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/2011111013380282.gif" alt=""></p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <img src="%E8%A3%85%E9%A5%B0%E6%A8%A1%E5%BC%8F%E4%B8%8E%E4%BB%A3%E7%90%86%E6%A8%A1%E5%BC%8F%E7%9A%84%E5%8C%BA%E5%88%AB(%E8%BD%AC%E8%BD%BD)%20-%20JaredLam%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/2011111013381672.gif" alt=""></p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; 
+这两个图可能使我们产生困惑。这两个设计模式看起来很像。对装饰器模式来说，装饰者（decorator）和被装饰者（decoratee）都实现同一个
+ 接口。对代理模式来说，代理类（proxy class）和真实处理的类（real 
+class）都实现同一个接口。此外，不论我们使用哪一个模式，都可以很容易地在真实对象的方法前面或者后面加上自定义的方法。</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 然而，实际上，在装饰器模式和代理模式之间还是有很多差别的。<span style="color: #ff0000;">装饰器模式关注于在一个对象上动态的添加方法，然而代理模式关注于控制对对象的访问。</span>换句话 说，<span style="color: #ff0000;">用代理模式，代理类（proxy class）可以对它的客户隐藏一个对象的具体信息。因此，当使用代理模式的时候，我们常常在一个代理类中创建一个对象的实例。并且，当我们使用装饰器模 式的时候，我们通常的做法是将原始对象作为一个参数传给装饰者的构造器。</span></p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+我们可以用另外一句话来总结这些差别：使用代理模式，代理和真实对象之间的的关系通常在编译时就已经确定了，而装饰者能够在运行时递归地被构
+造。&nbsp;&nbsp;&nbsp;&nbsp;</p>
+<p>代理模式：</p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="%E8%A3%85%E9%A5%B0%E6%A8%A1%E5%BC%8F%E4%B8%8E%E4%BB%A3%E7%90%86%E6%A8%A1%E5%BC%8F%E7%9A%84%E5%8C%BA%E5%88%AB(%E8%BD%AC%E8%BD%BD)%20-%20JaredLam%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre><span style="color: #008000;">//</span><span style="color: #008000;">代理模式</span><span style="color: #008000;"><br></span><span style="color: #0000ff;">public</span> <span style="color: #0000ff;">class</span> Proxy <span style="color: #0000ff;">implements</span> Subject{<br><br>       <span style="color: #0000ff;">private</span> Subject subject;<br>       <span style="color: #0000ff;">public</span> Proxy(){<br>             <span style="color: #008000;">//</span><span style="color: #008000;">关系在编译时确定</span><span style="color: #008000;"><br></span>            subject = <span style="color: #0000ff;">new</span> RealSubject();<br>       }<br>       <span style="color: #0000ff;">public</span> <span style="color: #0000ff;">void</span> doAction(){<br>             ….<br>             subject.doAction();<br>             ….<br>       }<br>}</pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="%E8%A3%85%E9%A5%B0%E6%A8%A1%E5%BC%8F%E4%B8%8E%E4%BB%A3%E7%90%86%E6%A8%A1%E5%BC%8F%E7%9A%84%E5%8C%BA%E5%88%AB(%E8%BD%AC%E8%BD%BD)%20-%20JaredLam%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="%E8%A3%85%E9%A5%B0%E6%A8%A1%E5%BC%8F%E4%B8%8E%E4%BB%A3%E7%90%86%E6%A8%A1%E5%BC%8F%E7%9A%84%E5%8C%BA%E5%88%AB(%E8%BD%AC%E8%BD%BD)%20-%20JaredLam%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre><span style="color: #008000;">//</span><span style="color: #008000;">代理的客户</span><span style="color: #008000;"><br></span><span style="color: #0000ff;">public</span> <span style="color: #0000ff;">class</span> Client{<br>        <span style="color: #0000ff;">public</span> <span style="color: #0000ff;">static</span> <span style="color: #0000ff;">void</span> main(String[] args){<br>             <span style="color: #008000;">//</span><span style="color: #008000;">客户不知道代理委托了另一个对象</span><span style="color: #008000;"><br></span>             Subject subject = <span style="color: #0000ff;">new</span> Proxy();<br>             …<br>        }<br>}</pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="%E8%A3%85%E9%A5%B0%E6%A8%A1%E5%BC%8F%E4%B8%8E%E4%BB%A3%E7%90%86%E6%A8%A1%E5%BC%8F%E7%9A%84%E5%8C%BA%E5%88%AB(%E8%BD%AC%E8%BD%BD)%20-%20JaredLam%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p>装饰模式：</p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="%E8%A3%85%E9%A5%B0%E6%A8%A1%E5%BC%8F%E4%B8%8E%E4%BB%A3%E7%90%86%E6%A8%A1%E5%BC%8F%E7%9A%84%E5%8C%BA%E5%88%AB(%E8%BD%AC%E8%BD%BD)%20-%20JaredLam%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre><span style="color: #008000;">//</span><span style="color: #008000;">装饰器模式</span><span style="color: #008000;"><br></span><span style="color: #0000ff;">public</span> <span style="color: #0000ff;">class</span> Decorator <span style="color: #0000ff;">implements</span> Component{<br>        <span style="color: #0000ff;">private</span> Component component;<br>        <span style="color: #0000ff;">public</span> Decorator(Component component){<br>            <span style="color: #0000ff;">this</span>.component = component<br>        }<br>       <span style="color: #0000ff;">public</span> <span style="color: #0000ff;">void</span> operation(){<br>            ….<br>            component.operation();<br>            ….<br>       }<br>}</pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="%E8%A3%85%E9%A5%B0%E6%A8%A1%E5%BC%8F%E4%B8%8E%E4%BB%A3%E7%90%86%E6%A8%A1%E5%BC%8F%E7%9A%84%E5%8C%BA%E5%88%AB(%E8%BD%AC%E8%BD%BD)%20-%20JaredLam%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="%E8%A3%85%E9%A5%B0%E6%A8%A1%E5%BC%8F%E4%B8%8E%E4%BB%A3%E7%90%86%E6%A8%A1%E5%BC%8F%E7%9A%84%E5%8C%BA%E5%88%AB(%E8%BD%AC%E8%BD%BD)%20-%20JaredLam%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre><span style="color: #008000;">//</span><span style="color: #008000;">装饰器的客户</span><span style="color: #008000;"><br></span><span style="color: #0000ff;">public</span> <span style="color: #0000ff;">class</span> Client{<br>        <span style="color: #0000ff;">public</span> <span style="color: #0000ff;">static</span> <span style="color: #0000ff;">void</span> main(String[] args){<br>            <span style="color: #008000;">//</span><span style="color: #008000;">客户指定了装饰者需要装饰的是哪一个类</span><span style="color: #008000;"><br></span>            Component component = <span style="color: #0000ff;">new</span> Decorator(<span style="color: #0000ff;">new</span> ConcreteComponent());<br>            …<br>        }<br>}</pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="%E8%A3%85%E9%A5%B0%E6%A8%A1%E5%BC%8F%E4%B8%8E%E4%BB%A3%E7%90%86%E6%A8%A1%E5%BC%8F%E7%9A%84%E5%8C%BA%E5%88%AB(%E8%BD%AC%E8%BD%BD)%20-%20JaredLam%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p><br><br><br><br></p>
+</div>
+<div id="MySignature"></div>
+<div class="clear"></div>
+<div id="blog_post_info_block">
+<div id="EntryTag">
+    标签: 
+            <a href="https://www.cnblogs.com/jaredlam/tag/%E8%A3%85%E9%A5%B0/">装饰</a>,             <a href="https://www.cnblogs.com/jaredlam/tag/%E8%A3%85%E9%A5%B0%E5%99%A8/">装饰器</a>,             <a href="https://www.cnblogs.com/jaredlam/tag/%E4%BB%A3%E7%90%86/">代理</a>,             <a href="https://www.cnblogs.com/jaredlam/tag/%E6%A8%A1%E5%BC%8F/">模式</a>,             <a href="https://www.cnblogs.com/jaredlam/tag/%E5%8C%BA%E5%88%AB/">区别</a></div>
+
+    <div id="blog_post_info">
+<div id="green_channel">
+        <a href="javascript:void(0);" id="green_channel_digg" onclick="DiggIt(2241089,cb_blogId,1);green_channel_success(this,'谢谢推荐！');">好文要顶</a>
+        <a id="green_channel_follow" onclick="follow('859c1e10-4201-e111-b7b9-842b2b196315');" href="javascript:void(0);">关注我</a>
+    <a id="green_channel_favorite" onclick="AddToWz(cb_entryId);return false;" href="javascript:void(0);">收藏该文</a>
+    <a id="green_channel_weibo" href="javascript:void(0);" title="分享至新浪微博" onclick="ShareToTsina()"><img src="%E8%A3%85%E9%A5%B0%E6%A8%A1%E5%BC%8F%E4%B8%8E%E4%BB%A3%E7%90%86%E6%A8%A1%E5%BC%8F%E7%9A%84%E5%8C%BA%E5%88%AB(%E8%BD%AC%E8%BD%BD)%20-%20JaredLam%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/icon_weibo_24.png" alt=""></a>
+    <a id="green_channel_wechat" href="javascript:void(0);" title="分享至微信" onclick="shareOnWechat()"><img src="%E8%A3%85%E9%A5%B0%E6%A8%A1%E5%BC%8F%E4%B8%8E%E4%BB%A3%E7%90%86%E6%A8%A1%E5%BC%8F%E7%9A%84%E5%8C%BA%E5%88%AB(%E8%BD%AC%E8%BD%BD)%20-%20JaredLam%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/wechat.png" alt=""></a>
+</div>
+<div id="author_profile">
+    <div id="author_profile_info" class="author_profile_info">
+        <div id="author_profile_detail" class="author_profile_info">
+            <a href="https://home.cnblogs.com/u/jaredlam/">JaredLam</a><br>
+            <a href="https://home.cnblogs.com/u/jaredlam/followees/">关注 - 0</a><br>
+            <a href="https://home.cnblogs.com/u/jaredlam/followers/">粉丝 - 7</a>
+        </div>
+    </div>
+    <div class="clear"></div>
+    <div id="author_profile_honor"></div>
+    <div id="author_profile_follow">
+                <a href="javascript:void(0);" onclick="follow('859c1e10-4201-e111-b7b9-842b2b196315');return false;">+加关注</a>
+    </div>
+</div>
+<div id="div_digg">
+    <div class="diggit" onclick="votePost(2241089,'Digg')">
+        <span class="diggnum" id="digg_count">14</span>
+    </div>
+    <div class="buryit" onclick="votePost(2241089,'Bury')">
+        <span class="burynum" id="bury_count">6</span>
+    </div>
+    <div class="clear"></div>
+    <div class="diggword" id="digg_tips">
+    </div>
+</div>
+
+<script type="text/javascript">
+    currentDiggType = 0;
+</script></div>
+    <div class="clear"></div>
+    <div id="post_next_prev">
+
+    <a href="https://www.cnblogs.com/jaredlam/archive/2011/10/30/2229593.html" class="p_n_p_prefix">« </a> 上一篇：    <a href="https://www.cnblogs.com/jaredlam/archive/2011/10/30/2229593.html" title="发布于 2011-10-30 21:54">Struts1关于struts-config.xml中的controller标签</a>
+    <br>
+    <a href="https://www.cnblogs.com/jaredlam/archive/2011/11/10/2244345.html" class="p_n_p_prefix">» </a> 下一篇：    <a href="https://www.cnblogs.com/jaredlam/archive/2011/11/10/2244345.html" title="发布于 2011-11-10 13:20">关于Struts2的工作流程</a>
+
+</div>
+</div>
+		</div>
+		<div class="postDesc">posted @ 
+<span id="post-date">2011-11-08 14:14</span>&nbsp;<a href="https://www.cnblogs.com/jaredlam/">JaredLam</a> 阅读(<span id="post_view_count">67329</span>) 评论(<span id="post_comment_count">20</span>) <a href="https://i.cnblogs.com/EditPosts.aspx?postid=2241089" rel="nofollow"> 编辑</a> <a href="javascript:void(0)" onclick="AddToWz(2241089); return false;">收藏</a>
+</div>
+	</div>
+	
+	
+</div><!--end: topics 文章、评论容器-->
+<script src="%E8%A3%85%E9%A5%B0%E6%A8%A1%E5%BC%8F%E4%B8%8E%E4%BB%A3%E7%90%86%E6%A8%A1%E5%BC%8F%E7%9A%84%E5%8C%BA%E5%88%AB(%E8%BD%AC%E8%BD%BD)%20-%20JaredLam%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/highlight.js"></script>
+<script>markdown_highlight();</script>
+<script>
+    var allowComments = true, cb_blogId = 100417, cb_blogApp = 'jaredlam', cb_blogUserGuid = '859c1e10-4201-e111-b7b9-842b2b196315';
+    var cb_entryId = 2241089, cb_entryCreatedDate = '2011-11-08 14:14', cb_postType = 1; 
+    loadViewCount(cb_entryId);
+</script><a name="!comments"></a>
+<div id="blog-comments-placeholder">
+
+<div id="comment_pager_top">
+    
+</div>
+
+<!--done-->
+<br>
+<div class="feedback_area_title">发表评论</div>
+<div class="feedbackNoItems"><div class="feedbackNoItems"></div></div>
+	
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+				<div class="feedbackManage">
+					&nbsp;&nbsp;
+
+<span class="comment_actions">
+    
+    
+    
+    
+</span>
+
+
+				</div>
+				
+<a href="#2775630" class="layer">#1楼</a>
+<a name="2775630" id="comment_anchor_2775630"></a>
+
+ 
+<span class="comment_date">2013-09-14 16:57</span>
+
+ | 
+
+            <a id="a_comment_author_2775630" href="https://www.cnblogs.com/zhangzhangkai/" target="_blank">张张开</a>
+
+			</div>
+			<div class="feedbackCon">
+				
+<div id="comment_body_2775630" class="blog_comment_body">
+    好文，谢谢。
+</div>
+        <div class="comment_vote">
+            <a href="javascript:void(0);" class="comment_digg" onclick="return voteComment('2775630', 'Digg', this);">
+                支持(0)
+            </a>
+            <a href="javascript:void(0);" class="comment_burry" onclick="return voteComment('2775630', 'Bury', this);">
+                反对(0)
+            </a>
+        </div>
+        
+
+			</div>
+		</div>
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+				<div class="feedbackManage">
+					&nbsp;&nbsp;
+
+<span class="comment_actions">
+    
+    
+    
+    
+</span>
+
+
+				</div>
+				
+<a href="#2996387" class="layer">#2楼</a>
+<a name="2996387" id="comment_anchor_2996387"></a>
+
+ 
+<span class="comment_date">2014-07-29 09:48</span>
+
+ | 
+
+            <a id="a_comment_author_2996387" href="https://home.cnblogs.com/u/445538/" target="_blank">蓝眸淡看</a>
+
+			</div>
+			<div class="feedbackCon">
+				
+<div id="comment_body_2996387" class="blog_comment_body">
+    为什么代理模式在初始化时不能像装饰模式一样传入一个realproxy的参数？例如： public Proxy(Subject subject){<br>             //关系在编译时确定<br>            subject =subject;<br>       }
+</div>
+        <div class="comment_vote">
+            <a href="javascript:void(0);" class="comment_digg" onclick="return voteComment('2996387', 'Digg', this);">
+                支持(1)
+            </a>
+            <a href="javascript:void(0);" class="comment_burry" onclick="return voteComment('2996387', 'Bury', this);">
+                反对(0)
+            </a>
+        </div>
+        
+
+			</div>
+		</div>
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+				<div class="feedbackManage">
+					&nbsp;&nbsp;
+
+<span class="comment_actions">
+    
+    
+    
+    
+</span>
+
+
+				</div>
+				
+<a href="#3104644" class="layer">#3楼</a>
+<a name="3104644" id="comment_anchor_3104644"></a>
+
+ 
+<span class="comment_date">2015-01-11 16:58</span>
+
+ | 
+
+            <a id="a_comment_author_3104644" href="https://www.cnblogs.com/man-tag/" target="_blank">脱毛的千里马</a>
+
+			</div>
+			<div class="feedbackCon">
+				
+<div id="comment_body_3104644" class="blog_comment_body">
+    按楼主的分析：<br>普通代理既是“静态代理”<br>装饰器既是“动态代理”
+</div>
+        <div class="comment_vote">
+            <a href="javascript:void(0);" class="comment_digg" onclick="return voteComment('3104644', 'Digg', this);">
+                支持(1)
+            </a>
+            <a href="javascript:void(0);" class="comment_burry" onclick="return voteComment('3104644', 'Bury', this);">
+                反对(1)
+            </a>
+        </div>
+        <span id="comment_3104644_avatar" style="display:none">
+            https://pic.cnblogs.com/face/662122/20140811145205.png
+        </span>
+
+			</div>
+		</div>
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+				<div class="feedbackManage">
+					&nbsp;&nbsp;
+
+<span class="comment_actions">
+    
+    
+    
+    
+</span>
+
+
+				</div>
+				
+<a href="#3209768" class="layer">#4楼</a>
+<a name="3209768" id="comment_anchor_3209768"></a>
+
+ 
+<span class="comment_date">2015-06-16 21:12</span>
+
+ | 
+
+            <a id="a_comment_author_3209768" href="https://home.cnblogs.com/u/775327/" target="_blank">呆萌小李</a>
+
+			</div>
+			<div class="feedbackCon">
+				
+<div id="comment_body_3209768" class="blog_comment_body">
+    可以问一下，你看的这是哪篇文章吗
+</div>
+        <div class="comment_vote">
+            <a href="javascript:void(0);" class="comment_digg" onclick="return voteComment('3209768', 'Digg', this);">
+                支持(0)
+            </a>
+            <a href="javascript:void(0);" class="comment_burry" onclick="return voteComment('3209768', 'Bury', this);">
+                反对(1)
+            </a>
+        </div>
+        
+
+			</div>
+		</div>
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+				<div class="feedbackManage">
+					&nbsp;&nbsp;
+
+<span class="comment_actions">
+    
+    
+    
+    
+</span>
+
+
+				</div>
+				
+<a href="#3222146" class="layer">#5楼</a>
+<a name="3222146" id="comment_anchor_3222146"></a>
+
+ 
+<span class="comment_date">2015-07-06 09:24</span>
+
+ | 
+
+            <a id="a_comment_author_3222146" href="https://www.cnblogs.com/laj12347/" target="_blank">流转的岁月</a>
+
+			</div>
+			<div class="feedbackCon">
+				
+<div id="comment_body_3222146" class="blog_comment_body">
+    一句话概括了两个模式的区别。 使用代理模式，代理和真实对象之间的的关系通常在编译时就已经确定了，而装饰者能够在运行时递归地被构造
+</div>
+        <div class="comment_vote">
+            <a href="javascript:void(0);" class="comment_digg" onclick="return voteComment('3222146', 'Digg', this);">
+                支持(2)
+            </a>
+            <a href="javascript:void(0);" class="comment_burry" onclick="return voteComment('3222146', 'Bury', this);">
+                反对(0)
+            </a>
+        </div>
+        <span id="comment_3222146_avatar" style="display:none">
+            https://pic.cnblogs.com/face/445909/20130316101212.png
+        </span>
+
+			</div>
+		</div>
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+				<div class="feedbackManage">
+					&nbsp;&nbsp;
+
+<span class="comment_actions">
+    
+    
+    
+    
+</span>
+
+
+				</div>
+				
+<a href="#3259293" class="layer">#6楼</a>
+<a name="3259293" id="comment_anchor_3259293"></a>
+
+ 
+<span class="comment_date">2015-09-02 19:58</span>
+
+ | 
+
+            <a id="a_comment_author_3259293" href="https://www.cnblogs.com/awarrior/" target="_blank">awarrior</a>
+
+			</div>
+			<div class="feedbackCon">
+				
+<div id="comment_body_3259293" class="blog_comment_body">
+    <a href="#3104644" title="查看所回复的评论" onclick="commentManager.renderComments(0,50,3104644);">@</a>
+脱毛的千里马<br>@脱毛的千里马<br>代理不是也有动态代理吗
+</div>
+        <div class="comment_vote">
+            <a href="javascript:void(0);" class="comment_digg" onclick="return voteComment('3259293', 'Digg', this);">
+                支持(0)
+            </a>
+            <a href="javascript:void(0);" class="comment_burry" onclick="return voteComment('3259293', 'Bury', this);">
+                反对(0)
+            </a>
+        </div>
+        <span id="comment_3259293_avatar" style="display:none">
+            https://pic.cnblogs.com/face/560941/20150309100042.png
+        </span>
+
+			</div>
+		</div>
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+				<div class="feedbackManage">
+					&nbsp;&nbsp;
+
+<span class="comment_actions">
+    
+    
+    
+    
+</span>
+
+
+				</div>
+				
+<a href="#3411935" class="layer">#7楼</a>
+<a name="3411935" id="comment_anchor_3411935"></a>
+
+ 
+<span class="comment_date">2016-04-19 13:42</span>
+
+ | 
+
+            <a id="a_comment_author_3411935" href="https://www.cnblogs.com/jmy-ipromiseu/" target="_blank">ipromiseu</a>
+
+			</div>
+			<div class="feedbackCon">
+				
+<div id="comment_body_3411935" class="blog_comment_body">
+    好文，搜了一上午的问题解决了。
+</div>
+        <div class="comment_vote">
+            <a href="javascript:void(0);" class="comment_digg" onclick="return voteComment('3411935', 'Digg', this);">
+                支持(0)
+            </a>
+            <a href="javascript:void(0);" class="comment_burry" onclick="return voteComment('3411935', 'Bury', this);">
+                反对(0)
+            </a>
+        </div>
+        
+
+			</div>
+		</div>
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+				<div class="feedbackManage">
+					&nbsp;&nbsp;
+
+<span class="comment_actions">
+    
+    
+    
+    
+</span>
+
+
+				</div>
+				
+<a href="#3425275" class="layer">#8楼</a>
+<a name="3425275" id="comment_anchor_3425275"></a>
+
+ 
+<span class="comment_date">2016-05-07 22:14</span>
+
+ | 
+
+            <a id="a_comment_author_3425275" href="https://www.cnblogs.com/maheng/" target="_blank">马衡</a>
+
+			</div>
+			<div class="feedbackCon">
+				
+<div id="comment_body_3425275" class="blog_comment_body">
+    我所看到的唯一区别是代理采用了类的组合，而装饰采用了类的聚合
+</div>
+        <div class="comment_vote">
+            <a href="javascript:void(0);" class="comment_digg" onclick="return voteComment('3425275', 'Digg', this);">
+                支持(1)
+            </a>
+            <a href="javascript:void(0);" class="comment_burry" onclick="return voteComment('3425275', 'Bury', this);">
+                反对(1)
+            </a>
+        </div>
+        
+
+			</div>
+		</div>
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+				<div class="feedbackManage">
+					&nbsp;&nbsp;
+
+<span class="comment_actions">
+    
+    
+    
+    
+</span>
+
+
+				</div>
+				
+<a href="#3441474" class="layer">#9楼</a>
+<a name="3441474" id="comment_anchor_3441474"></a>
+
+ 
+<span class="comment_date">2016-05-29 22:49</span>
+
+ | 
+
+            <a id="a_comment_author_3441474" href="https://home.cnblogs.com/u/966958/" target="_blank">silascript</a>
+
+			</div>
+			<div class="feedbackCon">
+				
+<div id="comment_body_3441474" class="blog_comment_body">
+    使用代理模式，代理和真实对象之间的的关系通常在编译时就已经确定了，而装饰者能够在运行时递归地被构造.这种理解是有偏差的。<br><br>模式区别除了实现外，最重要的是模式的目的性。代理模式与装饰器模式最根本区别是两者的目的不同，而不在具体的实现差异。
+</div>
+        <div class="comment_vote">
+            <a href="javascript:void(0);" class="comment_digg" onclick="return voteComment('3441474', 'Digg', this);">
+                支持(4)
+            </a>
+            <a href="javascript:void(0);" class="comment_burry" onclick="return voteComment('3441474', 'Bury', this);">
+                反对(0)
+            </a>
+        </div>
+        
+
+			</div>
+		</div>
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+				<div class="feedbackManage">
+					&nbsp;&nbsp;
+
+<span class="comment_actions">
+    
+    
+    
+    
+</span>
+
+
+				</div>
+				
+<a href="#3452385" class="layer">#10楼</a>
+<a name="3452385" id="comment_anchor_3452385"></a>
+
+ 
+<span class="comment_date">2016-06-15 10:00</span>
+
+ | 
+
+            <a id="a_comment_author_3452385" href="https://www.cnblogs.com/gossiplee/" target="_blank">ariclee</a>
+
+			</div>
+			<div class="feedbackCon">
+				
+<div id="comment_body_3452385" class="blog_comment_body">
+    既然是转载，为啥不写上原文的地址，替原文做作者感到不值！
+</div>
+        <div class="comment_vote">
+            <a href="javascript:void(0);" class="comment_digg" onclick="return voteComment('3452385', 'Digg', this);">
+                支持(2)
+            </a>
+            <a href="javascript:void(0);" class="comment_burry" onclick="return voteComment('3452385', 'Bury', this);">
+                反对(0)
+            </a>
+        </div>
+        <span id="comment_3452385_avatar" style="display:none">
+            https://pic.cnblogs.com/face/751662/20151030185756.png
+        </span>
+
+			</div>
+		</div>
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+				<div class="feedbackManage">
+					&nbsp;&nbsp;
+
+<span class="comment_actions">
+    
+    
+    
+    
+</span>
+
+
+				</div>
+				
+<a href="#3453420" class="layer">#11楼</a>
+<a name="3453420" id="comment_anchor_3453420"></a>
+
+ 
+<span class="comment_date">2016-06-16 16:15</span>
+
+ | 
+
+            <a id="a_comment_author_3453420" href="https://www.cnblogs.com/C-luffy/" target="_blank">Monkey_d_Luffy</a>
+
+			</div>
+			<div class="feedbackCon">
+				
+<div id="comment_body_3453420" class="blog_comment_body">
+    <a href="#3222146" title="查看所回复的评论" onclick="commentManager.renderComments(0,50,3222146);">@</a>
+流转的岁月<br>但是这样的话动态代理和装饰者模式的区别又是什么呢
+</div>
+        <div class="comment_vote">
+            <a href="javascript:void(0);" class="comment_digg" onclick="return voteComment('3453420', 'Digg', this);">
+                支持(0)
+            </a>
+            <a href="javascript:void(0);" class="comment_burry" onclick="return voteComment('3453420', 'Bury', this);">
+                反对(0)
+            </a>
+        </div>
+        <span id="comment_3453420_avatar" style="display:none">
+            https://pic.cnblogs.com/face/656875/20140727214044.png
+        </span>
+
+			</div>
+		</div>
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+				<div class="feedbackManage">
+					&nbsp;&nbsp;
+
+<span class="comment_actions">
+    
+    
+    
+    
+</span>
+
+
+				</div>
+				
+<a href="#3453428" class="layer">#12楼</a>
+<a name="3453428" id="comment_anchor_3453428"></a>
+
+ 
+<span class="comment_date">2016-06-16 16:20</span>
+
+ | 
+
+            <a id="a_comment_author_3453428" href="https://www.cnblogs.com/laj12347/" target="_blank">流转的岁月</a>
+
+			</div>
+			<div class="feedbackCon">
+				
+<div id="comment_body_3453428" class="blog_comment_body">
+    <a href="#3453420" title="查看所回复的评论" onclick="commentManager.renderComments(0,50,3453420);">@</a>
+Monkey_d_Luffy<br>使用的场景不一样。比如IO流使用的装饰者模式，可以层层增加功能。<br>代理模式可以用于增加特殊的功能。 有些动态代理不支持多层嵌套。
+</div>
+        <div class="comment_vote">
+            <a href="javascript:void(0);" class="comment_digg" onclick="return voteComment('3453428', 'Digg', this);">
+                支持(0)
+            </a>
+            <a href="javascript:void(0);" class="comment_burry" onclick="return voteComment('3453428', 'Bury', this);">
+                反对(0)
+            </a>
+        </div>
+        <span id="comment_3453428_avatar" style="display:none">
+            https://pic.cnblogs.com/face/445909/20130316101212.png
+        </span>
+
+			</div>
+		</div>
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+				<div class="feedbackManage">
+					&nbsp;&nbsp;
+
+<span class="comment_actions">
+    
+    
+    
+    
+</span>
+
+
+				</div>
+				
+<a href="#3503304" class="layer">#13楼</a>
+<a name="3503304" id="comment_anchor_3503304"></a>
+
+ 
+<span class="comment_date">2016-09-05 11:18</span>
+
+ | 
+
+            <a id="a_comment_author_3503304" href="https://home.cnblogs.com/u/999006/" target="_blank">失宠</a>
+
+			</div>
+			<div class="feedbackCon">
+				
+<div id="comment_body_3503304" class="blog_comment_body">
+    lz，我感觉这文章说的有问题啊。“因此，当使用代理模式的时候，我们常常在一个代理类中创建一个对象的实例。并且，当我们使用装饰器模 式的时候，我们通常的做法是将原始对象作为一个参数传给装饰者的构造器。”<br><br>但是我看think in java里讲到代理的时候，静态代理的第一个例子就是<br><div class="cnblogs_Highlighter"><pre class="gutter:true;brush:java">class SimpleProxy implements Interface {
+  private Interface proxied;
+  public SimpleProxy(Interface proxied) {
+    this.proxied = proxied;
+  }
+  public void doSomething() {
+    print("SimpleProxy doSomething");
+    proxied.doSomething();
+  }
+  public void somethingElse(String arg) {
+    print("SimpleProxy somethingElse " + arg);
+    proxied.somethingElse(arg);
+  }
+}
+</pre></div><br><br>按文章说的，这个应该是装饰器模式吧。
+</div>
+        <div class="comment_vote">
+            <a href="javascript:void(0);" class="comment_digg" onclick="return voteComment('3503304', 'Digg', this);">
+                支持(4)
+            </a>
+            <a href="javascript:void(0);" class="comment_burry" onclick="return voteComment('3503304', 'Bury', this);">
+                反对(0)
+            </a>
+        </div>
+        
+
+			</div>
+		</div>
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+				<div class="feedbackManage">
+					&nbsp;&nbsp;
+
+<span class="comment_actions">
+    
+    
+    
+    
+</span>
+
+
+				</div>
+				
+<a href="#3506558" class="layer">#14楼</a>
+<a name="3506558" id="comment_anchor_3506558"></a>
+
+ 
+<span class="comment_date">2016-09-09 09:31</span>
+
+ | 
+
+            <a id="a_comment_author_3506558" href="https://www.cnblogs.com/zhangshixin/" target="_blank">Coding丶世欣</a>
+
+			</div>
+			<div class="feedbackCon">
+				
+<div id="comment_body_3506558" class="blog_comment_body">
+    讲了半天，唯一有价值的就是<br><br>“代理不支持多层嵌套”<br><br>作者理解的代理模式就是片面的，难道代理就不能传入一个被代理对象吗？
+</div>
+        <div class="comment_vote">
+            <a href="javascript:void(0);" class="comment_digg" onclick="return voteComment('3506558', 'Digg', this);">
+                支持(7)
+            </a>
+            <a href="javascript:void(0);" class="comment_burry" onclick="return voteComment('3506558', 'Bury', this);">
+                反对(0)
+            </a>
+        </div>
+        
+
+			</div>
+		</div>
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+				<div class="feedbackManage">
+					&nbsp;&nbsp;
+
+<span class="comment_actions">
+    
+    
+    
+    
+</span>
+
+
+				</div>
+				
+<a href="#3506559" class="layer">#15楼</a>
+<a name="3506559" id="comment_anchor_3506559"></a>
+
+ 
+<span class="comment_date">2016-09-09 09:32</span>
+
+ | 
+
+            <a id="a_comment_author_3506559" href="https://www.cnblogs.com/zhangshixin/" target="_blank">Coding丶世欣</a>
+
+			</div>
+			<div class="feedbackCon">
+				
+<div id="comment_body_3506559" class="blog_comment_body">
+    看看什么是静态代理与动态代理吧<br><a href="http://blog.csdn.net/u011240877/article/details/52334547" target="_blank">http://blog.csdn.net/u011240877/article/details/52334547</a>
+</div>
+        <div class="comment_vote">
+            <a href="javascript:void(0);" class="comment_digg" onclick="return voteComment('3506559', 'Digg', this);">
+                支持(0)
+            </a>
+            <a href="javascript:void(0);" class="comment_burry" onclick="return voteComment('3506559', 'Bury', this);">
+                反对(0)
+            </a>
+        </div>
+        
+
+			</div>
+		</div>
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+				<div class="feedbackManage">
+					&nbsp;&nbsp;
+
+<span class="comment_actions">
+    
+    
+    
+    
+</span>
+
+
+				</div>
+				
+<a href="#3549313" class="layer">#16楼</a>
+<a name="3549313" id="comment_anchor_3549313"></a>
+
+ 
+<span class="comment_date">2016-11-06 19:23</span>
+
+ | 
+
+            <a id="a_comment_author_3549313" href="https://www.cnblogs.com/my-time/" target="_blank">熊咪</a>
+
+			</div>
+			<div class="feedbackCon">
+				
+<div id="comment_body_3549313" class="blog_comment_body">
+    <a href="#3506558" title="查看所回复的评论" onclick="commentManager.renderComments(0,50,3506558);">@</a>
+Coding丶世欣<br>你很聪明么？代理模式的意义是什么你都没搞清楚，说人家是片面的？手机上不带个打火机、吹风机功能就是片面的么？
+</div>
+        <div class="comment_vote">
+            <a href="javascript:void(0);" class="comment_digg" onclick="return voteComment('3549313', 'Digg', this);">
+                支持(0)
+            </a>
+            <a href="javascript:void(0);" class="comment_burry" onclick="return voteComment('3549313', 'Bury', this);">
+                反对(2)
+            </a>
+        </div>
+        
+
+			</div>
+		</div>
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+				<div class="feedbackManage">
+					&nbsp;&nbsp;
+
+<span class="comment_actions">
+    
+    
+    
+    
+</span>
+
+
+				</div>
+				
+<a href="#3549315" class="layer">#17楼</a>
+<a name="3549315" id="comment_anchor_3549315"></a>
+
+ 
+<span class="comment_date">2016-11-06 19:26</span>
+
+ | 
+
+            <a id="a_comment_author_3549315" href="https://www.cnblogs.com/my-time/" target="_blank">熊咪</a>
+
+			</div>
+			<div class="feedbackCon">
+				
+<div id="comment_body_3549315" class="blog_comment_body">
+    <a href="#3503304" title="查看所回复的评论" onclick="commentManager.renderComments(0,50,3503304);">@</a>
+失宠<br>@失宠<br>这个例子根本看不出来，你得看具体怎么用。。。
+</div>
+        <div class="comment_vote">
+            <a href="javascript:void(0);" class="comment_digg" onclick="return voteComment('3549315', 'Digg', this);">
+                支持(0)
+            </a>
+            <a href="javascript:void(0);" class="comment_burry" onclick="return voteComment('3549315', 'Bury', this);">
+                反对(0)
+            </a>
+        </div>
+        
+
+			</div>
+		</div>
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+				<div class="feedbackManage">
+					&nbsp;&nbsp;
+
+<span class="comment_actions">
+    
+    
+    
+    
+</span>
+
+
+				</div>
+				
+<a href="#3731777" class="layer">#18楼</a>
+<a name="3731777" id="comment_anchor_3731777"></a>
+
+ 
+<span class="comment_date">2017-07-10 11:47</span>
+
+ | 
+
+            <a id="a_comment_author_3731777" href="https://www.cnblogs.com/ljdblog/" target="_blank">博学善思。。ljd</a>
+
+			</div>
+			<div class="feedbackCon">
+				
+<div id="comment_body_3731777" class="blog_comment_body">
+    代理模式中类的关系不需要客户端去配置，客户只需要使用代理类就ok了。但是装饰者模式中，类之间的关系需要客户指定。需要看自己是开发者还是客户
+</div>
+        <div class="comment_vote">
+            <a href="javascript:void(0);" class="comment_digg" onclick="return voteComment('3731777', 'Digg', this);">
+                支持(1)
+            </a>
+            <a href="javascript:void(0);" class="comment_burry" onclick="return voteComment('3731777', 'Bury', this);">
+                反对(0)
+            </a>
+        </div>
+        <span id="comment_3731777_avatar" style="display:none">
+            https://pic.cnblogs.com/face/1001215/20160730152953.png
+        </span>
+
+			</div>
+		</div>
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+				<div class="feedbackManage">
+					&nbsp;&nbsp;
+
+<span class="comment_actions">
+    
+    
+    
+    
+</span>
+
+
+				</div>
+				
+<a href="#3842211" class="layer">#19楼</a>
+<a name="3842211" id="comment_anchor_3842211"></a>
+
+ 
+<span class="comment_date">2017-11-16 14:26</span>
+
+ | 
+
+            <a id="a_comment_author_3842211" href="https://www.cnblogs.com/chrischris/" target="_blank">chrischris</a>
+
+			</div>
+			<div class="feedbackCon">
+				
+<div id="comment_body_3842211" class="blog_comment_body">
+    <a href="#3104644" title="查看所回复的评论" onclick="commentManager.renderComments(0,50,3104644);">@</a>
+脱毛的千里马<br>reflect都没用怎么就是动态代理了呢
+</div>
+        <div class="comment_vote">
+            <a href="javascript:void(0);" class="comment_digg" onclick="return voteComment('3842211', 'Digg', this);">
+                支持(0)
+            </a>
+            <a href="javascript:void(0);" class="comment_burry" onclick="return voteComment('3842211', 'Bury', this);">
+                反对(0)
+            </a>
+        </div>
+        <span id="comment_3842211_avatar" style="display:none">
+            https://pic.cnblogs.com/face/1040662/20170801142124.png
+        </span>
+
+			</div>
+		</div>
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+				<div class="feedbackManage">
+					&nbsp;&nbsp;
+
+<span class="comment_actions">
+    
+    
+    
+    
+</span>
+
+
+				</div>
+				
+<a href="#4227316" class="layer">#20楼</a>
+<a name="4227316" id="comment_anchor_4227316"></a>
+
+        <span id="comment-maxId" style="display:none">4227316</span>
+        <span id="comment-maxDate" style="display:none">4/10/2019 3:11:08 PM</span>
+ 
+<span class="comment_date">2019-04-10 15:11</span>
+
+ | 
+
+            <a id="a_comment_author_4227316" href="https://home.cnblogs.com/u/986218/" target="_blank">樊宇豪</a>
+
+			</div>
+			<div class="feedbackCon">
+				
+<div id="comment_body_4227316" class="blog_comment_body">
+    代理和装饰其实从另一种角度更容易去理解这两个模式的区别：<br>代理更多的是强调控制对对象的访问，比如说：访问A对象的查询功能时，访问B
+对象的更新功能时，访问C对象的删除功能时都需要判断用户是否登录，那么我需要将判断用户是否登录功能抽出来，并对A对象，B对象，C对象进行代理使访问
+它们时都需要去判断用户是否登录，简单说就是将某个控制访问权限应用到多个对象上；而装饰更多的强调现在我要给A对象增加唱歌功能，跳舞功能，说唱功能等
+等，简单说就是讲多个功能附加在一个对象上；
+</div>
+        <div class="comment_vote">
+            <a href="javascript:void(0);" class="comment_digg" onclick="return voteComment('4227316', 'Digg', this);">
+                支持(0)
+            </a>
+            <a href="javascript:void(0);" class="comment_burry" onclick="return voteComment('4227316', 'Bury', this);">
+                反对(0)
+            </a>
+        </div>
+        
+
+			</div>
+		</div>
+
+<div id="comment_pager_bottom">
+    
+</div>
+
+
+</div>
+<script>
+    var commentManager = new blogCommentManager();
+    commentManager.renderComments(0);
+</script>
+
+<div id="comment_form" class="commentform">
+    <a name="commentform"></a>
+    <div id="divCommentShow"></div>
+    <div id="comment_nav"><span id="span_refresh_tips"></span><a href="javascript:void(0);" onclick="return RefreshCommentList();" id="lnk_RefreshComments" runat="server" clientidmode="Static">刷新评论</a><a href="#" onclick="return RefreshPage();">刷新页面</a><a href="#top">返回顶部</a></div>
+    <div id="comment_form_container"><div class="login_tips">
+    注册用户登录后才能发表评论，请 
+    <a rel="nofollow" href="javascript:void(0);" class="underline" onclick="return login('commentform');">登录</a>
+     或 
+    <a rel="nofollow" href="javascript:void(0);" class="underline" onclick="return register();">注册</a>，
+    <a href="https://www.cnblogs.com/">访问</a> 网站首页。
+</div></div>
+    <div class="ad_text_commentbox" id="ad_text_under_commentbox"></div>
+    <div id="ad_t2"><a href="http://www.ucancode.com/index.htm" target="_blank" onclick="ga('send', 'event', 'Link', 'click', 'T2-工控')">【推荐】超50万行VC++源码: 大型组态工控、电力仿真CAD与GIS源码库</a><br><a href="https://www.jdcloud.com/cn/activity/newUser?utm_source=DMT_cnblogs&amp;utm_medium=CH&amp;utm_campaign=09vm&amp;utm_term=Virtual-Machines" target="_blank" onclick="ga('send', 'event', 'Link', 'click', 'T2-京东云')">【活动】京东云限时优惠1.5折购云主机，最高返价值1000元礼品！</a><br><a href="http://clickc.admaster.com.cn/c/a131574,b3595115,c1705,i0,m101,8a1,8b3,h" target="_blank" onclick="ga('send', 'event', 'Link', 'click', 'T2-华为云微认证')">【推荐】零基础轻松玩转华为云产品，获壕礼加返百元大礼</a><br><a href="https://www.ctyun.cn/activity/#/20190919?hmsr=%E5%8D%9A%E5%AE%A2%E5%9B%AD-0916-919%E6%B4%BB%E5%8A%A8&amp;hmpl=&amp;hmcu=&amp;hmkw=&amp;hmci=" target="_blank" onclick="ga('send', 'event', 'Link', 'click', 'T2-天翼云')">【推荐】919 天翼云钜惠，全网低价，云主机9元轻松购</a><br><a href="http://clickc.admaster.com.cn/c/a131575,b3595121,c1705,i0,m101,8a1,8b3,h" target="_blank" onclick="ga('send', 'event', 'Link', 'click', 'T2-华为文字')">【推荐】华为云文字识别资源包重磅上市，1元万次限时抢购</a><br><a href="https://cloud.tencent.com/act/pro/overseas?fromSource=gwzcw.2802159.2802159.2802159&amp;utm_medium=cpc&amp;utm_id=gwzcw.2802159.2802159.2802159" target="_blank" onclick="ga('send', 'event', 'Link', 'click', 'T2-腾讯云')">【推荐】腾讯云海外云服务器1核2G19.8元/月</a><br><a href="https://www.cnblogs.com/cmt/p/11505603.html" target="_blank" onclick="ga('send', 'event', 'Link', 'click', 'T2-华为云代金券')">【福利】git pull &amp;&amp; cherry-pick 博客园&amp;华为云百万代金券</a><br></div>
+    <div id="opt_under_post"></div>
+    <script async="async" src="%E8%A3%85%E9%A5%B0%E6%A8%A1%E5%BC%8F%E4%B8%8E%E4%BB%A3%E7%90%86%E6%A8%A1%E5%BC%8F%E7%9A%84%E5%8C%BA%E5%88%AB(%E8%BD%AC%E8%BD%BD)%20-%20JaredLam%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/gpt.js"></script>
+    <script>
+        var googletag = googletag || {};
+        googletag.cmd = googletag.cmd || [];
+    </script>
+    <script>
+        googletag.cmd.push(function () {
+            googletag.defineSlot("/1090369/C1", [300, 250], "div-gpt-ad-1546353474406-0").addService(googletag.pubads());
+            googletag.defineSlot("/1090369/C2", [468, 60], "div-gpt-ad-1539008685004-0").addService(googletag.pubads());
+            googletag.pubads().enableSingleRequest();
+            googletag.enableServices();
+        });
+    </script>
+    <div id="cnblogs_c1" class="c_ad_block">
+        <div id="div-gpt-ad-1546353474406-0" style="height:250px; width:300px;" data-google-query-id="CKvSrebC5OQCFU14iwodHfsHkg"><div id="google_ads_iframe_/1090369/C1_0__container__" style="border: 0pt none;"><iframe id="google_ads_iframe_/1090369/C1_0" title="3rd party ad content" name="google_ads_iframe_/1090369/C1_0" scrolling="no" marginwidth="0" marginheight="0" style="border: 0px none; vertical-align: bottom;" srcdoc="" data-google-container-id="1" data-load-complete="true" width="300" height="250" frameborder="0"></iframe></div></div>
+    </div>
+    <div id="under_post_news"><div class="recomm-block"><b>相关博文：</b><br>·  <a title="代理模式 vs 装饰模式" href="https://www.cnblogs.com/luoxn28/p/5535877.html" target="_blank" onclick="clickRecomItmem(5535877)">代理模式 vs 装饰模式</a><br>·  <a title="Java 代理模式和装饰者模式的区别" href="https://www.cnblogs.com/onlywujun/archive/2013/03/28/2985887.html" target="_blank" onclick="clickRecomItmem(2985887)">Java 代理模式和装饰者模式的区别</a><br>·  <a title="装饰模式和代理模式的区别" href="https://www.cnblogs.com/wjw334/p/4267767.html" target="_blank" onclick="clickRecomItmem(4267767)">装饰模式和代理模式的区别</a><br>·  <a title="设计模式——代理模式与装饰模式的异同" href="https://www.cnblogs.com/zhengbin/p/5618564.html" target="_blank" onclick="clickRecomItmem(5618564)">设计模式——代理模式与装饰模式的异同</a><br>·  <a title="代理模式和装饰者模式的区别" href="https://www.cnblogs.com/xiaolovewei/p/7751332.html" target="_blank" onclick="clickRecomItmem(7751332)">代理模式和装饰者模式的区别</a><br></div></div>
+    <div id="cnblogs_c2" class="c_ad_block">
+        <div id="div-gpt-ad-1539008685004-0" style="height:60px; width:468px;" data-google-query-id="CKzSrebC5OQCFU14iwodHfsHkg">
+            
+        <div id="google_ads_iframe_/1090369/C2_0__container__" style="border: 0pt none;"><iframe id="google_ads_iframe_/1090369/C2_0" title="3rd party ad content" name="google_ads_iframe_/1090369/C2_0" scrolling="no" marginwidth="0" marginheight="0" style="border: 0px none; vertical-align: bottom;" srcdoc="" data-google-container-id="2" data-load-complete="true" width="468" height="60" frameborder="0"></iframe></div></div>
+    </div>
+    <div id="under_post_kb">
+<div class="itnews c_ad_block">
+    <b>最新 IT 新闻</b>:
+    <br>
+ ·              <a href="https://news.cnblogs.com/n/640303/" target="_blank">美政府批准苹果关税豁免申请 在美造电脑便宜了</a>
+            <br>
+ ·              <a href="https://news.cnblogs.com/n/640302/" target="_blank">华为Mate 30供应商全揭秘！国产撑起半边天</a>
+            <br>
+ ·              <a href="https://news.cnblogs.com/n/640301/" target="_blank">爱泼斯坦事件发酵，MIT师生发起抗议逼迫校长Rafael Reif辞职</a>
+            <br>
+ ·              <a href="https://news.cnblogs.com/n/640300/" target="_blank">200秒=超算1万年，谷歌实现“量子霸权”论文上架随即被撤回</a>
+            <br>
+ ·              <a href="https://news.cnblogs.com/n/640299/" target="_blank">公有云渐入深水区：格局或定 国内逐渐向BAT聚拢</a>
+            <br>
+    » <a href="https://news.cnblogs.com/" title="IT 新闻" target="_blank">更多新闻...</a>
+</div></div>
+    <div id="HistoryToday" class="c_ad_block"></div>
+    <script type="text/javascript">
+        fixPostBody();
+        setTimeout(function () { incrementViewCount(cb_entryId); }, 50);
+        deliverAdT2();
+        deliverAdC1();
+        deliverAdC2();
+        loadNewsAndKb();
+        loadBlogSignature();
+LoadPostCategoriesTags(cb_blogId, cb_entryId);        LoadPostInfoBlock(cb_blogId, cb_entryId, cb_blogApp, cb_blogUserGuid);
+        GetPrevNextPost(cb_entryId, cb_blogId, cb_entryCreatedDate, cb_postType);
+        loadOptUnderPost();
+        GetHistoryToday(cb_blogId, cb_blogApp, cb_entryCreatedDate);
+    </script>
+</div></div>
+
+
+	</div><!--end: topicList 文章列表容器-->
+
+	<div id="sideBar">
+		<div id="sideBarMain">
+			
+<div id="sidebar_news" class="newsItem"><!--done-->
+<div class="newsItem">
+<h3 class="catListTitle">公告</h3>
+	
+<div id="blog-news">
+    
+    <div id="profile_block">
+        昵称：
+        <a href="https://home.cnblogs.com/u/jaredlam/">
+            JaredLam
+        </a>
+        <br>
+        园龄：
+        <a href="https://home.cnblogs.com/u/jaredlam/" title="入园时间：2011-10-28">
+            7年10个月
+        </a>
+        <br>
+        粉丝：
+        <a href="https://home.cnblogs.com/u/jaredlam/followers/">
+            7
+        </a>
+        <br>
+        关注：
+        <a href="https://home.cnblogs.com/u/jaredlam/followees/">
+            0
+        </a>
+        <div id="p_b_follow">
+<a href="javascript:void(0)" onclick="follow('859c1e10-4201-e111-b7b9-842b2b196315')">+加关注</a></div>
+        <script>getFollowStatus('859c1e10-4201-e111-b7b9-842b2b196315');</script>
+    </div>
+</div>
+</div>
+
+</div>
+
+			<div id="calendar"><div id="calendar"><div id="blog-calendar" style="">
+
+<table id="blogCalendar" class="Cal" title="Calendar" cellspacing="0" cellpadding="0" border="0">
+    <tbody>
+        <tr>
+            <td colspan="7">
+                <table class="CalTitle" cellspacing="0" border="0">
+                    <tbody>
+                        <tr>
+                            <td class="CalNextPrev">
+                                <a href="javascript:void(0);" onclick="loadBlogCalendar('2011/10/08'); return false;">&lt;</a>
+                            </td>
+                            <td align="center">2011年11月</td>
+                            <td class="CalNextPrev" align="right">
+                                <a href="javascript:void(0);" onclick="loadBlogCalendar('2011/12/08'); return false;">&gt;</a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </td>
+        </tr>
+        <tr>
+                    <th class="CalDayHeader" abbr="日" scope="col" align="center">日</th>
+                    <th class="CalDayHeader" abbr="一" scope="col" align="center">一</th>
+                    <th class="CalDayHeader" abbr="二" scope="col" align="center">二</th>
+                    <th class="CalDayHeader" abbr="三" scope="col" align="center">三</th>
+                    <th class="CalDayHeader" abbr="四" scope="col" align="center">四</th>
+                    <th class="CalDayHeader" abbr="五" scope="col" align="center">五</th>
+                    <th class="CalDayHeader" abbr="六" scope="col" align="center">六</th>
+        </tr>
+            <tr>
+                            <td class="CalOtherMonthDay" align="center">30</td>
+                            <td class="CalOtherMonthDay" align="center">31</td>
+                        <td class="" align="center">
+                            1
+                        </td>
+                        <td class="" align="center">
+                            2
+                        </td>
+                        <td class="" align="center">
+                            3
+                        </td>
+                        <td class="" align="center">
+                            4
+                        </td>
+                    <td class="CalWeekendDay" align="center">
+                        5
+                    </td>
+            </tr>
+                <tr>
+                        <td class="CalWeekendDay" align="center">
+                            6
+                        </td>
+                            <td class="" align="center">
+                                7
+                            </td>
+                            <td class="" align="center">
+                                <a href="https://www.cnblogs.com/jaredlam/archive/2011/11/08.html"><u>8</u></a>
+                            </td>
+                            <td class="" align="center">
+                                9
+                            </td>
+                            <td class="" align="center">
+                                <a href="https://www.cnblogs.com/jaredlam/archive/2011/11/10.html"><u>10</u></a>
+                            </td>
+                            <td class="" align="center">
+                                <a href="https://www.cnblogs.com/jaredlam/archive/2011/11/11.html"><u>11</u></a>
+                            </td>
+                        <td class="CalWeekendDay" align="center">
+                            12
+                        </td>
+                </tr>
+                <tr>
+                        <td class="CalWeekendDay" align="center">
+                            13
+                        </td>
+                            <td class="" align="center">
+                                14
+                            </td>
+                            <td class="" align="center">
+                                15
+                            </td>
+                            <td class="" align="center">
+                                16
+                            </td>
+                            <td class="" align="center">
+                                <a href="https://www.cnblogs.com/jaredlam/archive/2011/11/17.html"><u>17</u></a>
+                            </td>
+                            <td class="" align="center">
+                                18
+                            </td>
+                        <td class="CalWeekendDay" align="center">
+                            19
+                        </td>
+                </tr>
+                <tr>
+                        <td class="CalWeekendDay" align="center">
+                            20
+                        </td>
+                            <td class="" align="center">
+                                21
+                            </td>
+                            <td class="" align="center">
+                                <a href="https://www.cnblogs.com/jaredlam/archive/2011/11/22.html"><u>22</u></a>
+                            </td>
+                            <td class="" align="center">
+                                23
+                            </td>
+                            <td class="" align="center">
+                                24
+                            </td>
+                            <td class="" align="center">
+                                25
+                            </td>
+                        <td class="CalWeekendDay" align="center">
+                            26
+                        </td>
+                </tr>
+                <tr>
+                        <td class="CalWeekendDay" align="center">
+                            27
+                        </td>
+                            <td class="" align="center">
+                                28
+                            </td>
+                            <td class="" align="center">
+                                29
+                            </td>
+                            <td class="" align="center">
+                                30
+                            </td>
+                            <td class="CalOtherMonthDay" align="center">
+                                1
+                            </td>
+                            <td class="CalOtherMonthDay" align="center">
+                                2
+                            </td>
+                        <td class="CalOtherMonthDay" align="center">
+                            3
+                        </td>
+                </tr>
+                <tr>
+                        <td class="CalOtherMonthDay" align="center">
+                            4
+                        </td>
+                            <td class="CalOtherMonthDay" align="center">
+                                5
+                            </td>
+                            <td class="CalOtherMonthDay" align="center">
+                                6
+                            </td>
+                            <td class="CalOtherMonthDay" align="center">
+                                7
+                            </td>
+                            <td class="CalOtherMonthDay" align="center">
+                                8
+                            </td>
+                            <td class="CalOtherMonthDay" align="center">
+                                9
+                            </td>
+                        <td class="CalOtherMonthDay" align="center">
+                            10
+                        </td>
+                </tr>
+    </tbody>
+</table></div></div>                
+                    <script>loadBlogDefaultCalendar();</script></div>
+			
+			<div id="leftcontentcontainer">
+				<div id="blog-sidecolumn">
+
+<!-- 搜索 -->
+<div id="sidebar_search" class="sidebar-block">
+    <div id="sidebar_search" class="mySearch">
+        <h3 class="catListTitle">搜索</h3>
+        <div id="sidebar_search_box">
+            <div id="widget_my_zzk" class="div_my_zzk">
+                <input type="text" id="q" onkeydown="return zzk_go_enter(event);" class="input_my_zzk">&nbsp;<input onclick="zzk_go()" type="button" value="找找看" id="btnZzk" class="btn_my_zzk">
+            </div>
+            <div id="widget_my_google" class="div_my_zzk">
+                <input type="text" name="google_q" id="google_q" onkeydown="return google_go_enter(event);" class="input_my_zzk">&nbsp;<input onclick="google_go()" type="button" value="谷歌搜索" class="btn_my_zzk">
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 常用链接 -->
+<div id="sidebar_shortcut" class="sidebar-block">
+    <div class="catListLink">
+<h3 class="catListTitle">
+常用链接
+</h3>
+<ul>
+		<li>
+
+<a href="https://www.cnblogs.com/jaredlam/p/" title="我的博客的随笔列表">我的随笔</a>
+</li>
+		<li>
+
+<a href="https://www.cnblogs.com/jaredlam/MyComments.html" title="我的发表过的评论列表">我的评论</a>
+</li>
+		<li>
+
+<a href="https://www.cnblogs.com/jaredlam/OtherPosts.html" title="我评论过的随笔列表">我的参与</a>
+</li>
+		<li>
+
+<a href="https://www.cnblogs.com/jaredlam/RecentComments.html" title="我的博客的评论列表">最新评论</a>
+</li>
+		<li>
+
+<a href="https://www.cnblogs.com/jaredlam/tag/" title="我的博客的标签列表">我的标签</a>
+</li>
+
+<li><a id="itemListLink" onclick="this.blur();WarpClass('itemListLink', 'itemListLin_con');return false;" href="#">更多链接</a></li>
+</ul>
+<div id="itemListLin_con" style="display:none;">
+<ul>
+
+</ul>
+</div>
+</div>
+
+
+</div>
+
+<!-- 最新随笔 -->
+
+
+
+<!-- 我的标签 -->
+<div id="sidebar_toptags" class="sidebar-block">
+    <div class="catListTag">
+<h3 class="catListTitle">我的标签</h3>
+<ul>
+
+        <li>
+            <a href="https://www.cnblogs.com/jaredlam/tag/android/">android</a>(3)
+        </li>
+        <li>
+            <a href="https://www.cnblogs.com/jaredlam/tag/%E6%B3%9B%E5%9E%8B/">泛型</a>(2)
+        </li>
+        <li>
+            <a href="https://www.cnblogs.com/jaredlam/tag/Struts1/">Struts1</a>(2)
+        </li>
+        <li>
+            <a href="https://www.cnblogs.com/jaredlam/tag/struts2/">struts2</a>(1)
+        </li>
+        <li>
+            <a href="https://www.cnblogs.com/jaredlam/tag/ZoomControls/">ZoomControls</a>(1)
+        </li>
+        <li>
+            <a href="https://www.cnblogs.com/jaredlam/tag/%E7%99%BE%E5%BA%A6/">百度</a>(1)
+        </li>
+        <li>
+            <a href="https://www.cnblogs.com/jaredlam/tag/%E6%A0%87%E7%AD%BE/">标签</a>(1)
+        </li>
+        <li>
+            <a href="https://www.cnblogs.com/jaredlam/tag/%E4%BB%A3%E7%90%86/">代理</a>(1)
+        </li>
+        <li>
+            <a href="https://www.cnblogs.com/jaredlam/tag/%E5%9C%B0%E5%9B%BE/">地图</a>(1)
+        </li>
+        <li>
+            <a href="https://www.cnblogs.com/jaredlam/tag/%E6%94%BE%E5%A4%A7%E7%BC%A9%E5%B0%8F/">放大缩小</a>(1)
+        </li>
+            <li>
+                <a href="https://www.cnblogs.com/jaredlam/tag/">更多</a>
+            </li>
+
+</ul>
+</div>
+
+
+</div>
+
+<!-- 积分与排名 -->
+
+
+<!-- 随笔分类、随笔档案、文章分类、新闻分类、相册、链接 -->
+<div id="sidebar_categories">
+    
+<div class="catListPostArchive">
+<h3 class="catListTitle">
+
+随笔档案
+
+
+</h3>
+
+
+<ul>
+
+<li>
+<a href="https://www.cnblogs.com/jaredlam/archive/2012/05.html" rel="" target="">
+    2012年5月(1)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/jaredlam/archive/2012/02.html" rel="" target="">
+    2012年2月(2)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/jaredlam/archive/2011/11.html" rel="" target="">
+    2011年11月(5)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/jaredlam/archive/2011/10.html" rel="" target="">
+    2011年10月(3)
+</a>
+ 
+</li>
+
+</ul>
+
+
+</div>
+
+
+</div>
+
+<!-- 最新评论 -->
+<div id="sidebar_recentcomments" class="sidebar-block">
+    <div class="catListComment">
+<h3 class="catListTitle">最新评论</h3>
+
+	<div class="RecentCommentBlock">
+        <ul>
+                    <li class="recent_comment_title"><a href="https://www.cnblogs.com/jaredlam/archive/2011/11/08/2241089.html#4227316">1. Re:装饰模式与代理模式的区别(转载)</a></li>
+                    <li class="recent_comment_body">代理和装饰其实从另一种角度更容易去理解这两个模式的区别：代理更多的是强调控制对对象的访问，比如说：访问A对象的查询功能时，访问B对象的更新功能时，访问C对象的删除功能时都需要判断用户是否登录，那么我需...</li>
+                    <li class="recent_comment_author">--樊宇豪</li>
+                    <li class="recent_comment_title"><a href="http://www.cnblogs.com/jaredlam/archive/2011/11/08/2241089.html#3842211">2. Re:装饰模式与代理模式的区别(转载)</a></li>
+                    <li class="recent_comment_body">@ 脱毛的千里马reflect都没用怎么就是动态代理了呢...</li>
+                    <li class="recent_comment_author">--chrischris</li>
+                    <li class="recent_comment_title"><a href="http://www.cnblogs.com/jaredlam/archive/2011/11/08/2241089.html#3731777">3. Re:装饰模式与代理模式的区别(转载)</a></li>
+                    <li class="recent_comment_body">代理模式中类的关系不需要客户端去配置，客户只需要使用代理类就ok了。但是装饰者模式中，类之间的关系需要客户指定。需要看自己是开发者还是客户</li>
+                    <li class="recent_comment_author">--博学善思。。ljd</li>
+                    <li class="recent_comment_title"><a href="http://www.cnblogs.com/jaredlam/archive/2011/11/08/2241089.html#3549315">4. Re:装饰模式与代理模式的区别(转载)</a></li>
+                    <li class="recent_comment_body">@ 失宠@失宠这个例子根本看不出来，你得看具体怎么用。。。...</li>
+                    <li class="recent_comment_author">--熊咪</li>
+                    <li class="recent_comment_title"><a href="http://www.cnblogs.com/jaredlam/archive/2011/11/08/2241089.html#3549313">5. Re:装饰模式与代理模式的区别(转载)</a></li>
+                    <li class="recent_comment_body">@ Coding丶世欣你很聪明么？代理模式的意义是什么你都没搞清楚，说人家是片面的？手机上不带个打火机、吹风机功能就是片面的么？...</li>
+                    <li class="recent_comment_author">--熊咪</li>
+        </ul>
+    </div>
+</div>
+
+
+</div>
+
+
+
+<!-- 阅读排行榜 -->
+<div id="sidebar_topviewedposts" class="sidebar-block">
+    <div class="catListView">
+<h3 class="catListTitle">阅读排行榜</h3>
+	<div id="TopViewPostsBlock">
+        <ul style="word-break:break-all">
+                    <li>
+                        <a href="https://www.cnblogs.com/jaredlam/archive/2011/11/08/2241089.html">
+                            1. 装饰模式与代理模式的区别(转载)(67365)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/jaredlam/archive/2011/10/28/2228216.html">
+                            2. 关于Spring中配置LocalSessionFactoryBean来生成SessionFactory(15306)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/jaredlam/archive/2012/02/21/2361619.html">
+                            3. (原创)android中使用Baidu Map遇到的问题之：移动Mapview上的放大缩小控件(3402)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/jaredlam/archive/2011/10/30/2229593.html">
+                            4. Struts1关于struts-config.xml中的controller标签(2903)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/jaredlam/archive/2011/11/22/2259451.html">
+                            5. OpenSessionInView的作用(2742)
+                        </a>
+                    </li>
+        </ul>
+    </div>
+</div>
+
+
+</div>
+
+<!-- 评论排行榜 -->
+<div id="sidebar_topcommentedposts" class="sidebar-block">
+    <div class="catListFeedback">
+<h3 class="catListTitle">评论排行榜</h3>
+	<div id="TopFeedbackPostsBlock">
+        <ul style="word-break:break-all">
+                    <li>
+                        <a href="https://www.cnblogs.com/jaredlam/archive/2011/11/08/2241089.html">
+                            1. 装饰模式与代理模式的区别(转载)(20)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/jaredlam/archive/2012/02/21/2361584.html">
+                            2. (原创)android加载GIF图片到地图(或者其他图层)中(1)
+                        </a>
+                    </li>
+        </ul>
+    </div>
+</div>
+
+
+</div>
+
+<!-- 推荐排行榜 -->
+<div id="sidebar_topdiggedposts" class="sidebar-block">
+    
+<div id="topdigg_posts_wrap">
+    <div class="catListView">
+        <h3 class="catListTitle">推荐排行榜</h3>
+        <div id="TopDiggPostsBlock">
+            <ul style="word-break: break-all">
+                        <li>
+                            <a href="https://www.cnblogs.com/jaredlam/archive/2011/11/08/2241089.html">
+                                1. 装饰模式与代理模式的区别(转载)(14)
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://www.cnblogs.com/jaredlam/archive/2011/10/28/2228216.html">
+                                2. 关于Spring中配置LocalSessionFactoryBean来生成SessionFactory(3)
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://www.cnblogs.com/jaredlam/archive/2011/11/17/2252915.html">
+                                3. JDK泛型中的问号(?)的用途 （泛型集合类的作为参数的时候的继承问题）(1)
+                            </a>
+                        </li>
+            </ul>
+        </div>
+    </div>
+</div>
+</div></div>
+                    <script>loadBlogSideColumn();</script>
+			</div>
+			
+		</div><!--end: sideBarMain -->
+		<div class="clear"></div>
+		<div id="footer">
+			<!--done-->
+Copyright © 2019 JaredLam
+<br><span id="poweredby">Powered by .NET Core 3.0.0-preview9-19423-09 on Linux</span>
+
+
+
+		</div><!--end: footer -->
+	</div><!--end: sideBar 侧边栏容器 -->
+</div><!--end: home 自定义的最大容器 -->
+</center>
+
+
+    
+
+
+</body></html>

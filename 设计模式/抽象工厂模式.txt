@@ -1,0 +1,126 @@
+﻿通过反射来获取具体的类实例.
+
+package chap15;
+
+public class User {
+    private String name;
+
+    public User(String name){
+        this.name = name;
+    }
+
+    public String toString(){
+        return name;
+    }
+}
+
+
+
+package chap15;
+
+public interface IUser {
+    public User insertUser(User user);
+    public User getUser(String name);
+}
+
+
+
+package chap15;
+
+public class Db2User implements IUser {
+    @Override
+    public User insertUser(User user) {
+        System.out.println("Insert User " + user + " into DataBase DB2!");
+        return user;
+    }
+
+    @Override
+    public User getUser(String name) {
+        System.out.println("Select User " + name + " from DataBase DB2!");
+        return new User(name);
+    }
+}
+
+
+
+package chap15;
+
+public class Department {
+    private String name;
+
+    public Department(String name){
+        this.name = name;
+    }
+
+    public String toString(){
+        return name;
+    }
+}
+
+
+
+package chap15;
+
+public interface IDepartment {
+    public Department insertDepartment(Department department);
+    public Department getDepartment(String name);
+}
+
+
+
+package chap15;
+
+public class Db2Department implements IDepartment {
+    @Override
+    public Department insertDepartment(Department department) {
+        System.out.println("Insert Department " + department + " into DataBase DB2!");
+        return department;
+    }
+
+    @Override
+    public Department getDepartment(String name) {
+        System.out.println("Select Department " +name+ " from DataBase DB2!");
+        return new Department(name);
+    }
+}
+
+
+
+
+package chap15;
+
+import java.lang.reflect.*;
+
+public class DataAccess {
+    private String dbName;
+    public DataAccess(String dbName){
+        this.dbName = dbName;
+    }
+
+    public IUser createUserRepo() throws ClassNotFoundException, IllegalAccessException, InstantiationException {
+        return  (IUser) Class.forName("chap15."+dbName+"User").newInstance();
+    }
+
+    public IDepartment createDepartmentRepo() throws ClassNotFoundException, IllegalAccessException, InstantiationException {
+        return (IDepartment) Class.forName("chap15."+dbName+"Department").newInstance();
+    }
+}
+
+
+
+
+package chap15;
+
+public class Client {
+    public static void main(String[] args) throws IllegalAccessException, InstantiationException, ClassNotFoundException {
+        DataAccess dataAccess = new DataAccess("Db2");
+
+        IUser userRepo = dataAccess.createUserRepo();
+        userRepo.insertUser(new User("BillHu"));
+        userRepo.getUser("BillHu");
+
+        IDepartment departmentRepo = dataAccess.createDepartmentRepo();
+        departmentRepo.insertDepartment(new Department("IGA"));
+        departmentRepo.getDepartment("IGA");
+    }
+}

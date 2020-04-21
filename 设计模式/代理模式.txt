@@ -1,0 +1,100 @@
+﻿package chap7;
+
+public interface GiveGift {
+    public void giveDolls();
+    public void giveFlowers();
+    public void giveChocolate();
+}
+
+
+
+package chap7;
+
+public class SchoolGirl {
+    private String name;
+
+    public SchoolGirl(String name){
+        this.name = name;
+    }
+
+    public String toString(){
+        return "SchoolGirl-"+name;
+    }
+}
+
+
+
+package chap7;
+
+public class Pursuit implements GiveGift{
+
+    private String name;
+    private SchoolGirl girl;
+
+    public Pursuit(String name, SchoolGirl girl){
+        this.name = name;
+        this.girl = girl;
+    }
+
+    @Override
+    public void giveDolls() {
+        System.out.println("Pursuit "+name+ " is giving Dolls to "+girl+"!");
+    }
+
+    @Override
+    public void giveFlowers() {
+        System.out.println("Pursuit "+name+ " is giving Flowers to "+girl+"!");
+    }
+
+    @Override
+    public void giveChocolate() {
+        System.out.println("Pursuit "+name+ " is giving Chocolate to "+girl+"!");
+    }
+
+    public String toString(){
+        return name;
+    }
+}
+
+
+
+
+package chap7;
+
+public class PursuitProxy implements GiveGift{
+    private Pursuit pursuit;
+    public PursuitProxy(SchoolGirl girl){
+        this.pursuit = new Pursuit("proxy",girl);
+    }
+
+
+    @Override
+    public void giveDolls() {
+        pursuit.giveDolls();
+    }
+
+    @Override
+    public void giveFlowers() {
+        pursuit.giveFlowers();
+    }
+
+    @Override
+    public void giveChocolate() {
+        pursuit.giveChocolate();
+    }
+}
+
+
+
+package chap7;
+
+public class Client {
+    public static void main(String[] args){
+        SchoolGirl ywt = new SchoolGirl("YangWenTing");
+        PursuitProxy proxy = new PursuitProxy(ywt);     ====>通过代理来向SchoolGirl 送礼物
+
+        proxy.giveDolls();
+        proxy.giveFlowers();
+        proxy.giveChocolate();
+    }
+}

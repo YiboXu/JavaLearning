@@ -1,0 +1,66 @@
+﻿只能有一个实例。
+
+2种实现方法：
+Singleton : 私有构造函数 + 公共方法返回单例
+Singleton2: 静态初始化 + 公共方法返回单例
+
+package chap21;
+
+public class Singleton {
+    private static Singleton singleton;
+    private Singleton(){
+        System.out.println("Singleton instance is created!");
+    }
+
+    public static Singleton getInstance(){
+        if(singleton == null){
+            singleton = new Singleton();
+        }
+
+        return singleton;
+    }
+}
+
+
+
+package chap21;
+
+public class Singleton2 {
+    private static Singleton2 singleton;
+
+    private Singleton2(){
+        System.out.println("Singleton2 instance is created!");
+    }
+
+    static {
+        singleton = new Singleton2();
+    }
+
+    public static Singleton2 getInstance() {
+        return singleton;
+    }
+}
+
+
+package chap21;
+
+public class Client {
+    public static void main(String[] args){
+        Singleton singleton1 = Singleton.getInstance();
+        Singleton singleton2 = Singleton.getInstance();
+        Singleton singleton3 = Singleton.getInstance();
+
+        if(singleton1 == singleton2 && singleton2 == singleton3){
+            System.out.println("All the instance of Singleton are the same one!");
+        }
+
+        Singleton2 singleton4 = Singleton2.getInstance();
+        Singleton2 singleton5 = Singleton2.getInstance();
+        Singleton2 singleton6 = Singleton2.getInstance();
+
+        if(singleton4 == singleton5 && singleton5 == singleton6){
+            System.out.println("All the instance of Singleton2 are the same one!");
+        }
+    }
+}
+

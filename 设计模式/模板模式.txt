@@ -1,0 +1,61 @@
+﻿当不变的和可变的行为在方法的子类中混合在一起的时候，不变的行为就会在子类中重负出现。
+我们通过模板方法模式把这些行为搬移到单一的地方，这样就帮助子类拜托重复的不变行为的纠缠。
+
+package chap10;
+
+public abstract class AbstractClass {
+    public abstract void method1();
+    public abstract void method2();
+
+    public void templateMethod(){
+        method1();
+        method2();
+        System.out.println("templateMethod() in AbstractClass");
+    }
+}
+
+
+package chap10;
+
+public class ConcreteClassA extends AbstractClass{
+
+    @Override
+    public void method1() {
+        System.out.println("method1 in ConcreteClassA");
+    }
+
+    @Override
+    public void method2() {
+        System.out.println("method2 in ConcreteClassA");
+    }
+}
+
+
+package chap10;
+
+public class ConcreteClassB extends AbstractClass {
+    @Override
+    public void method1() {
+        System.out.println("method1 in ConcreteClassB");
+    }
+
+    @Override
+    public void method2() {
+        System.out.println("method2 in ConcreteClassB");
+    }
+}
+
+
+
+package chap10;
+
+public class Client {
+    public static void main(String[] args){
+        ConcreteClassA classA = new ConcreteClassA();
+        ConcreteClassB classB = new ConcreteClassB();
+
+        classA.templateMethod();
+
+        classB.templateMethod();
+    }
+}

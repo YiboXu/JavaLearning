@@ -1,0 +1,27 @@
+@startuml
+
+together {
+    class Voltage220 {
+        + int output220()
+    }
+
+    interface PhoneCharging {
+        public int output5();
+    }
+
+    class VoltageAdapter implements PhoneCharging{
+        - Voltage220 voltage220
+        + int output5()
+    }
+}
+
+class Phone {
+    - PhoneCharging phoneCharging;
+    + Phone(PhoneCharging phoneCharging)
+    + void charging()
+}
+
+VoltageAdapter <|- Voltage220
+Phone o- PhoneCharging
+
+@enduml
