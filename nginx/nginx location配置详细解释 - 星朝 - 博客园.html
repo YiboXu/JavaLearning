@@ -1,0 +1,1584 @@
+<!DOCTYPE html>
+<html lang="zh-cn"><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="never">
+    <meta property="og:description" content="&amp;amp;nbsp; &amp;amp;nbsp;&amp;amp;nbsp; 写在这是方便大家找 nginx的安装配置三部曲：点击即可查看 1、安装和配置文件的基础配置，ctrl+f搜索nginx 2、nginx文">
+    <meta http-equiv="Cache-Control" content="no-transform">
+    <meta http-equiv="Cache-Control" content="no-siteapp">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>nginx location配置详细解释 - 星朝 - 博客园</title>
+    
+    <link rel="stylesheet" href="nginx%20location%E9%85%8D%E7%BD%AE%E8%AF%A6%E7%BB%86%E8%A7%A3%E9%87%8A%20-%20%E6%98%9F%E6%9C%9D%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/blog-common.css">
+    <link id="MainCss" rel="stylesheet" href="nginx%20location%E9%85%8D%E7%BD%AE%E8%AF%A6%E7%BB%86%E8%A7%A3%E9%87%8A%20-%20%E6%98%9F%E6%9C%9D%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/bundle-darkgreentrip.css">
+    
+    <link id="mobile-style" media="only screen and (max-width: 767px)" type="text/css" rel="stylesheet" href="nginx%20location%E9%85%8D%E7%BD%AE%E8%AF%A6%E7%BB%86%E8%A7%A3%E9%87%8A%20-%20%E6%98%9F%E6%9C%9D%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/bundle-darkgreentrip-mobile.css">
+    
+    <link type="application/rss+xml" rel="alternate" href="https://www.cnblogs.com/jpfss/rss">
+    <link type="application/rsd+xml" rel="EditURI" href="https://www.cnblogs.com/jpfss/rsd.xml">
+    <link type="application/wlwmanifest+xml" rel="wlwmanifest" href="https://www.cnblogs.com/jpfss/wlwmanifest.xml">
+    <script src="nginx%20location%E9%85%8D%E7%BD%AE%E8%AF%A6%E7%BB%86%E8%A7%A3%E9%87%8A%20-%20%E6%98%9F%E6%9C%9D%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/amp4ads-host-v0.js"></script><script src="nginx%20location%E9%85%8D%E7%BD%AE%E8%AF%A6%E7%BB%86%E8%A7%A3%E9%87%8A%20-%20%E6%98%9F%E6%9C%9D%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/pubads_impl_rendering_2020032302.js"></script><script async="" src="nginx%20location%E9%85%8D%E7%BD%AE%E8%AF%A6%E7%BB%86%E8%A7%A3%E9%87%8A%20-%20%E6%98%9F%E6%9C%9D%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/analytics.js"></script><script src="nginx%20location%E9%85%8D%E7%BD%AE%E8%AF%A6%E7%BB%86%E8%A7%A3%E9%87%8A%20-%20%E6%98%9F%E6%9C%9D%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/jquery-2.js"></script>
+    <script src="nginx%20location%E9%85%8D%E7%BD%AE%E8%AF%A6%E7%BB%86%E8%A7%A3%E9%87%8A%20-%20%E6%98%9F%E6%9C%9D%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/blog-common.js"></script>
+    <script>
+        var currentBlogId = 334861;
+        var currentBlogApp = 'jpfss';
+        var cb_enable_mathjax = false;
+        var isLogined = false;
+        var skinName = 'darkgreentrip';
+    </script>
+    
+    
+    
+<link rel="preload" href="nginx%20location%E9%85%8D%E7%BD%AE%E8%AF%A6%E7%BB%86%E8%A7%A3%E9%87%8A%20-%20%E6%98%9F%E6%9C%9D%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/integrator.js" as="script"><script type="text/javascript" src="nginx%20location%E9%85%8D%E7%BD%AE%E8%AF%A6%E7%BB%86%E8%A7%A3%E9%87%8A%20-%20%E6%98%9F%E6%9C%9D%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/integrator.js"></script><script src="nginx%20location%E9%85%8D%E7%BD%AE%E8%AF%A6%E7%BB%86%E8%A7%A3%E9%87%8A%20-%20%E6%98%9F%E6%9C%9D%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/pubads_impl_2020032302.js" async=""></script></head>
+<body>
+    <a name="top"></a>
+    
+    
+<!--done-->
+<div id="home">
+<div id="header">
+	<div id="blogTitle">
+        <a id="lnkBlogLogo" href="https://www.cnblogs.com/jpfss/"><img id="blogLogo" src="nginx%20location%E9%85%8D%E7%BD%AE%E8%AF%A6%E7%BB%86%E8%A7%A3%E9%87%8A%20-%20%E6%98%9F%E6%9C%9D%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/logo.gif" alt="返回主页"></a>		
+		
+<!--done-->
+<h1><a id="Header1_HeaderTitle" class="headermaintitle HeaderMainTitle" href="https://www.cnblogs.com/jpfss/">星朝</a>
+</h1>
+<h2>
+
+</h2>
+
+
+
+
+		
+	</div><!--end: blogTitle 博客的标题和副标题 -->
+	<div id="navigator">
+		
+<ul id="navList">
+<li><a id="blog_nav_sitehome" class="menu" href="https://www.cnblogs.com/">
+博客园</a>
+</li>
+<li>
+<a id="blog_nav_myhome" class="menu" href="https://www.cnblogs.com/jpfss/">
+首页</a>
+</li>
+<li>
+
+<a id="blog_nav_newpost" class="menu" href="https://i.cnblogs.com/EditPosts.aspx?opt=1">
+新随笔</a>
+</li>
+<li>
+<a id="blog_nav_contact" class="menu" href="https://msg.cnblogs.com/send/%E6%98%9F%E6%9C%9D">
+联系</a></li>
+<li>
+<a id="blog_nav_rss" class="menu" href="https://www.cnblogs.com/jpfss/rss/">
+订阅</a>
+<!--<partial name="./Shared/_XmlLink.cshtml" model="Model" /></li>--></li>
+<li>
+<a id="blog_nav_admin" class="menu" href="https://i.cnblogs.com/">
+管理</a>
+</li>
+</ul>
+
+
+		<div class="blogStats">
+			
+			<span id="stats_post_count">随笔 - 
+5081&nbsp; </span>
+<span id="stats_article_count">文章 - 
+45&nbsp; </span>
+<span id="stats-comment_count">评论 - 
+238</span>
+
+			
+		</div><!--end: blogStats -->
+	</div><!--end: navigator 博客导航栏 -->
+</div><!--end: header 头部 -->
+
+<div id="main">
+	<div id="mainContent">
+	<div class="forFlow">
+		<div id="post_detail">
+    <!--done-->
+    <div id="topics">
+        <div class="post">
+            <h1 class="postTitle">
+                
+<a id="cb_post_title_url" class="postTitle2" href="https://www.cnblogs.com/jpfss/p/10418150.html">nginx location配置详细解释</a>
+
+            </h1>
+            <div class="clear"></div>
+            <div class="postBody">
+                
+<div id="cnblogs_post_body" class="blogpost-body cnblogs-markdown">
+    <div class="htmledit_views" id="content_views">
+                <p>&nbsp;</p>
+<p>--------------------&nbsp;&nbsp; 写在这是方便大家找</p>
+<p><a href="https://www.baidu.com/s?wd=nginx&amp;tn=24004469_oem_dg&amp;rsv_dl=gh_pl_sl_csd" target="_blank">nginx</a>的安装配置三部曲：点击即可查看</p>
+<p><a href="https://blog.csdn.net/qq_33862644/article/details/80146508" rel="nofollow" target="_blank">1、安装和配置文件的基础配置，ctrl+f搜索nginx</a></p>
+<p><a href="https://blog.csdn.net/qq_33862644/article/details/79337348" rel="nofollow" target="_blank">2、nginx文档如何查看 + 常用的配置方式（伪静态，反向代理，动静分离，防盗链，图片缓存，gzip图片压缩）</a></p>
+<p><a href="https://blog.csdn.net/qq_33862644/article/details/79361487" rel="nofollow" target="_blank">3、高级配置-》负载均衡</a></p>
+<p>---------------------</p>
+<h3><a name="t0"></a>server_name _; #不启用域名</h3>
+<p>&nbsp;</p>
+<h1><a name="t1"></a>指令-热启动</h1>
+<p>Nginx重新读取配置的命令</p>
+<p><code>nginx -s reload</code></p>
+<p>&nbsp;</p>
+<h2><a name="t2"></a>看文档的方法</h2>
+<p>&nbsp;</p>
+<p>gzip压缩文件模块的使用：</p>
+<p>&nbsp;</p>
+<p><img alt="" class="has" src="nginx%20location%E9%85%8D%E7%BD%AE%E8%AF%A6%E7%BB%86%E8%A7%A3%E9%87%8A%20-%20%E6%98%9F%E6%9C%9D%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/20180430173716479.png"></p>
+<p>&nbsp;</p>
+<p>参考：nginx官方文档-》<span style="color:#000000;"><strong>Modules reference-》</strong></span><a href="http://nginx.org/en/docs/http/ngx_http_gzip_module.html" rel="nofollow" target="_blank">ngx_http_gzip_module</a></p>
+<p><img alt="" class="has" src="nginx%20location%E9%85%8D%E7%BD%AE%E8%AF%A6%E7%BB%86%E8%A7%A3%E9%87%8A%20-%20%E6%98%9F%E6%9C%9D%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/20180430173202408.png"></p>
+<p>&nbsp;</p>
+<h2><a name="t3"></a>语法详解</h2>
+<p>&nbsp;</p>
+<p>语法规则： <code>location [=|~|~*|^~] /uri/ { … }</code></p>
+<ul><li>
+	<p><code>=</code> 开头表示<span style="color:#000099;">精确</span>匹配</p>
+	</li>
+	<li>
+	<p><code>^~</code> 开头表示uri以某个常规字符串开头，理解为<span style="color:#000099;">匹配 url路径</span>即可。nginx不对url做编码，因此请求为/static/20%/aa，可以被规则^~ /static/ /aa匹配到（<span style="color:#ff6600;">注意是空格</span>）。<span style="color:#3333ff;">以xx开头</span></p>
+	</li>
+	<li>
+	<p><code>~</code> 开头表示<span style="color:#000099;">区分</span>大小写的正则匹
+配&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+ <span style="color:#3333ff;">以xx结尾</span></p>
+	</li>
+	<li>
+	<p><code>~*</code> 开头表示<span style="color:#000099;">不区分</span>大小写的正则匹配&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span style="color:#3333ff;">以xx结尾</span></p>
+	</li>
+	<li>
+	<p><code><span style="color:#000099;">!</span>~</code>和<code><span style="color:#000099;">!</span>~*</code>分别为区分大小写<span style="color:#000099;">不匹配</span>及不区分大小写不匹配 的正则</p>
+	</li>
+	<li>
+	<p><code>/</code> <span style="color:#000099;">通用匹配</span>，任何请求都会匹配到。</p>
+	</li>
+</ul><p>多个location配置的情况下匹配顺序为（参考资料而来，还未实际验证，试试就知道了，不必拘泥，仅供参考）：</p>
+<p><img alt="" class="has" src="nginx%20location%E9%85%8D%E7%BD%AE%E8%AF%A6%E7%BB%86%E8%A7%A3%E9%87%8A%20-%20%E6%98%9F%E6%9C%9D%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/20180219195126400.png"></p>
+<p><span style="color:#000099;">首先</span>精确匹配 =<span style="color:#000099;"><span style="color:#009900;">-》</span>其次<span style="color:#000000;">以xx开头</span></span>匹配^~<span style="color:#009900;">-》</span><span style="color:#000099;">然后</span>是按文件中顺序的正则匹配<span style="color:#000099;"><span style="color:#009900;">-》</span>最后</span>是交给 / 通用匹配。</p>
+<p>当有<span style="color:#000099;">匹配成功</span>时候，<span style="color:#000099;">停止</span>匹配，按当前匹配规则处理请求。</p>
+<p>例子，有如下匹配规则：</p>
+<pre class="has" name="code"><code class="language-php hljs">location = / {
+   <span class="hljs-comment"><span class="hljs-comment">#规则A</span></span>
+}
+location = /login {
+   <span class="hljs-comment"><span class="hljs-comment">#规则B</span></span>
+}
+location ^~ /<span class="hljs-keyword"><span class="hljs-keyword">static</span></span>/ {
+   <span class="hljs-comment"><span class="hljs-comment">#规则C</span></span>
+}
+location ~ \.(gif|jpg|png|js|css)$ {
+   <span class="hljs-comment"><span class="hljs-comment">#规则D，注意：是根据括号内的大小写进行匹配。括号内全是小写，只匹配小写</span></span>
+}
+location ~* \.png$ {
+   <span class="hljs-comment"><span class="hljs-comment">#规则E</span></span>
+}
+location !~ \.xhtml$ {
+   <span class="hljs-comment"><span class="hljs-comment">#规则F</span></span>
+}
+location !~* \.xhtml$ {
+   <span class="hljs-comment"><span class="hljs-comment">#规则G</span></span>
+}
+location / {
+   <span class="hljs-comment"><span class="hljs-comment">#规则H</span></span>
+}</code></pre>
+<p>那么产生的效果如下：</p>
+<p>访问<span style="color:#000099;">根目录/</span>， 比如http://localhost/ 将匹配规则A</p>
+<p>访问 http://localhost<span style="color:#000099;">/login</span> 将匹配规则B，http://localhost/register 则匹配规则H</p>
+<p>访问 http://localhost<span style="color:#000099;">/static/</span>a.html 将匹配规则C</p>
+<p>访问 http://localhost/a.<span style="color:#000099;">gif</span>, http://localhost/b.<span style="color:#000099;">jpg</span> 将匹配规则D和规则E，但是规则D顺序优先，规则E不起作用， 而 http://localhost<span style="color:#000099;">/static/</span>c.png 则优先匹配到 规则C</p>
+<p>访问 http://localhost/a<span style="color:#000099;">.PNG</span> 则匹配规则E， 而不会匹配规则D，因为规则E不区分大小写。</p>
+<p>访问 http://localhost/a.<span style="color:#000099;">xhtml </span>不会匹配规则F和规则G，</p>
+<p>http://localhost/a.<span style="color:#000099;">XHTML</span>不会匹配规则G，（<span style="color:#000099;">因为!</span>）。规则F，规则G属于<span style="color:#000099;">排除法</span>，符合匹配规则也不会匹配到，所以想想看实际应用中哪里会用到。</p>
+<p>访问 http://localhost/category/id/1111 则<span style="color:#000099;">最终匹配到规则H</span>，因为以上规则都不匹配，这个时候nginx<span style="color:#000099;">转发请求给后端应用<a href="https://www.baidu.com/s?wd=%E6%9C%8D%E5%8A%A1%E5%99%A8&amp;tn=24004469_oem_dg&amp;rsv_dl=gh_pl_sl_csd" target="_blank">服务器</a></span>，比如FastCGI（php），tomcat（jsp），nginx作为<span style="color:#000099;">方向代理服务器</span>存在。</p>
+<p>所以实际使用中，个人觉得至少有三个匹配规则定义，如下：</p>
+<pre class="has" name="code" onclick="hljs.copyCode(event)"><code class="language-html hljs xml"><ol class="hljs-ln"><li><div class="hljs-ln-numbers"><div class="hljs-ln-line hljs-ln-n" data-line-number="1"></div></div><div class="hljs-ln-code"><div class="hljs-ln-line">#直接匹配网站根，通过域名访问网站首页比较频繁，使用这个会加速处理，官网如是说。</div></div></li><li><div class="hljs-ln-numbers"><div class="hljs-ln-line hljs-ln-n" data-line-number="2"></div></div><div class="hljs-ln-code"><div class="hljs-ln-line">#这里是直接转发给后端应用服务器了，也可以是一个静态首页</div></div></li><li><div class="hljs-ln-numbers"><div class="hljs-ln-line hljs-ln-n" data-line-number="3"></div></div><div class="hljs-ln-code"><div class="hljs-ln-line"># 第一个必选规则</div></div></li><li><div class="hljs-ln-numbers"><div class="hljs-ln-line hljs-ln-n" data-line-number="4"></div></div><div class="hljs-ln-code"><div class="hljs-ln-line">location = / {</div></div></li><li><div class="hljs-ln-numbers"><div class="hljs-ln-line hljs-ln-n" data-line-number="5"></div></div><div class="hljs-ln-code"><div class="hljs-ln-line">    proxy_pass http://tomcat:8080/index</div></div></li><li><div class="hljs-ln-numbers"><div class="hljs-ln-line hljs-ln-n" data-line-number="6"></div></div><div class="hljs-ln-code"><div class="hljs-ln-line">}</div></div></li><li><div class="hljs-ln-numbers"><div class="hljs-ln-line hljs-ln-n" data-line-number="7"></div></div><div class="hljs-ln-code"><div class="hljs-ln-line"> </div></div></li><li><div class="hljs-ln-numbers"><div class="hljs-ln-line hljs-ln-n" data-line-number="8"></div></div><div class="hljs-ln-code"><div class="hljs-ln-line"># 第二个必选规则是处理静态文件请求，这是nginx作为http服务器的强项</div></div></li><li><div class="hljs-ln-numbers"><div class="hljs-ln-line hljs-ln-n" data-line-number="9"></div></div><div class="hljs-ln-code"><div class="hljs-ln-line"># 有两种配置模式，目录匹配或后缀匹配,任选其一或搭配使用</div></div></li><li><div class="hljs-ln-numbers"><div class="hljs-ln-line hljs-ln-n" data-line-number="10"></div></div><div class="hljs-ln-code"><div class="hljs-ln-line">location ^~ /static/ {          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;//以xx开头</div></div></li><li><div class="hljs-ln-numbers"><div class="hljs-ln-line hljs-ln-n" data-line-number="11"></div></div><div class="hljs-ln-code"><div class="hljs-ln-line">    root /webroot/static/;</div></div></li><li><div class="hljs-ln-numbers"><div class="hljs-ln-line hljs-ln-n" data-line-number="12"></div></div><div class="hljs-ln-code"><div class="hljs-ln-line">}</div></div></li><li><div class="hljs-ln-numbers"><div class="hljs-ln-line hljs-ln-n" data-line-number="13"></div></div><div class="hljs-ln-code"><div class="hljs-ln-line">location ~* \.(gif|jpg|jpeg|png|css|js|ico)$ {     //以xx结尾</div></div></li><li><div class="hljs-ln-numbers"><div class="hljs-ln-line hljs-ln-n" data-line-number="14"></div></div><div class="hljs-ln-code"><div class="hljs-ln-line">    root /webroot/res/;</div></div></li><li><div class="hljs-ln-numbers"><div class="hljs-ln-line hljs-ln-n" data-line-number="15"></div></div><div class="hljs-ln-code"><div class="hljs-ln-line">}</div></div></li><li><div class="hljs-ln-numbers"><div class="hljs-ln-line hljs-ln-n" data-line-number="16"></div></div><div class="hljs-ln-code"><div class="hljs-ln-line"> </div></div></li><li><div class="hljs-ln-numbers"><div class="hljs-ln-line hljs-ln-n" data-line-number="17"></div></div><div class="hljs-ln-code"><div class="hljs-ln-line">#第三个规则就是通用规则，用来转发动态请求到后端应用服务器</div></div></li><li><div class="hljs-ln-numbers"><div class="hljs-ln-line hljs-ln-n" data-line-number="18"></div></div><div class="hljs-ln-code"><div class="hljs-ln-line">#非静态文件请求就默认是动态请求，自己根据实际把握</div></div></li><li><div class="hljs-ln-numbers"><div class="hljs-ln-line hljs-ln-n" data-line-number="19"></div></div><div class="hljs-ln-code"><div class="hljs-ln-line">location / {</div></div></li><li><div class="hljs-ln-numbers"><div class="hljs-ln-line hljs-ln-n" data-line-number="20"></div></div><div class="hljs-ln-code"><div class="hljs-ln-line">    proxy_pass http://tomcat:8080/</div></div></li><li><div class="hljs-ln-numbers"><div class="hljs-ln-line hljs-ln-n" data-line-number="21"></div></div><div class="hljs-ln-code"><div class="hljs-ln-line">}</div></div></li></ol></code><div class="hljs-button" data-title="复制"></div></pre>
+<p><strong>nginx的其他配置信息介绍</strong></p>
+<p>三、ReWrite语法</p>
+<p><code>last</code> – 基本上都用这个Flag。<br><code>break</code> – 中止Rewirte，<span style="color:#000099;">不在继续匹配</span><br><code>redirect</code> – 返回<span style="color:#000099;">临时</span>重定向的HTTP状态302<br><code>permanent</code> – 返回<span style="color:#000099;">永久</span>重定向的HTTP状态301</p>
+<p>1、下面是可以用来判断的表达式：</p>
+<p><code>-f</code>和<code>!-f</code>用来判断是否存在<span style="color:#000099;">文件</span><br><code>-d</code>和<code>!-d</code>用来判断是否存在<span style="color:#000099;">目录</span><br><code>-e</code>和<code>!-e</code>用来判断是否存在<span style="color:#000099;">文件或目录</span><br><code>-x</code>和<code>!-x</code>用来判断<span style="color:#000099;">文件是否可执行</span></p>
+<p>2、下面是可以用作判断的全局变量</p>
+<p>例：http://localhost:88/test1/test2/test.php</p>
+<pre class="has" name="code" onclick="hljs.copyCode(event)"><code class="language-html hljs xml"><ol class="hljs-ln"><li><div class="hljs-ln-numbers"><div class="hljs-ln-line hljs-ln-n" data-line-number="1"></div></div><div class="hljs-ln-code"><div class="hljs-ln-line">$host：localhost</div></div></li><li><div class="hljs-ln-numbers"><div class="hljs-ln-line hljs-ln-n" data-line-number="2"></div></div><div class="hljs-ln-code"><div class="hljs-ln-line">$server_port：88</div></div></li><li><div class="hljs-ln-numbers"><div class="hljs-ln-line hljs-ln-n" data-line-number="3"></div></div><div class="hljs-ln-code"><div class="hljs-ln-line">$request_uri：http://localhost:88/test1/test2/test.php</div></div></li><li><div class="hljs-ln-numbers"><div class="hljs-ln-line hljs-ln-n" data-line-number="4"></div></div><div class="hljs-ln-code"><div class="hljs-ln-line">$document_uri：/test1/test2/test.php</div></div></li><li><div class="hljs-ln-numbers"><div class="hljs-ln-line hljs-ln-n" data-line-number="5"></div></div><div class="hljs-ln-code"><div class="hljs-ln-line">$document_root：D:\nginx/html</div></div></li><li><div class="hljs-ln-numbers"><div class="hljs-ln-line hljs-ln-n" data-line-number="6"></div></div><div class="hljs-ln-code"><div class="hljs-ln-line">$request_filename：D:\nginx/html/test1/test2/test.php</div></div></li></ol></code><div class="hljs-button" data-title="复制"></div></pre>
+<h2>&nbsp;</h2>
+<p>附：一些可用的全局变量</p>
+<pre class="has" name="code" onclick="hljs.copyCode(event)"><code class="language-html hljs xml"><ol class="hljs-ln"><li><div class="hljs-ln-numbers"><div class="hljs-ln-line hljs-ln-n" data-line-number="1"></div></div><div class="hljs-ln-code"><div class="hljs-ln-line">$args</div></div></li><li><div class="hljs-ln-numbers"><div class="hljs-ln-line hljs-ln-n" data-line-number="2"></div></div><div class="hljs-ln-code"><div class="hljs-ln-line">$content_length</div></div></li><li><div class="hljs-ln-numbers"><div class="hljs-ln-line hljs-ln-n" data-line-number="3"></div></div><div class="hljs-ln-code"><div class="hljs-ln-line">$content_type</div></div></li><li><div class="hljs-ln-numbers"><div class="hljs-ln-line hljs-ln-n" data-line-number="4"></div></div><div class="hljs-ln-code"><div class="hljs-ln-line">$document_root</div></div></li><li><div class="hljs-ln-numbers"><div class="hljs-ln-line hljs-ln-n" data-line-number="5"></div></div><div class="hljs-ln-code"><div class="hljs-ln-line">$document_uri</div></div></li><li><div class="hljs-ln-numbers"><div class="hljs-ln-line hljs-ln-n" data-line-number="6"></div></div><div class="hljs-ln-code"><div class="hljs-ln-line">$host</div></div></li><li><div class="hljs-ln-numbers"><div class="hljs-ln-line hljs-ln-n" data-line-number="7"></div></div><div class="hljs-ln-code"><div class="hljs-ln-line">$http_user_agent</div></div></li><li><div class="hljs-ln-numbers"><div class="hljs-ln-line hljs-ln-n" data-line-number="8"></div></div><div class="hljs-ln-code"><div class="hljs-ln-line">$http_cookie</div></div></li><li><div class="hljs-ln-numbers"><div class="hljs-ln-line hljs-ln-n" data-line-number="9"></div></div><div class="hljs-ln-code"><div class="hljs-ln-line">$limit_rate</div></div></li><li><div class="hljs-ln-numbers"><div class="hljs-ln-line hljs-ln-n" data-line-number="10"></div></div><div class="hljs-ln-code"><div class="hljs-ln-line">$request_body_file</div></div></li><li><div class="hljs-ln-numbers"><div class="hljs-ln-line hljs-ln-n" data-line-number="11"></div></div><div class="hljs-ln-code"><div class="hljs-ln-line">$request_method</div></div></li><li><div class="hljs-ln-numbers"><div class="hljs-ln-line hljs-ln-n" data-line-number="12"></div></div><div class="hljs-ln-code"><div class="hljs-ln-line">$remote_addr</div></div></li><li><div class="hljs-ln-numbers"><div class="hljs-ln-line hljs-ln-n" data-line-number="13"></div></div><div class="hljs-ln-code"><div class="hljs-ln-line">$remote_port</div></div></li><li><div class="hljs-ln-numbers"><div class="hljs-ln-line hljs-ln-n" data-line-number="14"></div></div><div class="hljs-ln-code"><div class="hljs-ln-line">$remote_user</div></div></li><li><div class="hljs-ln-numbers"><div class="hljs-ln-line hljs-ln-n" data-line-number="15"></div></div><div class="hljs-ln-code"><div class="hljs-ln-line">$request_filename</div></div></li><li><div class="hljs-ln-numbers"><div class="hljs-ln-line hljs-ln-n" data-line-number="16"></div></div><div class="hljs-ln-code"><div class="hljs-ln-line">$request_uri</div></div></li><li><div class="hljs-ln-numbers"><div class="hljs-ln-line hljs-ln-n" data-line-number="17"></div></div><div class="hljs-ln-code"><div class="hljs-ln-line">$query</div></div></li></ol></code><div class="hljs-button" data-title="复制"></div></pre>
+<p>&nbsp;</p>
+<h2>&nbsp;</h2>
+<p>&nbsp;</p>
+<h2><a name="t6"></a>一些常用的配置</h2>
+<p>1、普通的（静态的）http服务器</p>
+<p>这样如果访问http://localhost 就会默认访问到E盘wwwroot目录下面的index.html，如果一个网站只是静态页面的话，那么就可以通过这种方式来实现部署。</p>
+<p>&nbsp;</p>
+<pre onclick="hljs.copyCode(event)"><code class="hljs perl"><ol class="hljs-ln"><li><div class="hljs-ln-numbers"><div class="hljs-ln-line hljs-ln-n" data-line-number="1"></div></div><div class="hljs-ln-code"><div class="hljs-ln-line"><span style="color:#4271ae;">server</span> {</div></div></li><li><div class="hljs-ln-numbers"><div class="hljs-ln-line hljs-ln-n" data-line-number="2"></div></div><div class="hljs-ln-code"><div class="hljs-ln-line">    <span class="hljs-keyword"><span class="hljs-keyword">listen</span></span>       <span style="color:#f5871f;"><span class="hljs-number"><span class="hljs-number">80</span></span></span>;                                                         </div></div></li><li><div class="hljs-ln-numbers"><div class="hljs-ln-line hljs-ln-n" data-line-number="3"></div></div><div class="hljs-ln-code"><div class="hljs-ln-line">    server_name  localhost;                                               </div></div></li><li><div class="hljs-ln-numbers"><div class="hljs-ln-line hljs-ln-n" data-line-number="4"></div></div><div class="hljs-ln-code"><div class="hljs-ln-line">    client_max_body_size <span style="color:#f5871f;"><span class="hljs-number"><span class="hljs-number">1024</span></span>M</span>;</div></div></li><li><div class="hljs-ln-numbers"><div class="hljs-ln-line hljs-ln-n" data-line-number="5"></div></div><div class="hljs-ln-code"><div class="hljs-ln-line"> </div></div></li><li><div class="hljs-ln-numbers"><div class="hljs-ln-line hljs-ln-n" data-line-number="6"></div></div><div class="hljs-ln-code"><div class="hljs-ln-line"> </div></div></li><li><div class="hljs-ln-numbers"><div class="hljs-ln-line hljs-ln-n" data-line-number="7"></div></div><div class="hljs-ln-code"><div class="hljs-ln-line">    location / {&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div></div></li><li><div class="hljs-ln-numbers"><div class="hljs-ln-line hljs-ln-n" data-line-number="8"></div></div><div class="hljs-ln-code"><div class="hljs-ln-line">           root   e:wwwroot;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-regexp"><span class="hljs-regexp">//</span></span>思路：通过/将所有的请求，转发给root处理</div></div></li><li><div class="hljs-ln-numbers"><div class="hljs-ln-line hljs-ln-n" data-line-number="9"></div></div><div class="hljs-ln-code"><div class="hljs-ln-line">           <span class="hljs-keyword"><span class="hljs-keyword">index</span></span>  index.html;</div></div></li><li><div class="hljs-ln-numbers"><div class="hljs-ln-line hljs-ln-n" data-line-number="10"></div></div><div class="hljs-ln-code"><div class="hljs-ln-line">       }</div></div></li><li><div class="hljs-ln-numbers"><div class="hljs-ln-line hljs-ln-n" data-line-number="11"></div></div><div class="hljs-ln-code"><div class="hljs-ln-line">}</div></div></li></ol></code><div class="hljs-button" data-title="复制"></div></pre>
+<p>&nbsp;</p>
+<p>2、反向代理</p>
+<p>&nbsp;</p>
+<p>localhost的时候，就相当于访问localhost:8080了</p>
+<pre class="has" name="code"><code class="language-php hljs">server {  
+    listen       <span class="hljs-number"><span class="hljs-number">80</span></span>;                                                         
+    server_name  localhost;                                               
+    client_max_body_size <span class="hljs-number"><span class="hljs-number">1024</span></span>M;
+
+    location / {
+        proxy_pass http:<span class="hljs-comment"><span class="hljs-comment">//localhost:8080;   </span></span>
+        proxy_set_header Host $host:$server_port;&nbsp;&nbsp;&nbsp; <span class="hljs-comment"><span class="hljs-comment">//思路：通过/，将所有的请求，转发给第3方处理</span></span>
+    }
+}</code></pre>
+<p>既然服务器可以直接HTTP访问，为什么要在中间加上一个反向代理，不是多此一举吗？反向代理有什么作用？</p>
+<p>负载均衡、虚拟主机等，都基于反向代理实现，当然反向代理的功能也不仅仅是这些。</p>
+<p>3、Redirect（重定向）语法</p>
+<p>&nbsp;</p>
+<pre class="has" name="code" onclick="hljs.copyCode(event)"><code class="language-html hljs xml"><ol class="hljs-ln"><li><div class="hljs-ln-numbers"><div class="hljs-ln-line hljs-ln-n" data-line-number="1"></div></div><div class="hljs-ln-code"><div class="hljs-ln-line">server {</div></div></li><li><div class="hljs-ln-numbers"><div class="hljs-ln-line hljs-ln-n" data-line-number="2"></div></div><div class="hljs-ln-code"><div class="hljs-ln-line">    listen 80;</div></div></li><li><div class="hljs-ln-numbers"><div class="hljs-ln-line hljs-ln-n" data-line-number="3"></div></div><div class="hljs-ln-code"><div class="hljs-ln-line">    server_name start.igrow.cn;</div></div></li><li><div class="hljs-ln-numbers"><div class="hljs-ln-line hljs-ln-n" data-line-number="4"></div></div><div class="hljs-ln-code"><div class="hljs-ln-line">    index index.html index.php;</div></div></li><li><div class="hljs-ln-numbers"><div class="hljs-ln-line hljs-ln-n" data-line-number="5"></div></div><div class="hljs-ln-code"><div class="hljs-ln-line">    root html;</div></div></li><li><div class="hljs-ln-numbers"><div class="hljs-ln-line hljs-ln-n" data-line-number="6"></div></div><div class="hljs-ln-code"><div class="hljs-ln-line">    if ($http_host !~ "^star\.igrow\.cn$" {</div></div></li><li><div class="hljs-ln-numbers"><div class="hljs-ln-line hljs-ln-n" data-line-number="7"></div></div><div class="hljs-ln-code"><div class="hljs-ln-line">        rewrite ^(.*) http://star.igrow.cn$1 redirect;</div></div></li><li><div class="hljs-ln-numbers"><div class="hljs-ln-line hljs-ln-n" data-line-number="8"></div></div><div class="hljs-ln-code"><div class="hljs-ln-line">    }</div></div></li><li><div class="hljs-ln-numbers"><div class="hljs-ln-line hljs-ln-n" data-line-number="9"></div></div><div class="hljs-ln-code"><div class="hljs-ln-line">}</div></div></li></ol></code><div class="hljs-button" data-title="复制"></div></pre>
+<p>&nbsp;</p>
+<p>4、防盗链</p>
+<p><img alt="" class="has" src="nginx%20location%E9%85%8D%E7%BD%AE%E8%AF%A6%E7%BB%86%E8%A7%A3%E9%87%8A%20-%20%E6%98%9F%E6%9C%9D%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/20180430183342452.png"></p>
+<pre class="has" name="code"><code class="language-swift hljs">location ~* \.(gif|jpg|png|bmp)$ {
+    valid_referers <span class="hljs-keyword"><span class="hljs-keyword">none</span></span> blocked *.ttlsa.com server_names ~\.google\. ~\.baidu\.;
+    <span class="hljs-keyword"><span class="hljs-keyword">if</span></span> ($invalid_referer) {
+        <span class="hljs-keyword"><span class="hljs-keyword">return</span></span> <span class="hljs-number"><span class="hljs-number">403</span></span>;
+        #rewrite ^/ http:<span class="hljs-comment"><span class="hljs-comment">//www.ttlsa.com/403.jpg;</span></span>
+    }
+}</code></pre>
+<p>5、根据<span style="color:#3333ff;">文件</span>类型设置过期时间</p>
+<pre class="has" name="code" onclick="hljs.copyCode(event)"><code class="language-html hljs xml"><ol class="hljs-ln"><li><div class="hljs-ln-numbers"><div class="hljs-ln-line hljs-ln-n" data-line-number="1"></div></div><div class="hljs-ln-code"><div class="hljs-ln-line">location ~* \.(js|css|jpg|jpeg|gif|png|swf)$ {</div></div></li><li><div class="hljs-ln-numbers"><div class="hljs-ln-line hljs-ln-n" data-line-number="2"></div></div><div class="hljs-ln-code"><div class="hljs-ln-line">    if (-f $request_filename) {     //只能是文件，因为这用-f判断了</div></div></li><li><div class="hljs-ln-numbers"><div class="hljs-ln-line hljs-ln-n" data-line-number="3"></div></div><div class="hljs-ln-code"><div class="hljs-ln-line">        expires 1h;</div></div></li><li><div class="hljs-ln-numbers"><div class="hljs-ln-line hljs-ln-n" data-line-number="4"></div></div><div class="hljs-ln-code"><div class="hljs-ln-line">        break;</div></div></li><li><div class="hljs-ln-numbers"><div class="hljs-ln-line hljs-ln-n" data-line-number="5"></div></div><div class="hljs-ln-code"><div class="hljs-ln-line">    }</div></div></li><li><div class="hljs-ln-numbers"><div class="hljs-ln-line hljs-ln-n" data-line-number="6"></div></div><div class="hljs-ln-code"><div class="hljs-ln-line">}</div></div></li></ol></code><div class="hljs-button" data-title="复制"></div></pre>
+<p>&nbsp;</p>
+<p>6、设置<span style="color:#3333ff;">图片</span>缓存（过期）时间</p>
+<p><img alt="" class="has" src="nginx%20location%E9%85%8D%E7%BD%AE%E8%AF%A6%E7%BB%86%E8%A7%A3%E9%87%8A%20-%20%E6%98%9F%E6%9C%9D%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/2018043017361175.png"></p>
+<p><img alt="" class="has" src="nginx%20location%E9%85%8D%E7%BD%AE%E8%AF%A6%E7%BB%86%E8%A7%A3%E9%87%8A%20-%20%E6%98%9F%E6%9C%9D%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/2018043017365450.png"><img alt="" class="has" src="nginx%20location%E9%85%8D%E7%BD%AE%E8%AF%A6%E7%BB%86%E8%A7%A3%E9%87%8A%20-%20%E6%98%9F%E6%9C%9D%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/20180430172208766.png"></p>
+<p>7、禁止访问<span style="color:#000099;">某个</span>目录</p>
+<pre class="has" name="code" onclick="hljs.copyCode(event)"><code class="language-html hljs xml"><ol class="hljs-ln"><li><div class="hljs-ln-numbers"><div class="hljs-ln-line hljs-ln-n" data-line-number="1"></div></div><div class="hljs-ln-code"><div class="hljs-ln-line">location ~* \.(txt|doc)${</div></div></li><li><div class="hljs-ln-numbers"><div class="hljs-ln-line hljs-ln-n" data-line-number="2"></div></div><div class="hljs-ln-code"><div class="hljs-ln-line">root /data/www/wwwroot/linuxtone/test;  #所有用户都禁止访问这个目录</div></div></li><li><div class="hljs-ln-numbers"><div class="hljs-ln-line hljs-ln-n" data-line-number="3"></div></div><div class="hljs-ln-code"><div class="hljs-ln-line">deny all;</div></div></li><li><div class="hljs-ln-numbers"><div class="hljs-ln-line hljs-ln-n" data-line-number="4"></div></div><div class="hljs-ln-code"><div class="hljs-ln-line">}</div></div></li></ol></code><div class="hljs-button" data-title="复制"></div></pre>
+<p>&nbsp;</p>
+<p>8、隐藏版本号的作用</p>
+<p>通过你所用的版本，找其漏洞，进行攻击你</p>
+<p>在http中添加该配置：server_tokens off;</p>
+<p><img alt="" class="has" src="nginx%20location%E9%85%8D%E7%BD%AE%E8%AF%A6%E7%BB%86%E8%A7%A3%E9%87%8A%20-%20%E6%98%9F%E6%9C%9D%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/20180430174525349.png"></p>
+<p>&nbsp;</p>
+<p>9、配置https</p>
+<p><img alt="" class="has" src="nginx%20location%E9%85%8D%E7%BD%AE%E8%AF%A6%E7%BB%86%E8%A7%A3%E9%87%8A%20-%20%E6%98%9F%E6%9C%9D%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/20180520125654199.png"></p>
+<p>&nbsp;</p>
+<p>1、去阿里云/腾讯云申请免费的</p>
+<p>2、下载证书</p>
+<p>3、证书放到/usr/local/nginx目录下（就是和conf同级，nginx.conf默认的配置文件的上一级）</p>
+<p>4、在vhost目录下加入配置文件</p>
+<pre class="has" name="code"><code class="language-perl hljs">server {
+ <span class="hljs-keyword"><span class="hljs-keyword">listen</span></span> <span class="hljs-number"><span class="hljs-number">443</span></span>;
+ server_name lampol.edu0532.cn; <span class="hljs-comment"><span class="hljs-comment">#改域名</span></span>
+ ssl on;
+ root /home/www/xcxtp5/public; <span class="hljs-comment"><span class="hljs-comment">#改项目路径</span></span>
+ ssl_certificate ../certbo/<span class="hljs-number"><span class="hljs-number">1523694051089</span></span>.pem;    <span class="hljs-comment"><span class="hljs-comment">#改证书路径</span></span>
+ ssl_certificate_key ../certbo/<span class="hljs-number"><span class="hljs-number">1523694051089</span></span>.key; <span class="hljs-comment"><span class="hljs-comment">#改私钥路径</span></span>
+ ssl_session_timeout <span class="hljs-number"><span class="hljs-number">5</span></span><span class="hljs-keyword"><span class="hljs-keyword">m</span></span>;
+ ssl_ciphers ECDHE-RSA-AES128-GCM-SHA256:ECDHE:ECDH:AES:HIGH:!NULL:!aNULL:!MD5:!ADH:!RC4;
+ ssl_protocols TLSv1 TLSv1.<span class="hljs-number"><span class="hljs-number">1</span></span> TLSv1.<span class="hljs-number"><span class="hljs-number">2</span></span>;
+ ssl_prefer_server_ciphers on;
+        location / {
+            <span class="hljs-keyword"><span class="hljs-keyword">index</span></span>  index.html index.htm index.php;
+            autoindex  on;
+            <span class="hljs-comment"><span class="hljs-comment"># 伪静态配置  </span></span>
+            <span class="hljs-keyword"><span class="hljs-keyword">if</span></span> (!-e $request_filename) {
+                rewrite  ^(.*)$  /index.php?<span class="hljs-keyword"><span class="hljs-keyword">s</span></span>=$1  <span class="hljs-keyword"><span class="hljs-keyword">last</span></span>;
+                <span class="hljs-keyword"><span class="hljs-keyword">break</span></span>;
+            }
+        }
+
+        location ~ \.php$ {
+            fastcgi_pass   <span class="hljs-number"><span class="hljs-number">127.0</span></span>.<span class="hljs-number"><span class="hljs-number">0</span></span>.<span class="hljs-number"><span class="hljs-number">1</span></span>:<span class="hljs-number"><span class="hljs-number">9000</span></span>;
+            fastcgi_index  index.php;
+            include        fastcgi.conf;
+        }
+
+}
+</code></pre>
+<p>10、动静分离</p>
+<p>思路：动、静态的文件，请求时匹配不同的目录</p>
+<p>当访问gif,jpeg时 直接访问<code>e:wwwroot;</code>,正则自行配置</p>
+<pre class="has" name="code"><code class="language-perl hljs">server {  
+  <span class="hljs-keyword"><span class="hljs-keyword">listen</span></span>       <span class="hljs-number"><span class="hljs-number">80</span></span>;  
+  server_name  localhost;  
+
+  location / {  
+      root   e:wwwroot;  
+      <span class="hljs-keyword"><span class="hljs-keyword">index</span></span>  index.html;  
+  }  
+
+  <span class="hljs-comment"><span class="hljs-comment"># 所有静态请求都由nginx处理，存放目录为html  </span></span>
+  location ~ .(gif|jpg|jpeg|png|bmp|swf|css|js)$ {  
+      root    e:wwwroot;  
+  }  
+
+  <span class="hljs-comment"><span class="hljs-comment"># 所有动态请求都转发给tomcat处理  </span></span>
+  location ~ .(jsp|<span class="hljs-keyword"><span class="hljs-keyword">do</span></span>)$ {  
+      proxy_pass  http:<span class="hljs-regexp"><span class="hljs-regexp">//test</span></span>;  
+  }  
+
+  error_page   <span class="hljs-number"><span class="hljs-number">500</span></span> <span class="hljs-number"><span class="hljs-number">502</span></span> <span class="hljs-number"><span class="hljs-number">503</span></span> <span class="hljs-number"><span class="hljs-number">504</span></span>  /<span class="hljs-number"><span class="hljs-number">50</span></span>x.html;  
+  location = <span class="hljs-regexp"><span class="hljs-regexp">/50x.html {  
+      root   e:wwwroot;  
+  }  
+}  </span></span></code></pre>
+<h3><a name="t7"></a>负载均衡</h3>
+<p>参考：nginx官方文档-》<span style="color:#000000;"><strong>Modules reference-》<a href="http://nginx.org/en/docs/http/ngx_http_upstream_module.html" rel="nofollow" target="_blank">ngx_http_upstream_module</a></strong></span></p>
+<p><a href="https://blog.csdn.net/qq_33862644/article/details/79361487" rel="nofollow" target="_blank"><span style="color:#000000;">请点击参考我这篇博客</span></a></p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>            </div>
+</div>
+<div id="MySignature"></div>
+<div class="clear"></div>
+<div id="blog_post_info_block"><div id="BlogPostCategory">
+    分类: 
+            <a href="https://www.cnblogs.com/jpfss/category/992649.html" target="_blank">工作总结</a>,             <a href="https://www.cnblogs.com/jpfss/category/966126.html" target="_blank">运维</a></div>
+<div id="EntryTag">
+    标签: 
+            <a href="https://www.cnblogs.com/jpfss/tag/java%E7%BB%8F%E9%AA%8C%E9%9B%86%E9%94%A6/">java经验集锦</a>,             <a href="https://www.cnblogs.com/jpfss/tag/%E9%80%9A%E7%94%A8%E5%AE%9E%E8%B7%B5/">通用实践</a>,             <a href="https://www.cnblogs.com/jpfss/tag/Nginx/">Nginx</a></div>
+
+    <div id="blog_post_info">
+<div id="green_channel">
+        <a href="javascript:void(0);" id="green_channel_digg" onclick="DiggIt(10418150,cb_blogId,1);green_channel_success(this,'谢谢推荐！');">好文要顶</a>
+        <a id="green_channel_follow" onclick="follow('c4ae1430-d7f9-e611-845c-ac853d9f53ac');" href="javascript:void(0);">关注我</a>
+    <a id="green_channel_favorite" onclick="AddToWz(cb_entryId);return false;" href="javascript:void(0);">收藏该文</a>
+    <a id="green_channel_weibo" href="javascript:void(0);" title="分享至新浪微博" onclick="ShareToTsina()"><img src="nginx%20location%E9%85%8D%E7%BD%AE%E8%AF%A6%E7%BB%86%E8%A7%A3%E9%87%8A%20-%20%E6%98%9F%E6%9C%9D%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/icon_weibo_24.png" alt=""></a>
+    <a id="green_channel_wechat" href="javascript:void(0);" title="分享至微信" onclick="shareOnWechat()"><img src="nginx%20location%E9%85%8D%E7%BD%AE%E8%AF%A6%E7%BB%86%E8%A7%A3%E9%87%8A%20-%20%E6%98%9F%E6%9C%9D%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/wechat.png" alt=""></a>
+</div>
+<div id="author_profile">
+    <div id="author_profile_info" class="author_profile_info">
+        <div id="author_profile_detail" class="author_profile_info">
+            <a href="https://home.cnblogs.com/u/jpfss/">星朝</a><br>
+            <a href="https://home.cnblogs.com/u/jpfss/followees/">关注 - 1</a><br>
+            <a href="https://home.cnblogs.com/u/jpfss/followers/">粉丝 - 841</a>
+        </div>
+    </div>
+    <div class="clear"></div>
+    <div id="author_profile_honor"></div>
+    <div id="author_profile_follow">
+                <a href="javascript:void(0);" onclick="follow('c4ae1430-d7f9-e611-845c-ac853d9f53ac');return false;">+加关注</a>
+    </div>
+</div>
+<div id="div_digg">
+    <div class="diggit" onclick="votePost(10418150,'Digg')">
+        <span class="diggnum" id="digg_count">1</span>
+    </div>
+    <div class="buryit" onclick="votePost(10418150,'Bury')">
+        <span class="burynum" id="bury_count">0</span>
+    </div>
+    <div class="clear"></div>
+    <div class="diggword" id="digg_tips">
+    </div>
+</div>
+
+<script type="text/javascript">
+    currentDiggType = 0;
+</script></div>
+    <div class="clear"></div>
+    <div id="post_next_prev">
+
+    <a href="https://www.cnblogs.com/jpfss/p/10417885.html" class="p_n_p_prefix">« </a> 上一篇：    <a href="https://www.cnblogs.com/jpfss/p/10417885.html" title="发布于 2019-02-22 13:38">nginx配置自动跳转</a>
+    <br>
+    <a href="https://www.cnblogs.com/jpfss/p/10418182.html" class="p_n_p_prefix">» </a> 下一篇：    <a href="https://www.cnblogs.com/jpfss/p/10418182.html" title="发布于 2019-02-22 14:28">配置nginx的负载均衡</a>
+
+</div>
+</div>
+            </div>
+            <div class="postDesc">posted @ 
+<span id="post-date">2019-02-22 14:24</span>&nbsp;
+<a href="https://www.cnblogs.com/jpfss/">星朝</a>&nbsp;
+阅读(<span id="post_view_count">8332</span>)&nbsp;
+评论(<span id="post_comment_count">0</span>)&nbsp;
+<a href="https://i.cnblogs.com/EditPosts.aspx?postid=10418150" rel="nofollow">编辑</a>&nbsp;
+<a href="javascript:void(0)" onclick="AddToWz(10418150);return false;">收藏</a></div>
+        </div>
+	    
+	    
+    </div><!--end: topics 文章、评论容器-->
+</div>
+<script src="nginx%20location%E9%85%8D%E7%BD%AE%E8%AF%A6%E7%BB%86%E8%A7%A3%E9%87%8A%20-%20%E6%98%9F%E6%9C%9D%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/highlight.js"></script>
+<script>markdown_highlight();</script>
+<script>
+    var allowComments = true, cb_blogId = 334861, cb_blogApp = 'jpfss', cb_blogUserGuid = 'c4ae1430-d7f9-e611-845c-ac853d9f53ac';
+    var cb_entryId = 10418150, cb_entryCreatedDate = '2019-02-22 14:24', cb_postType = 1; 
+    loadViewCount(cb_entryId);
+</script><a name="!comments"></a>
+<div id="blog-comments-placeholder"></div>
+<script>
+    var commentManager = new blogCommentManager();
+    commentManager.renderComments(0);
+</script>
+
+<div id="comment_form" class="commentform">
+    <a name="commentform"></a>
+    <div id="divCommentShow"></div>
+    <div id="comment_nav"><span id="span_refresh_tips"></span><a href="javascript:void(0);" onclick="return RefreshCommentList();" id="lnk_RefreshComments" runat="server" clientidmode="Static">刷新评论</a><a href="#" onclick="return RefreshPage();">刷新页面</a><a href="#top">返回顶部</a></div>
+    <div id="comment_form_container" style="visibility: visible;"><div class="login_tips">
+    注册用户登录后才能发表评论，请 
+    <a rel="nofollow" href="javascript:void(0);" class="underline" onclick="return login('commentform');">登录</a>
+     或 
+    <a rel="nofollow" href="javascript:void(0);" class="underline" onclick="return register();">注册</a>，
+    <a href="https://www.cnblogs.com/">访问</a> 网站首页。
+</div></div>
+    <div class="ad_text_commentbox" id="ad_text_under_commentbox"></div>
+    <div id="ad_t2"><a href="http://www.ucancode.com/index.htm" target="_blank" onclick="ga('send', 'event', 'Link', 'click', 'T2-ucancode')">【推荐】超50万行VC++源码: 大型组态工控、电力仿真CAD与GIS源码库</a><br><a href="https://developer.aliyun.com/article/751560?utm_content=g_1000110386" target="_blank" onclick="ga('send', 'event', 'Link', 'click', 'T2-阿里云开发者社区')">【推荐】10+实战课程看透面向对象的三大特性</a><br><a href="https://cloud.tencent.com/act/seckill?fromSource=gwzcw.3498755.3498755.3498755&amp;utm_medium=cpc&amp;utm_id=gwzcw.3498755.3498755.3498755" target="_blank" onclick="ga('send', 'event', 'Link', 'click', 'T2-腾讯云')">【推荐】腾讯云产品限时秒杀，爆款1核2G云服务器99元/年！</a><br><a href="https://developer.aliyun.com/article/741282?utm_content=g_1000104141" target="_blank" onclick="ga('send', 'event', 'Link', 'click', 'T2-阿里云开发者社区')">【推荐】开放下载！《阿里巴巴大数据及AI实战》深度解析典型场景实践</a><br></div>
+    <div id="opt_under_post"></div>
+    <script async="async" src="nginx%20location%E9%85%8D%E7%BD%AE%E8%AF%A6%E7%BB%86%E8%A7%A3%E9%87%8A%20-%20%E6%98%9F%E6%9C%9D%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/gpt.js"></script>
+    <script>
+        var googletag = googletag || {};
+        googletag.cmd = googletag.cmd || [];
+    </script>
+    <script>
+        googletag.cmd.push(function () {
+            googletag.defineSlot("/1090369/C1", [300, 250], "div-gpt-ad-1546353474406-0").addService(googletag.pubads());
+            googletag.defineSlot("/1090369/C2", [468, 60], "div-gpt-ad-1539008685004-0").addService(googletag.pubads());
+            googletag.pubads().enableSingleRequest();
+            googletag.enableServices();
+        });
+    </script>
+    <div id="cnblogs_c1" class="c_ad_block">
+        <div id="div-gpt-ad-1546353474406-0" style="height:250px; width:300px;" data-google-query-id="CMTGw8jtyOgCFdiXvQodlUoBpg"><div id="google_ads_iframe_/1090369/C1_0__container__" style="border: 0pt none;"><iframe id="google_ads_iframe_/1090369/C1_0" title="3rd party ad content" name="google_ads_iframe_/1090369/C1_0" scrolling="no" marginwidth="0" marginheight="0" style="border: 0px none; vertical-align: bottom;" srcdoc="" data-google-container-id="1" data-load-complete="true" width="300" height="250" frameborder="0"></iframe></div></div>
+    </div>
+    <div id="under_post_news"><div class="recomm-block"><b>相关博文：</b><br>·  <a title="Nginx Location配置总结" href="https://www.cnblogs.com/gpfeisoft/p/4823919.html" target="_blank" onclick="clickRecomItmem(4823919)">Nginx Location配置总结</a><br>·  <a title="nginx跳转" href="https://www.cnblogs.com/cynchanpin/p/6708822.html" target="_blank" onclick="clickRecomItmem(6708822)">nginx跳转</a><br>·  <a title="详解 nginx location ~ .*\.(js|css)?$ 什么意思？" href="https://www.cnblogs.com/feiyuanxing/p/4668818.html" target="_blank" onclick="clickRecomItmem(4668818)">详解 nginx location ~ .*\.(js|css)?$ 什么意思？</a><br>·  <a title="SublimeText3注册码激活码(持续更新中2018-11-20)" href="https://www.cnblogs.com/jpfss/p/10213730.html" target="_blank" onclick="clickRecomItmem(10213730)">SublimeText3注册码激活码(持续更新中2018-11-20)</a><br>·  <a title="Nginx Location配置总结" href="https://www.cnblogs.com/qingyizhishi/p/4450403.html" target="_blank" onclick="clickRecomItmem(4450403)">Nginx Location配置总结</a><br>»  <a target="_blank" href="https://recomm.cnblogs.com/blogpost/10418150">更多推荐...</a><div id="cnblogs_t5"><a href="https://developer.aliyun.com/article/744670?utm_content=g_1000104140" target="_blank" onclick="ga('send', 'event', 'Link', 'click', 'T5-阿里云开发者社区')">如何在面试中成长？来看阿里前端终面官的面试心得</a></div></div></div>
+    <div id="cnblogs_c2" class="c_ad_block">
+        <div id="div-gpt-ad-1539008685004-0" style="height:60px; width:468px;" data-google-query-id="CMXGw8jtyOgCFdiXvQodlUoBpg">
+            <script>
+                if (new Date() >= new Date(2018, 9, 13)) {
+                    googletag.cmd.push(function () { googletag.display("div-gpt-ad-1539008685004-0"); });
+                }
+            </script>
+        <div id="google_ads_iframe_/1090369/C2_0__container__" style="border: 0pt none; width: 468px; height: 60px;"></div></div>
+    </div>
+    <div id="under_post_kb">
+<div class="itnews c_ad_block">
+    <b>最新 IT 新闻</b>:
+    <br>
+ ·              <a href="https://news.cnblogs.com/n/658907/" target="_blank">Gartner报告：阿里云成全球容器产品最完善云服务商</a>
+            <br>
+ ·              <a href="https://news.cnblogs.com/n/658909/" target="_blank">李国庆谈罗永浩带货：企业家带货很荒唐，透支信用</a>
+            <br>
+ ·              <a href="https://news.cnblogs.com/n/658906/" target="_blank">“低调”小米金融：消费贷拉动金融业务收入，已拿下7类金融牌照</a>
+            <br>
+ ·              <a href="https://news.cnblogs.com/n/658905/" target="_blank">苹果破天荒允许带iPhone样机回家 视频指导中国员工组装</a>
+            <br>
+ ·              <a href="https://news.cnblogs.com/n/658904/" target="_blank">存在严重隐私和安全问题？SpaceX禁止员工使用Zoom</a>
+            <br>
+    » <a href="https://news.cnblogs.com/" title="IT 新闻" target="_blank">更多新闻...</a>
+</div></div>
+    <div id="HistoryToday" class="c_ad_block">
+<b>历史上的今天：</b>
+<br>
+
+2019-02-22    <a href="https://www.cnblogs.com/jpfss/p/10417885.html">nginx配置自动跳转</a>
+    <br>
+2019-02-22    <a href="https://www.cnblogs.com/jpfss/p/10416920.html">Eclipse中遇到main方法不能运行 的情况</a>
+    <br>
+</div>
+    <script type="text/javascript">
+        fixPostBody();
+        deliverBigBanner();
+setTimeout(function() { incrementViewCount(cb_entryId); }, 50);        deliverAdT2();
+        deliverAdC1();
+        deliverAdC2();
+        loadNewsAndKb();
+        loadBlogSignature();
+LoadPostCategoriesTags(cb_blogId, cb_entryId);        LoadPostInfoBlock(cb_blogId, cb_entryId, cb_blogApp, cb_blogUserGuid);
+        GetPrevNextPost(cb_entryId, cb_blogId, cb_entryCreatedDate, cb_postType);
+        loadOptUnderPost();
+        GetHistoryToday(cb_blogId, cb_blogApp, cb_entryCreatedDate);
+    </script>
+</div>
+	</div><!--end: forFlow -->
+	</div><!--end: mainContent 主体内容容器-->
+
+	<div id="sideBar">
+		<div id="sideBarMain">
+			
+<div id="sidebar_news" class="newsItem"><!--done-->
+<h3 class="catListTitle">公告</h3>
+
+<div id="blog-news">
+    
+    <div id="profile_block">
+        昵称：
+        <a href="https://home.cnblogs.com/u/jpfss/">
+            星朝
+        </a>
+        <br>
+        园龄：
+        <a href="https://home.cnblogs.com/u/jpfss/" title="入园时间：2017-02-23">
+            3年1个月
+        </a>
+        <br>
+        粉丝：
+        <a href="https://home.cnblogs.com/u/jpfss/followers/">
+            841
+        </a>
+        <br>
+        关注：
+        <a href="https://home.cnblogs.com/u/jpfss/followees/">
+            1
+        </a>
+        <div id="p_b_follow">
+<a href="javascript:void(0)" onclick="follow('c4ae1430-d7f9-e611-845c-ac853d9f53ac')">+加关注</a></div>
+        <script>getFollowStatus('c4ae1430-d7f9-e611-845c-ac853d9f53ac');</script>
+    </div>
+</div>
+
+</div>
+
+			<div id="blog-calendar" style="">
+
+<table id="blogCalendar" class="Cal" title="Calendar" cellspacing="0" cellpadding="0" border="0">
+    <tbody>
+        <tr>
+            <td colspan="7">
+                <table class="CalTitle" cellspacing="0" border="0">
+                    <tbody>
+                        <tr>
+                            <td class="CalNextPrev">
+                                <a href="javascript:void(0);" onclick="loadBlogCalendar('2020/03/02'); return false;">&lt;</a>
+                            </td>
+                            <td align="center">2020年4月</td>
+                            <td class="CalNextPrev" align="right">
+                                <a href="javascript:void(0);" onclick="loadBlogCalendar('2020/05/02'); return false;">&gt;</a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </td>
+        </tr>
+        <tr>
+                    <th class="CalDayHeader" abbr="日" scope="col" align="center">日</th>
+                    <th class="CalDayHeader" abbr="一" scope="col" align="center">一</th>
+                    <th class="CalDayHeader" abbr="二" scope="col" align="center">二</th>
+                    <th class="CalDayHeader" abbr="三" scope="col" align="center">三</th>
+                    <th class="CalDayHeader" abbr="四" scope="col" align="center">四</th>
+                    <th class="CalDayHeader" abbr="五" scope="col" align="center">五</th>
+                    <th class="CalDayHeader" abbr="六" scope="col" align="center">六</th>
+        </tr>
+            <tr>
+                            <td class="CalOtherMonthDay" align="center">29</td>
+                            <td class="CalOtherMonthDay" align="center">30</td>
+                            <td class="CalOtherMonthDay" align="center">31</td>
+                        <td class="" align="center">
+                            1
+                        </td>
+                        <td class="CalTodayDay" align="center">
+                            2
+                        </td>
+                        <td class="" align="center">
+                            3
+                        </td>
+                    <td class="CalWeekendDay" align="center">
+                        4
+                    </td>
+            </tr>
+                <tr>
+                        <td class="CalWeekendDay" align="center">
+                            5
+                        </td>
+                            <td class="" align="center">
+                                6
+                            </td>
+                            <td class="" align="center">
+                                7
+                            </td>
+                            <td class="" align="center">
+                                8
+                            </td>
+                            <td class="" align="center">
+                                9
+                            </td>
+                            <td class="" align="center">
+                                10
+                            </td>
+                        <td class="CalWeekendDay" align="center">
+                            11
+                        </td>
+                </tr>
+                <tr>
+                        <td class="CalWeekendDay" align="center">
+                            12
+                        </td>
+                            <td class="" align="center">
+                                13
+                            </td>
+                            <td class="" align="center">
+                                14
+                            </td>
+                            <td class="" align="center">
+                                15
+                            </td>
+                            <td class="" align="center">
+                                16
+                            </td>
+                            <td class="" align="center">
+                                17
+                            </td>
+                        <td class="CalWeekendDay" align="center">
+                            18
+                        </td>
+                </tr>
+                <tr>
+                        <td class="CalWeekendDay" align="center">
+                            19
+                        </td>
+                            <td class="" align="center">
+                                20
+                            </td>
+                            <td class="" align="center">
+                                21
+                            </td>
+                            <td class="" align="center">
+                                22
+                            </td>
+                            <td class="" align="center">
+                                23
+                            </td>
+                            <td class="" align="center">
+                                24
+                            </td>
+                        <td class="CalWeekendDay" align="center">
+                            25
+                        </td>
+                </tr>
+                <tr>
+                        <td class="CalWeekendDay" align="center">
+                            26
+                        </td>
+                            <td class="" align="center">
+                                27
+                            </td>
+                            <td class="" align="center">
+                                28
+                            </td>
+                            <td class="" align="center">
+                                29
+                            </td>
+                            <td class="" align="center">
+                                30
+                            </td>
+                            <td class="CalOtherMonthDay" align="center">
+                                1
+                            </td>
+                        <td class="CalOtherMonthDay" align="center">
+                            2
+                        </td>
+                </tr>
+                <tr>
+                        <td class="CalOtherMonthDay" align="center">
+                            3
+                        </td>
+                            <td class="CalOtherMonthDay" align="center">
+                                4
+                            </td>
+                            <td class="CalOtherMonthDay" align="center">
+                                5
+                            </td>
+                            <td class="CalOtherMonthDay" align="center">
+                                6
+                            </td>
+                            <td class="CalOtherMonthDay" align="center">
+                                7
+                            </td>
+                            <td class="CalOtherMonthDay" align="center">
+                                8
+                            </td>
+                        <td class="CalOtherMonthDay" align="center">
+                            9
+                        </td>
+                </tr>
+    </tbody>
+</table></div><script>loadBlogDefaultCalendar();</script>
+			
+			<div id="leftcontentcontainer">
+				<div id="blog-sidecolumn">
+<!-- 搜索 -->
+<div id="sidebar_search" class="sidebar-block">
+    <div id="sidebar_search" class="mySearch">
+        <h3 class="catListTitle">搜索</h3>
+        <div id="sidebar_search_box">
+            <div id="widget_my_zzk" class="div_my_zzk">
+                <input type="text" id="q" onkeydown="return zzk_go_enter(event);" class="input_my_zzk">&nbsp;<input onclick="zzk_go()" type="button" value="找找看" id="btnZzk" class="btn_my_zzk">
+            </div>
+            <div id="widget_my_google" class="div_my_zzk">
+                <input type="text" name="google_q" id="google_q" onkeydown="return google_go_enter(event);" class="input_my_zzk">&nbsp;<input onclick="google_go()" type="button" value="谷歌搜索" class="btn_my_zzk">
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 常用链接 -->
+<div id="sidebar_shortcut" class="sidebar-block">
+    <div class="catListLink">
+<h3 class="catListTitle">
+常用链接
+</h3>
+<ul>
+		<li>
+
+<a href="https://www.cnblogs.com/jpfss/p/" title="我的博客的随笔列表">我的随笔</a>
+</li>
+		<li>
+
+<a href="https://www.cnblogs.com/jpfss/MyComments.html" title="我的发表过的评论列表">我的评论</a>
+</li>
+		<li>
+
+<a href="https://www.cnblogs.com/jpfss/OtherPosts.html" title="我评论过的随笔列表">我的参与</a>
+</li>
+		<li>
+
+<a href="https://www.cnblogs.com/jpfss/RecentComments.html" title="我的博客的评论列表">最新评论</a>
+</li>
+		<li>
+
+<a href="https://www.cnblogs.com/jpfss/tag/" title="我的博客的标签列表">我的标签</a>
+</li>
+
+</ul>
+<div id="itemListLin_con" style="display:none;">
+<ul>
+
+</ul>
+</div>
+</div>
+
+
+</div>
+
+<!-- 最新随笔 -->
+
+
+
+<!-- 我的标签 -->
+<div id="sidebar_toptags" class="sidebar-block">
+    <div class="catListTag">
+<h3 class="catListTitle">我的标签</h3>
+<ul>
+
+        <li>
+            <a href="https://www.cnblogs.com/jpfss/tag/java%E7%BB%8F%E9%AA%8C%E9%9B%86%E9%94%A6/">java经验集锦</a>(3677)
+        </li>
+        <li>
+            <a href="https://www.cnblogs.com/jpfss/tag/%E9%80%9A%E7%94%A8%E5%AE%9E%E8%B7%B5/">通用实践</a>(3525)
+        </li>
+        <li>
+            <a href="https://www.cnblogs.com/jpfss/tag/SQL/">SQL</a>(785)
+        </li>
+        <li>
+            <a href="https://www.cnblogs.com/jpfss/tag/Mysql/">Mysql</a>(715)
+        </li>
+        <li>
+            <a href="https://www.cnblogs.com/jpfss/tag/DB/">DB</a>(698)
+        </li>
+        <li>
+            <a href="https://www.cnblogs.com/jpfss/tag/JDK/">JDK</a>(576)
+        </li>
+        <li>
+            <a href="https://www.cnblogs.com/jpfss/tag/SpringBoot/">SpringBoot</a>(549)
+        </li>
+        <li>
+            <a href="https://www.cnblogs.com/jpfss/tag/%E9%AB%98%E5%B9%B6%E5%8F%91/">高并发</a>(537)
+        </li>
+        <li>
+            <a href="https://www.cnblogs.com/jpfss/tag/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/">性能优化</a>(488)
+        </li>
+        <li>
+            <a href="https://www.cnblogs.com/jpfss/tag/Spring/">Spring</a>(487)
+        </li>
+            <li>
+                <a href="https://www.cnblogs.com/jpfss/tag/">更多</a>
+            </li>
+
+</ul>
+</div>
+
+
+</div>
+
+<!-- 积分与排名 -->
+
+
+<!-- 随笔分类、随笔档案、文章分类、新闻分类、相册、链接 -->
+<div id="sidebar_categories">
+    
+        <div id="sidebar_postcategory" class="catListPostCategory sidebar-block">
+            <h3 class="catListTitle">
+                
+
+随笔分类
+
+
+
+            </h3>
+
+
+            <ul>
+
+                        <li>
+                            
+<a href="https://www.cnblogs.com/jpfss/category/971276.html" rel="" target="">
+    J2EE(40)
+</a>
+ 
+
+                        </li>
+                        <li>
+                            
+<a href="https://www.cnblogs.com/jpfss/category/966127.html" rel="" target="">
+    J2se(97)
+</a>
+ 
+
+                        </li>
+                        <li>
+                            
+<a href="https://www.cnblogs.com/jpfss/category/1182870.html" rel="" target="">
+    JVM(26)
+</a>
+ 
+
+                        </li>
+                        <li>
+                            
+<a href="https://www.cnblogs.com/jpfss/category/967359.html" rel="" target="">
+    Markdown(2)
+</a>
+ 
+
+                        </li>
+                        <li>
+                            
+<a href="https://www.cnblogs.com/jpfss/category/977504.html" rel="" target="">
+    Maven(5)
+</a>
+ 
+
+                        </li>
+                        <li>
+                            
+<a href="https://www.cnblogs.com/jpfss/category/1183552.html" rel="" target="">
+    Office办公(2)
+</a>
+ 
+
+                        </li>
+                        <li>
+                            
+<a href="https://www.cnblogs.com/jpfss/category/953616.html" rel="" target="">
+    OpenCMS(4)
+</a>
+ 
+
+                        </li>
+                        <li>
+                            
+<a href="https://www.cnblogs.com/jpfss/category/1068661.html" rel="" target="">
+    Python(25)
+</a>
+ 
+
+                        </li>
+                        <li>
+                            
+<a href="https://www.cnblogs.com/jpfss/category/1155839.html" rel="" target="">
+    Security(25)
+</a>
+ 
+
+                        </li>
+                        <li>
+                            
+<a href="https://www.cnblogs.com/jpfss/category/982135.html" rel="" target="">
+    Spring(15)
+</a>
+ 
+
+                        </li>
+                        <li>
+                            
+<a href="https://www.cnblogs.com/jpfss/category/982136.html" rel="" target="">
+    SpringMVC(67)
+</a>
+ 
+
+                        </li>
+                        <li>
+                            
+<a href="https://www.cnblogs.com/jpfss/category/972339.html" rel="" target="">
+    SQL(613)
+</a>
+ 
+
+                        </li>
+                        <li>
+                            
+<a href="https://www.cnblogs.com/jpfss/category/992663.html" rel="" target="">
+    Struts2(1)
+</a>
+ 
+
+                        </li>
+                        <li>
+                            
+<a href="https://www.cnblogs.com/jpfss/category/1158043.html" rel="" target="">
+    WebServer(4)
+</a>
+ 
+
+                        </li>
+                        <li>
+                            
+<a href="https://www.cnblogs.com/jpfss/category/996787.html" rel="" target="">
+    Web前端(73)
+</a>
+ 
+
+                        </li>
+                        <li>
+                            
+<a href="https://www.cnblogs.com/jpfss/category/1120547.html" rel="" target="">
+    大数据(289)
+</a>
+ 
+
+                        </li>
+                        <li>
+                            
+<a href="https://www.cnblogs.com/jpfss/category/992649.html" rel="" target="">
+    工作总结(4414)
+</a>
+ 
+
+                        </li>
+                        <li>
+                            
+<a href="https://www.cnblogs.com/jpfss/category/1174807.html" rel="" target="">
+    架构设计(794)
+</a>
+ 
+
+                        </li>
+                        <li>
+                            
+<a href="https://www.cnblogs.com/jpfss/category/1177334.html" rel="" target="">
+    开发技巧(142)
+</a>
+ 
+
+                        </li>
+                        <li>
+                            
+<a href="https://www.cnblogs.com/jpfss/category/992650.html" rel="" target="">
+    开发经验(4215)
+</a>
+ 
+
+                        </li>
+                        <li>
+                            
+<a href="https://www.cnblogs.com/jpfss/category/992664.html" rel="" target="">
+    其他(9)
+</a>
+ 
+
+                        </li>
+                        <li>
+                            
+<a href="https://www.cnblogs.com/jpfss/category/1213452.html" rel="" target="">
+    人工智能(33)
+</a>
+ 
+
+                        </li>
+                        <li>
+                            
+<a href="https://www.cnblogs.com/jpfss/category/1094096.html" rel="" target="">
+    设计模式(16)
+</a>
+ 
+
+                        </li>
+                        <li>
+                            
+<a href="https://www.cnblogs.com/jpfss/category/1020495.html" rel="" target="">
+    算法(18)
+</a>
+ 
+
+                        </li>
+                        <li>
+                            
+<a href="https://www.cnblogs.com/jpfss/category/1223105.html" rel="" target="">
+    云计算(2)
+</a>
+ 
+
+                        </li>
+                        <li>
+                            
+<a href="https://www.cnblogs.com/jpfss/category/966126.html" rel="" target="">
+    运维(714)
+</a>
+ 
+
+                        </li>
+
+            </ul>
+
+
+        </div>
+        <div id="sidebar_postarchive" class="catListPostArchive sidebar-block">
+            <h3 class="catListTitle">
+                
+
+随笔档案
+
+
+
+            </h3>
+
+
+            <ul>
+
+                        <li>
+                            
+<a href="https://www.cnblogs.com/jpfss/archive/2020/01.html" rel="" target="">
+    2020年1月(43)
+</a>
+ 
+
+                        </li>
+                        <li>
+                            
+<a href="https://www.cnblogs.com/jpfss/archive/2019/12.html" rel="" target="">
+    2019年12月(175)
+</a>
+ 
+
+                        </li>
+                        <li>
+                            
+<a href="https://www.cnblogs.com/jpfss/archive/2019/11.html" rel="" target="">
+    2019年11月(131)
+</a>
+ 
+
+                        </li>
+                        <li>
+                            
+<a href="https://www.cnblogs.com/jpfss/archive/2019/10.html" rel="" target="">
+    2019年10月(95)
+</a>
+ 
+
+                        </li>
+                        <li>
+                            
+<a href="https://www.cnblogs.com/jpfss/archive/2019/09.html" rel="" target="">
+    2019年9月(226)
+</a>
+ 
+
+                        </li>
+                        <li>
+                            
+<a href="https://www.cnblogs.com/jpfss/archive/2019/08.html" rel="" target="">
+    2019年8月(209)
+</a>
+ 
+
+                        </li>
+                        <li>
+                            
+<a href="https://www.cnblogs.com/jpfss/archive/2019/07.html" rel="" target="">
+    2019年7月(271)
+</a>
+ 
+
+                        </li>
+                        <li>
+                            
+<a href="https://www.cnblogs.com/jpfss/archive/2019/06.html" rel="" target="">
+    2019年6月(395)
+</a>
+ 
+
+                        </li>
+                        <li>
+                            
+<a href="https://www.cnblogs.com/jpfss/archive/2019/05.html" rel="" target="">
+    2019年5月(412)
+</a>
+ 
+
+                        </li>
+                        <li>
+                            
+<a href="https://www.cnblogs.com/jpfss/archive/2019/04.html" rel="" target="">
+    2019年4月(113)
+</a>
+ 
+
+                        </li>
+                        <li>
+                            
+<a href="https://www.cnblogs.com/jpfss/archive/2019/03.html" rel="" target="">
+    2019年3月(21)
+</a>
+ 
+
+                        </li>
+                        <li>
+                            
+<a href="https://www.cnblogs.com/jpfss/archive/2019/02.html" rel="" target="">
+    2019年2月(84)
+</a>
+ 
+
+                        </li>
+                        <li>
+                            
+<a href="https://www.cnblogs.com/jpfss/archive/2019/01.html" rel="" target="">
+    2019年1月(141)
+</a>
+ 
+
+                        </li>
+                        <li>
+                            
+<a href="https://www.cnblogs.com/jpfss/archive/2018/12.html" rel="" target="">
+    2018年12月(127)
+</a>
+ 
+
+                        </li>
+                        <li>
+                            
+<a href="https://www.cnblogs.com/jpfss/archive/2018/11.html" rel="" target="">
+    2018年11月(235)
+</a>
+ 
+
+                        </li>
+                        <li>
+                            
+<a href="https://www.cnblogs.com/jpfss/archive/2018/10.html" rel="" target="">
+    2018年10月(246)
+</a>
+ 
+
+                        </li>
+                        <li>
+                            
+<a href="https://www.cnblogs.com/jpfss/archive/2018/09.html" rel="" target="">
+    2018年9月(150)
+</a>
+ 
+
+                        </li>
+                        <li>
+                            
+<a href="https://www.cnblogs.com/jpfss/archive/2018/08.html" rel="" target="">
+    2018年8月(238)
+</a>
+ 
+
+                        </li>
+                        <li>
+                            
+<a href="https://www.cnblogs.com/jpfss/archive/2018/07.html" rel="" target="">
+    2018年7月(181)
+</a>
+ 
+
+                        </li>
+                        <li>
+                            
+<a href="https://www.cnblogs.com/jpfss/archive/2018/06.html" rel="" target="">
+    2018年6月(279)
+</a>
+ 
+
+                        </li>
+                        <li>
+                            
+<a href="https://www.cnblogs.com/jpfss/archive/2018/05.html" rel="" target="">
+    2018年5月(252)
+</a>
+ 
+
+                        </li>
+                        <li>
+                            
+<a href="https://www.cnblogs.com/jpfss/archive/2018/04.html" rel="" target="">
+    2018年4月(146)
+</a>
+ 
+
+                        </li>
+                        <li>
+                            
+<a href="https://www.cnblogs.com/jpfss/archive/2018/03.html" rel="" target="">
+    2018年3月(97)
+</a>
+ 
+
+                        </li>
+                        <li>
+                            
+<a href="https://www.cnblogs.com/jpfss/archive/2018/02.html" rel="" target="">
+    2018年2月(81)
+</a>
+ 
+
+                        </li>
+                        <li>
+                            
+<a href="https://www.cnblogs.com/jpfss/archive/2018/01.html" rel="" target="">
+    2018年1月(177)
+</a>
+ 
+
+                        </li>
+                        <li>
+                            
+<a href="https://www.cnblogs.com/jpfss/archive/2017/12.html" rel="" target="">
+    2017年12月(166)
+</a>
+ 
+
+                        </li>
+                        <li>
+                            
+<a href="https://www.cnblogs.com/jpfss/archive/2017/11.html" rel="" target="">
+    2017年11月(108)
+</a>
+ 
+
+                        </li>
+                        <li>
+                            
+<a href="https://www.cnblogs.com/jpfss/archive/2017/10.html" rel="" target="">
+    2017年10月(45)
+</a>
+ 
+
+                        </li>
+                        <li>
+                            
+<a href="https://www.cnblogs.com/jpfss/archive/2017/09.html" rel="" target="">
+    2017年9月(37)
+</a>
+ 
+
+                        </li>
+                        <li>
+                            
+<a href="https://www.cnblogs.com/jpfss/archive/2017/08.html" rel="" target="">
+    2017年8月(63)
+</a>
+ 
+
+                        </li>
+                        <li>
+                            
+<a href="https://www.cnblogs.com/jpfss/archive/2017/07.html" rel="" target="">
+    2017年7月(35)
+</a>
+ 
+
+                        </li>
+                        <li>
+                            
+<a href="https://www.cnblogs.com/jpfss/archive/2017/06.html" rel="" target="">
+    2017年6月(21)
+</a>
+ 
+
+                        </li>
+                        <li>
+                            
+<a href="https://www.cnblogs.com/jpfss/archive/2017/05.html" rel="" target="">
+    2017年5月(17)
+</a>
+ 
+
+                        </li>
+                        <li>
+                            
+<a href="https://www.cnblogs.com/jpfss/archive/2017/04.html" rel="" target="">
+    2017年4月(17)
+</a>
+ 
+
+                        </li>
+                        <li>
+                            
+<a href="https://www.cnblogs.com/jpfss/archive/2017/03.html" rel="" target="">
+    2017年3月(43)
+</a>
+ 
+
+                        </li>
+                        <li>
+                            
+<a href="https://www.cnblogs.com/jpfss/archive/2017/02.html" rel="" target="">
+    2017年2月(4)
+</a>
+ 
+
+                        </li>
+
+            </ul>
+
+
+        </div>
+        <div id="sidebar_articlecategory" class="catListArticleCategory sidebar-block">
+            <h3 class="catListTitle">
+                
+
+文章分类
+
+
+
+            </h3>
+
+
+            <ul>
+
+                        <li>
+                            
+<a href="https://www.cnblogs.com/jpfss/category/1182873.html" rel="" target="">
+    JVM(4)
+</a>
+ 
+
+                        </li>
+                        <li>
+                            
+<a href="https://www.cnblogs.com/jpfss/category/1182879.html" rel="" target="">
+    Markdown(4)
+</a>
+ 
+
+                        </li>
+                        <li>
+                            
+<a href="https://www.cnblogs.com/jpfss/category/1240418.html" rel="" target="">
+    SQL(5)
+</a>
+ 
+
+                        </li>
+                        <li>
+                            
+<a href="https://www.cnblogs.com/jpfss/category/1221847.html" rel="" target="">
+    开源项目(4)
+</a>
+ 
+
+                        </li>
+                        <li>
+                            
+<a href="https://www.cnblogs.com/jpfss/category/1213442.html" rel="" target="">
+    人工智能(9)
+</a>
+ 
+
+                        </li>
+                        <li>
+                            
+<a href="https://www.cnblogs.com/jpfss/category/1213440.html" rel="" target="">
+    算法(2)
+</a>
+ 
+
+                        </li>
+
+            </ul>
+
+
+        </div>
+
+</div>
+
+<!-- 最新评论 -->
+<div id="sidebar_recentcomments" class="sidebar-block">
+    <div class="catListComment">
+<h3 class="catListTitle">最新评论</h3>
+
+	<div class="RecentCommentBlock">
+        <ul>
+                    <li class="recent_comment_title"><a href="https://www.cnblogs.com/jpfss/p/11095506.html#4539307">1. Re:SpringBoot2集成Activiti6</a></li>
+                    <li class="recent_comment_body"><h1 id="section">基本上按照这个做，亲测成功了。</h1>
+</li>
+                    <li class="recent_comment_author">--Festone</li>
+                    <li class="recent_comment_title"><a href="https://www.cnblogs.com/jpfss/p/11139099.html#4534380">2. Re:枚举类型的数据存入到map中</a></li>
+                    <li class="recent_comment_body">lookup =Arrays.asList(values()).stream().collect(collectors.tomap(x-&gt;x.getValue(),x-&gt;x)); map可以用lamb...</li>
+                    <li class="recent_comment_author">--杰西米特123</li>
+                    <li class="recent_comment_title"><a href="https://www.cnblogs.com/jpfss/p/11276754.html#4534082">3. Re:Docker 修改镜像源地址</a></li>
+                    <li class="recent_comment_body"><h1 id="section">舒服啦</h1>
+</li>
+                    <li class="recent_comment_author">--gent95</li>
+                    <li class="recent_comment_title"><a href="https://www.cnblogs.com/jpfss/p/11016226.html#4531644">4. Re:spring-session（一）揭秘</a></li>
+                    <li class="recent_comment_body"><p>getSession(true),方法体粘贴乱了。</p>
+</li>
+                    <li class="recent_comment_author">--爱跑步的星仔</li>
+                    <li class="recent_comment_title"><a href="https://www.cnblogs.com/jpfss/p/10915192.html#4528225">5. Re:VMware虚拟机CentOS7 - VMnet8网络配置及常见问题解决</a></li>
+                    <li class="recent_comment_body"><p>ganxie</p>
+</li>
+                    <li class="recent_comment_author">--宇智波悟空</li>
+        </ul>
+    </div>
+</div>
+
+
+</div>
+
+
+
+<!-- 阅读排行榜 -->
+<div id="sidebar_topviewedposts" class="sidebar-block">
+    <div class="catListView">
+<h3 class="catListTitle">阅读排行榜</h3>
+	<div id="TopViewPostsBlock">
+        <ul style="word-break:break-all">
+                    <li>
+                        <a href="https://www.cnblogs.com/jpfss/p/9105119.html">
+                            1. js判断对象是否为空对象的几种方法(181823)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/jpfss/p/9591528.html">
+                            2. Tor Browser（洋葱浏览器）——一款使你匿名上网的浏览器(143483)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/jpfss/p/8625526.html">
+                            3. JSON字符串转换为Map(110986)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/jpfss/p/6973048.html">
+                            4. mysql中insert into select from的使用(106254)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/jpfss/p/9036645.html">
+                            5. Unsupported major.minor version 52.0解决办法(102739)
+                        </a>
+                    </li>
+        </ul>
+    </div>
+</div>
+
+
+</div>
+
+<!-- 评论排行榜 -->
+<div id="sidebar_topcommentedposts" class="sidebar-block">
+    <div class="catListFeedback">
+<h3 class="catListTitle">评论排行榜</h3>
+	<div id="TopFeedbackPostsBlock">
+        <ul style="word-break:break-all">
+                    <li>
+                        <a href="https://www.cnblogs.com/jpfss/p/8352031.html">
+                            1. Shiro权限管理框架详解(6)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/jpfss/p/8918315.html">
+                            2. Mybatis Update操作返回值问题(5)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/jpfss/p/9154304.html">
+                            3. 线上MySQL慢查询现象案例--Impossible WHERE noticed after reading const tables(5)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/jpfss/p/8889788.html">
+                            4. jquery input 赋值和取值(4)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/jpfss/p/8777754.html">
+                            5. javax.websocket.Session的一个close异常记录(4)
+                        </a>
+                    </li>
+        </ul>
+    </div>
+</div>
+
+
+</div>
+
+<!-- 推荐排行榜 -->
+<div id="sidebar_topdiggedposts" class="sidebar-block">
+    
+<div id="topdigg_posts_wrap">
+    <div class="catListView">
+        <h3 class="catListTitle">推荐排行榜</h3>
+        <div id="TopDiggPostsBlock">
+            <ul style="word-break: break-all">
+                        <li>
+                            <a href="https://www.cnblogs.com/jpfss/p/8352031.html">
+                                1. Shiro权限管理框架详解(17)
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://www.cnblogs.com/jpfss/p/9105119.html">
+                                2. js判断对象是否为空对象的几种方法(8)
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://www.cnblogs.com/jpfss/p/9928747.html">
+                                3. Java泛型详解：&lt;T&gt;和Class&lt;T&gt;的使用。泛型类，泛型方法的详细使用实例(7)
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://www.cnblogs.com/jpfss/p/8488111.html">
+                                4. Java性能分析神器-JProfiler详解（转）(5)
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://www.cnblogs.com/jpfss/p/9042249.html">
+                                5. idea下springboot打包成jar包和war包，并且可以在外部tomcat下运行访问到(4)
+                            </a>
+                        </li>
+            </ul>
+        </div>
+    </div>
+</div>
+</div></div>
+                    <script>loadBlogSideColumn();</script>
+			</div>
+			
+		</div><!--end: sideBarMain -->
+	</div><!--end: sideBar 侧边栏容器 -->
+	<div class="clear"></div>
+	</div><!--end: main -->
+	<div class="clear"></div>
+	<div id="footer">
+		<!--done-->
+Copyright © 2020 星朝
+<br><span id="poweredby">Powered by .NET Core on Kubernetes</span>
+
+
+
+	</div><!--end: footer -->
+</div><!--end: home 自定义的最大容器 -->
+
+
+    
+
+</body></html>
