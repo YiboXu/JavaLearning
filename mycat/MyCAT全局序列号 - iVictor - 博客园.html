@@ -1,0 +1,1651 @@
+<!DOCTYPE html>
+<html lang="zh-cn"><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="origin">
+    <meta property="og:description" content="在实现分库分表的情况下，数据库自增主键已无法保证自增主键的全局唯一。为此，MyCat 提供了全局sequence，并且提供了包含本地配置和数据库配置等多种实现方式。 本地文件方式 原理：此方式MyCA">
+    <meta http-equiv="Cache-Control" content="no-transform">
+    <meta http-equiv="Cache-Control" content="no-siteapp">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>MyCAT全局序列号 - iVictor - 博客园</title>
+    
+    <link rel="stylesheet" href="MyCAT%E5%85%A8%E5%B1%80%E5%BA%8F%E5%88%97%E5%8F%B7%20-%20iVictor%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/blog-common.css">
+    <link id="MainCss" rel="stylesheet" href="MyCAT%E5%85%A8%E5%B1%80%E5%BA%8F%E5%88%97%E5%8F%B7%20-%20iVictor%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/bundle-coffee.css">
+    
+    <link id="mobile-style" media="only screen and (max-width: 767px)" type="text/css" rel="stylesheet" href="MyCAT%E5%85%A8%E5%B1%80%E5%BA%8F%E5%88%97%E5%8F%B7%20-%20iVictor%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/bundle-coffee-mobile.css">
+    
+    <link type="application/rss+xml" rel="alternate" href="https://www.cnblogs.com/ivictor/rss">
+    <link type="application/rsd+xml" rel="EditURI" href="https://www.cnblogs.com/ivictor/rsd.xml">
+    <link type="application/wlwmanifest+xml" rel="wlwmanifest" href="https://www.cnblogs.com/ivictor/wlwmanifest.xml">
+    <script src="MyCAT%E5%85%A8%E5%B1%80%E5%BA%8F%E5%88%97%E5%8F%B7%20-%20iVictor%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/amp4ads-host-v0.js"></script><script src="MyCAT%E5%85%A8%E5%B1%80%E5%BA%8F%E5%88%97%E5%8F%B7%20-%20iVictor%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/pubads_impl_rendering_2020042001.js"></script><script async="" src="MyCAT%E5%85%A8%E5%B1%80%E5%BA%8F%E5%88%97%E5%8F%B7%20-%20iVictor%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/analytics.js"></script><script type="text/javascript" src="MyCAT%E5%85%A8%E5%B1%80%E5%BA%8F%E5%88%97%E5%8F%B7%20-%20iVictor%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/encoder.js"></script><script src="MyCAT%E5%85%A8%E5%B1%80%E5%BA%8F%E5%88%97%E5%8F%B7%20-%20iVictor%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/jquery-2.js"></script>
+    <script src="MyCAT%E5%85%A8%E5%B1%80%E5%BA%8F%E5%88%97%E5%8F%B7%20-%20iVictor%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/blog-common.js"></script>
+    <script>
+        var currentBlogId = 166611;
+        var currentBlogApp = 'ivictor';
+        var cb_enable_mathjax = false;
+        var isLogined = false;
+        var skinName = 'coffee';
+    </script>
+    
+    
+    
+<link rel="preload" href="MyCAT%E5%85%A8%E5%B1%80%E5%BA%8F%E5%88%97%E5%8F%B7%20-%20iVictor%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/integrator.js" as="script"><script type="text/javascript" src="MyCAT%E5%85%A8%E5%B1%80%E5%BA%8F%E5%88%97%E5%8F%B7%20-%20iVictor%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/integrator.js"></script><script src="MyCAT%E5%85%A8%E5%B1%80%E5%BA%8F%E5%88%97%E5%8F%B7%20-%20iVictor%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/pubads_impl_2020042001.js" async=""></script></head>
+<body>
+    <a name="top"></a>
+    
+    
+<!--done-->
+<div id="home">
+<div id="header">
+	<div id="blogTitle">
+	<a href="https://www.cnblogs.com/ivictor/"><img id="blogLogo" src="MyCAT%E5%85%A8%E5%B1%80%E5%BA%8F%E5%88%97%E5%8F%B7%20-%20iVictor%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/logo.gif" alt="返回主页"></a>			
+		
+<!--done-->
+<h1><a id="Header1_HeaderTitle" class="headermaintitle HeaderMainTitle" href="https://www.cnblogs.com/ivictor/">SlowTech</a>
+</h1>
+<h2>
+生活本应就是慢的
+</h2>
+
+
+
+
+		
+	</div><!--end: blogTitle 博客的标题和副标题 -->
+</div><!--end: header 头部 -->
+
+<div id="main">
+	<div id="mainContent">
+	<div class="forFlow">
+		<div id="navigator">
+			
+<ul id="navList">
+	<li><a id="blog_nav_sitehome" class="menu" href="https://www.cnblogs.com/">
+博客园</a>
+</li>
+	<li>
+<a id="blog_nav_myhome" class="menu" href="https://www.cnblogs.com/ivictor/">
+首页</a>
+</li>
+	<li>
+
+<a id="blog_nav_newpost" class="menu" href="https://i.cnblogs.com/EditPosts.aspx?opt=1">
+新随笔</a>
+</li>
+	<li>
+<a id="blog_nav_contact" class="menu" href="https://msg.cnblogs.com/send/iVictor">
+联系</a></li>
+	<li>
+<a id="blog_nav_admin" class="menu" href="https://i.cnblogs.com/">
+管理</a>
+</li>
+	<li>
+<a id="blog_nav_rss" class="menu" href="https://www.cnblogs.com/ivictor/rss/">
+订阅</a>
+	
+<a id="blog_nav_rss_image" href="https://www.cnblogs.com/ivictor/rss/">
+    <img src="MyCAT%E5%85%A8%E5%B1%80%E5%BA%8F%E5%88%97%E5%8F%B7%20-%20iVictor%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/xml.gif" alt="订阅">
+</a></li>
+</ul>
+
+
+
+			<div class="blogStats">
+				
+				<!--done-->
+随笔- 
+253&nbsp;
+文章- 
+0&nbsp;
+评论- 
+327&nbsp;
+
+
+
+				
+			</div><!--end: blogStats -->
+		</div><!--end: navigator 博客导航栏 -->
+		<div id="post_detail">
+<!--done-->
+<div id="topics">
+	<div class="post">
+		<h1 class="postTitle">
+			
+<a id="cb_post_title_url" class="postTitle2" href="https://www.cnblogs.com/ivictor/p/5235147.html">MyCAT全局序列号</a>
+
+		</h1>
+		<div class="clear"></div>
+		<div class="postBody">
+			
+<div id="cnblogs_post_body" class="blogpost-body ">
+    <p>在实现分库分表的情况下，数据库自增主键已无法保证自增主键的全局唯一。为此，MyCat 提供了全局sequence，并且提供了包含本地配置和数据库配置等多种实现方式。</p>
+<p class="1"><strong><span style="color: #008000;">本地文件方式</span></strong></p>
+<p>原理：此方式<span lang="EN-US">MyCAT将<span lang="EN-US">sequence配置到文件中，当使用到<span lang="EN-US">sequence中的配置后，<span lang="EN-US">MyCAT会更下conf<span lang="EN-US">中的<span lang="EN-US">sequence_conf.properties文件中<span lang="EN-US">sequence当前的值。</span></span></span></span></span></span></span></p>
+<p>譬如：</p>
+<div class="cnblogs_code">
+<pre><span style="color: #000000;">#default global sequence
+GLOBAL.HISIDS</span>=<span style="color: #000000;">
+GLOBAL.MINID</span>=<span style="color: #800080;">10001</span><span style="color: #000000;">
+GLOBAL.MAXID</span>=<span style="color: #800080;">20000</span><span style="color: #000000;">
+GLOBAL.CURID</span>=<span style="color: #800080;">10000</span></pre>
+</div>
+<p>其中HISIDS表示使用过的历史分段(一般无特殊需要可不配置)，MINID表示最小ID值，MAXID表示最大ID值，CURID表示当前ID值。</p>
+<p>使用方式：</p>
+<p>在server.xml中配置如下：</p>
+<div class="cnblogs_code">
+<pre><span style="color: #0000ff;">&lt;</span><span style="color: #800000;">system</span><span style="color: #0000ff;">&gt;&lt;</span><span style="color: #800000;">property </span><span style="color: #ff0000;">name</span><span style="color: #0000ff;">="sequnceHandlerType"</span><span style="color: #0000ff;">&gt;</span>0<span style="color: #0000ff;">&lt;/</span><span style="color: #800000;">property</span><span style="color: #0000ff;">&gt;&lt;/</span><span style="color: #800000;">system</span><span style="color: #0000ff;">&gt;</span> </pre>
+</div>
+<p>其中0<span lang="EN-US">，表示使用本地文件方式。</span></p>
+<p>测试如下：</p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="MyCAT%E5%85%A8%E5%B1%80%E5%BA%8F%E5%88%97%E5%8F%B7%20-%20iVictor%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre>mysql<span style="color: #808080;">&gt;</span> <span style="color: #0000ff;">create</span> <span style="color: #0000ff;">table</span> test(id <span style="color: #0000ff;">int</span>,name <span style="color: #0000ff;">varchar</span>(<span style="color: #800000; font-weight: bold;">20</span><span style="color: #000000;">));
+Query OK, </span><span style="color: #800000; font-weight: bold;">0</span> rows affected (<span style="color: #800000; font-weight: bold;">0.13</span><span style="color: #000000;"> sec)
+
+mysql</span><span style="color: #808080;">&gt;</span> <span style="color: #0000ff;">insert</span> <span style="color: #0000ff;">into</span> test(id,name) <span style="color: #0000ff;">values</span>(<span style="color: #0000ff;">next</span> value <span style="color: #0000ff;">for</span> MYCATSEQ_GLOBAL,<span style="color: #008000; font-weight: bold;">@@hostname</span><span style="color: #000000;">);
+Query OK, </span><span style="color: #800000; font-weight: bold;">1</span> row affected, <span style="color: #800000; font-weight: bold;">1</span> warning (<span style="color: #800000; font-weight: bold;">0.03</span><span style="color: #000000;"> sec)
+
+mysql</span><span style="color: #808080;">&gt;</span> <span style="color: #0000ff;">select</span> <span style="color: #808080;">*</span> <span style="color: #0000ff;">from</span><span style="color: #000000;"> test;
+</span><span style="color: #808080;">+</span><span style="color: #008080;">--</span><span style="color: #008080;">-----+--------------+</span>
+<span style="color: #808080;">|</span> id    <span style="color: #808080;">|</span> name         <span style="color: #808080;">|</span>
+<span style="color: #808080;">+</span><span style="color: #008080;">--</span><span style="color: #008080;">-----+--------------+</span>
+<span style="color: #808080;">|</span> <span style="color: #800000; font-weight: bold;">10001</span> <span style="color: #808080;">|</span> mysql<span style="color: #808080;">-</span>slave2 <span style="color: #808080;">|</span>
+<span style="color: #808080;">+</span><span style="color: #008080;">--</span><span style="color: #008080;">-----+--------------+</span>
+<span style="color: #800000; font-weight: bold;">1</span> row <span style="color: #808080;">in</span> <span style="color: #0000ff;">set</span> (<span style="color: #800000; font-weight: bold;">0.02</span> sec)</pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="MyCAT%E5%85%A8%E5%B1%80%E5%BA%8F%E5%88%97%E5%8F%B7%20-%20iVictor%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p>此时，sequence_conf.properties中GLOBAL.CURID值为10001。当然，可以使用sequence_conf.properties中定义的任何规则，譬如：</p>
+<div class="cnblogs_code">
+<pre><span style="color: #000000;"># self define sequence
+COMPANY.HISIDS</span>=<span style="color: #000000;">
+COMPANY.MINID</span>=<span style="color: #800080;">1001</span><span style="color: #000000;">
+COMPANY.MAXID</span>=<span style="color: #800080;">2000</span><span style="color: #000000;">
+COMPANY.CURID</span>=<span style="color: #800080;">1000</span></pre>
+</div>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="MyCAT%E5%85%A8%E5%B1%80%E5%BA%8F%E5%88%97%E5%8F%B7%20-%20iVictor%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre>mysql<span style="color: #808080;">&gt;</span> <span style="color: #0000ff;">insert</span> <span style="color: #0000ff;">into</span> test(id,name) <span style="color: #0000ff;">values</span>(<span style="color: #0000ff;">next</span> value <span style="color: #0000ff;">for</span> MYCATSEQ_COMPANY,<span style="color: #008000; font-weight: bold;">@@hostname</span><span style="color: #000000;">);
+Query OK, </span><span style="color: #800000; font-weight: bold;">1</span> row affected, <span style="color: #800000; font-weight: bold;">1</span> warning (<span style="color: #800000; font-weight: bold;">0.02</span><span style="color: #000000;"> sec)
+
+mysql</span><span style="color: #808080;">&gt;</span> <span style="color: #0000ff;">select</span> <span style="color: #808080;">*</span> <span style="color: #0000ff;">from</span><span style="color: #000000;"> test;
+</span><span style="color: #808080;">+</span><span style="color: #008080;">--</span><span style="color: #008080;">-----+--------------+</span>
+<span style="color: #808080;">|</span> id    <span style="color: #808080;">|</span> name         <span style="color: #808080;">|</span>
+<span style="color: #808080;">+</span><span style="color: #008080;">--</span><span style="color: #008080;">-----+--------------+</span>
+<span style="color: #808080;">|</span> <span style="color: #800000; font-weight: bold;">10001</span> <span style="color: #808080;">|</span> mysql<span style="color: #808080;">-</span>slave1 <span style="color: #808080;">|</span>
+<span style="color: #808080;">|</span>  <span style="color: #800000; font-weight: bold;">1001</span> <span style="color: #808080;">|</span> mysql<span style="color: #808080;">-</span>slave1 <span style="color: #808080;">|</span>
+<span style="color: #808080;">+</span><span style="color: #008080;">--</span><span style="color: #008080;">-----+--------------+</span>
+<span style="color: #800000; font-weight: bold;">2</span> rows <span style="color: #808080;">in</span> <span style="color: #0000ff;">set</span> (<span style="color: #800000; font-weight: bold;">0.10</span> sec)</pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="MyCAT%E5%85%A8%E5%B1%80%E5%BA%8F%E5%88%97%E5%8F%B7%20-%20iVictor%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p>这个可自定义。</p>
+<p>&nbsp;</p>
+<p><strong><span style="color: #008000;">数据库方式</span></strong></p>
+<p>原理</p>
+<p>在数据库中建立一张表，存放sequence名称(name)，sequence当前值(current_value)，步长(increment int类型每次读取多少个sequence，假设为K)等信息；</p>
+<p>Sequence获取步骤：</p>
+<p>1).第一次使用该sequence时，根据传入的sequence名称，从数据库这张表中读取current_value，和increment
+到MyCat中，并将数据库中的current_value设置为原current_value值+increment值（实现方式是基于后续的存储函
+数）</p>
+<p>2).MyCat将读取到current_value+increment作为本次要使用的sequence值，下次使用时，自动加1，当使用increment次后，执行步骤1)相同的操作.<br>MyCat负责维护这张表，用到哪些sequence，只需要在这张表中插入一条记录即可。若某次读取的sequence没有用完，系统就停掉了，则这次读取的sequence剩余值不会再使用。</p>
+<p>使用方式：</p>
+<p>1. 配置server.xml文件</p>
+<div class="cnblogs_code">
+<pre><span style="color: #0000ff;">&lt;</span><span style="color: #800000;">system</span><span style="color: #0000ff;">&gt;&lt;</span><span style="color: #800000;">property </span><span style="color: #ff0000;">name</span><span style="color: #0000ff;">="sequnceHandlerType"</span><span style="color: #0000ff;">&gt;</span>1<span style="color: #0000ff;">&lt;/</span><span style="color: #800000;">property</span><span style="color: #0000ff;">&gt;&lt;/</span><span style="color: #800000;">system</span><span style="color: #0000ff;">&gt;</span></pre>
+</div>
+<p>1代表使用数据库方式生成<span lang="EN-US">sequence</span></p>
+<p>2. 配置数据库</p>
+<p>在其中一个分片点对应的数据库中创建表和存储过程</p>
+<p>因我在schem.xml中datanode的配置信息如下：</p>
+<div class="cnblogs_code">
+<pre><span style="color: #0000ff;">&lt;</span><span style="color: #800000;">dataNode </span><span style="color: #ff0000;">name</span><span style="color: #0000ff;">="dn$1-3"</span><span style="color: #ff0000;"> dataHost</span><span style="color: #0000ff;">="localhost1"</span><span style="color: #ff0000;"> database</span><span style="color: #0000ff;">="db$1-3"</span> <span style="color: #0000ff;">/&gt;</span></pre>
+</div>
+<p>譬如我在dn2中创建，对应的数据库名为db2（为什么这里会涉及到datanode，因为后续的sequence_db_conf.properties文件会使用到），注意，是登录到数据库中创建，而不是在mycat中创建</p>
+<p>1&gt; 创建MYCAT_SEQUENCE表</p>
+<div class="cnblogs_code">
+<pre>mysql<span style="color: #808080;">&gt;</span> <span style="color: #0000ff;">DROP</span> <span style="color: #0000ff;">TABLE</span> <span style="color: #0000ff;">IF</span> <span style="color: #808080;">EXISTS</span><span style="color: #000000;"> MYCAT_SEQUENCE;
+Query OK, </span><span style="color: #800000; font-weight: bold;">0</span> rows affected, <span style="color: #800000; font-weight: bold;">1</span> warning (<span style="color: #800000; font-weight: bold;">0.00</span><span style="color: #000000;"> sec)
+
+mysql</span><span style="color: #808080;">&gt;</span> <span style="color: #0000ff;">CREATE</span> <span style="color: #0000ff;">TABLE</span> MYCAT_SEQUENCE (name <span style="color: #0000ff;">VARCHAR</span>(<span style="color: #800000; font-weight: bold;">50</span>) <span style="color: #808080;">NOT</span> <span style="color: #0000ff;">NULL</span>,current_value <span style="color: #0000ff;">INT</span> <span style="color: #808080;">NOT</span> <span style="color: #0000ff;">NULL</span>,increment <span style="color: #0000ff;">INT</span> <span style="color: #808080;">NOT</span> <span style="color: #0000ff;">NULL</span> <span style="color: #0000ff;">DEFAULT</span> <span style="color: #800000; font-weight: bold;">100</span>, <span style="color: #0000ff;">PRIMARY</span> <span style="color: #0000ff;">KEY</span>(name)) ENGINE<span style="color: #808080;">=</span><span style="color: #000000;">InnoDB;
+Query OK, </span><span style="color: #800000; font-weight: bold;">0</span> rows affected (<span style="color: #800000; font-weight: bold;">0.07</span> sec)</pre>
+</div>
+<p>其中： –<span lang="EN-US"> name sequence名称<span lang="EN-US"><br>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;–<span lang="EN-US">
+current_value 当前<span lang="EN-US">value<br>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;–<span lang="EN-US"> increment
+增长步长<span lang="EN-US">! 可理解为<span lang="EN-US">mycat在数据库中一次读取多少个<span lang="EN-US">sequence. 当这些用完后<span lang="EN-US">, 下次再从数据库中读取<span lang="EN-US">.</span></span></span></span></span></span></span></span></span></span></p>
+<p><span lang="EN-US"><span lang="EN-US"><span lang="EN-US"><span lang="EN-US"><span lang="EN-US"><span lang="EN-US"><span lang="EN-US"><span lang="EN-US"><span lang="EN-US"><span lang="EN-US">注意：MYCAT_SEQUENCE必须大写。</span></span></span></span></span></span></span></span></span></span></p>
+<p><span lang="EN-US"><span lang="EN-US"><span lang="EN-US"><span lang="EN-US"><span lang="EN-US"><span lang="EN-US"><span lang="EN-US"><span lang="EN-US"><span lang="EN-US"><span lang="EN-US">2&gt; 插入sequence记录</span></span></span></span></span></span></span></span></span></span></p>
+<div class="cnblogs_code">
+<pre>mysql<span style="color: #808080;">&gt;</span> <span style="color: #0000ff;">INSERT</span> <span style="color: #0000ff;">INTO</span> MYCAT_SEQUENCE(name,current_value,increment) <span style="color: #0000ff;">VALUES</span> (<span style="color: #ff0000;">'</span><span style="color: #ff0000;">mycat</span><span style="color: #ff0000;">'</span>, <span style="color: #800000; font-weight: bold;">1</span>, <span style="color: #800000; font-weight: bold;">100</span><span style="color: #000000;">);
+Query OK, </span><span style="color: #800000; font-weight: bold;">1</span> row affected (<span style="color: #800000; font-weight: bold;">0.01</span> sec)</pre>
+</div>
+<p>代表插入了一个名为mycat的sequence，当前值为1，步长为100。</p>
+<p>3&gt; 创建存储函数。</p>
+<p>注意：必须在同一个数据库中创建，在本例中，是db2。一共要创建三个。</p>
+<p>– 获取当前<span lang="EN-US">sequence的值<span lang="EN-US">（返回当前值<span lang="EN-US">,增量）</span></span></span></p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="MyCAT%E5%85%A8%E5%B1%80%E5%BA%8F%E5%88%97%E5%8F%B7%20-%20iVictor%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre>    <span style="color: #0000ff;">DROP</span> <span style="color: #0000ff;">FUNCTION</span> <span style="color: #0000ff;">IF</span> <span style="color: #808080;">EXISTS</span><span style="color: #000000;"> mycat_seq_currval;
+    DELIMITER $
+    </span><span style="color: #0000ff;">CREATE</span> <span style="color: #0000ff;">FUNCTION</span> mycat_seq_currval(seq_name <span style="color: #0000ff;">VARCHAR</span>(<span style="color: #800000; font-weight: bold;">50</span>)) <span style="color: #0000ff;">RETURNS</span> <span style="color: #0000ff;">varchar</span>(<span style="color: #800000; font-weight: bold;">64</span><span style="color: #000000;">)     CHARSET utf8
+    DETERMINISTIC
+    </span><span style="color: #0000ff;">BEGIN</span>
+    <span style="color: #0000ff;">DECLARE</span> retval <span style="color: #0000ff;">VARCHAR</span>(<span style="color: #800000; font-weight: bold;">64</span><span style="color: #000000;">);
+    </span><span style="color: #0000ff;">SET</span> retval<span style="color: #808080;">=</span>"<span style="color: #808080;">-</span><span style="color: #800000; font-weight: bold;">999999999</span>,<span style="color: #0000ff;">null</span><span style="color: #000000;">";
+    </span><span style="color: #0000ff;">SELECT</span> concat(<span style="color: #ff00ff;">CAST</span>(current_value <span style="color: #0000ff;">AS</span> <span style="color: #0000ff;">CHAR</span>),",",<span style="color: #ff00ff;">CAST</span>(increment <span style="color: #0000ff;">AS</span> <span style="color: #0000ff;">CHAR</span>)) <span style="color: #0000ff;">INTO</span> retval <span style="color: #0000ff;">FROM</span> MYCAT_SEQUENCE <span style="color: #0000ff;">WHERE</span> name <span style="color: #808080;">=</span><span style="color: #000000;"> seq_name;
+    </span><span style="color: #0000ff;">RETURN</span><span style="color: #000000;"> retval;
+    </span><span style="color: #0000ff;">END</span><span style="color: #000000;"> $
+    DELIMITER ;</span></pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="MyCAT%E5%85%A8%E5%B1%80%E5%BA%8F%E5%88%97%E5%8F%B7%20-%20iVictor%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p>– 设置<span lang="EN-US">sequence值</span></p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="MyCAT%E5%85%A8%E5%B1%80%E5%BA%8F%E5%88%97%E5%8F%B7%20-%20iVictor%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre>    <span style="color: #0000ff;">DROP</span> <span style="color: #0000ff;">FUNCTION</span> <span style="color: #0000ff;">IF</span> <span style="color: #808080;">EXISTS</span><span style="color: #000000;"> mycat_seq_setval;
+    DELIMITER $
+    </span><span style="color: #0000ff;">CREATE</span> <span style="color: #0000ff;">FUNCTION</span> mycat_seq_setval(seq_name <span style="color: #0000ff;">VARCHAR</span>(<span style="color: #800000; font-weight: bold;">50</span>),value <span style="color: #0000ff;">INTEGER</span>) <span style="color: #0000ff;">RETURNS</span>     <span style="color: #0000ff;">varchar</span>(<span style="color: #800000; font-weight: bold;">64</span><span style="color: #000000;">) CHARSET utf8
+    DETERMINISTIC
+    </span><span style="color: #0000ff;">BEGIN</span>
+    <span style="color: #0000ff;">UPDATE</span><span style="color: #000000;"> MYCAT_SEQUENCE
+    </span><span style="color: #0000ff;">SET</span> current_value <span style="color: #808080;">=</span><span style="color: #000000;"> value
+    </span><span style="color: #0000ff;">WHERE</span> name <span style="color: #808080;">=</span><span style="color: #000000;"> seq_name;
+    </span><span style="color: #0000ff;">RETURN</span><span style="color: #000000;"> mycat_seq_currval(seq_name);
+    </span><span style="color: #0000ff;">END</span><span style="color: #000000;"> $
+    DELIMITER ;</span></pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="MyCAT%E5%85%A8%E5%B1%80%E5%BA%8F%E5%88%97%E5%8F%B7%20-%20iVictor%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p>– 获取下一个<span lang="EN-US">sequence值<span lang="EN-US"><br>
+<!--[if !supportLineBreakNewLine]--></span></span></p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="MyCAT%E5%85%A8%E5%B1%80%E5%BA%8F%E5%88%97%E5%8F%B7%20-%20iVictor%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre>    <span style="color: #0000ff;">DROP</span> <span style="color: #0000ff;">FUNCTION</span> <span style="color: #0000ff;">IF</span> <span style="color: #808080;">EXISTS</span><span style="color: #000000;"> mycat_seq_nextval;
+    DELIMITER $
+    </span><span style="color: #0000ff;">CREATE</span> <span style="color: #0000ff;">FUNCTION</span> mycat_seq_nextval(seq_name <span style="color: #0000ff;">VARCHAR</span>(<span style="color: #800000; font-weight: bold;">50</span>)) <span style="color: #0000ff;">RETURNS</span> <span style="color: #0000ff;">varchar</span>(<span style="color: #800000; font-weight: bold;">64</span><span style="color: #000000;">)     CHARSET utf8
+    DETERMINISTIC
+    </span><span style="color: #0000ff;">BEGIN</span>
+    <span style="color: #0000ff;">UPDATE</span><span style="color: #000000;"> MYCAT_SEQUENCE
+    </span><span style="color: #0000ff;">SET</span> current_value <span style="color: #808080;">=</span> current_value <span style="color: #808080;">+</span> increment <span style="color: #0000ff;">WHERE</span> name <span style="color: #808080;">=</span><span style="color: #000000;"> seq_name;
+    </span><span style="color: #0000ff;">RETURN</span><span style="color: #000000;"> mycat_seq_currval(seq_name);
+    </span><span style="color: #0000ff;">END</span><span style="color: #000000;"> $
+    DELIMITER ;</span></pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="MyCAT%E5%85%A8%E5%B1%80%E5%BA%8F%E5%88%97%E5%8F%B7%20-%20iVictor%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p>至此，数据库方面的准备工作已结束完毕。</p>
+<p>3. 在mycat conf目录下的sequence_db_conf.properties文件中添加如下内容：</p>
+<div class="cnblogs_code">
+<pre>MYCAT<span style="color: #808080;">=</span>dn2</pre>
+</div>
+<p>其中，dn2对应的是数据库db2的datanode</p>
+<p>注意：MYCAT必须为大写，这个与表的数据是否大写无关，事实上，MYCAT_SEQUENCE中name是否大小写对结果没有影响。</p>
+<p>开始测试：</p>
+<p>登录mycat客户端</p>
+<p># mysql -h127.0.0.1 -utest -ptest -P8066 -DTESTDB</p>
+<p>创建测试表</p>
+<div class="cnblogs_code">
+<pre>mysql<span style="color: #808080;">&gt;</span> <span style="color: #0000ff;">create</span> <span style="color: #0000ff;">table</span> test(id <span style="color: #0000ff;">int</span>,name <span style="color: #0000ff;">varchar</span>(<span style="color: #800000; font-weight: bold;">10</span><span style="color: #000000;">));
+Query OK, </span><span style="color: #800000; font-weight: bold;">0</span> rows affected (<span style="color: #800000; font-weight: bold;">0.22</span> sec)</pre>
+</div>
+<p>插入数据</p>
+<p>插入的格式如下：</p>
+<p>insert into table1(id,name) values(next value for MYCATSEQ_GLOBAL,'test');</p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="MyCAT%E5%85%A8%E5%B1%80%E5%BA%8F%E5%88%97%E5%8F%B7%20-%20iVictor%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre>mysql<span style="color: #808080;">&gt;</span> mysql<span style="color: #808080;">&gt;</span> <span style="color: #0000ff;">insert</span> <span style="color: #0000ff;">into</span> test(id,name) <span style="color: #0000ff;">values</span>(<span style="color: #0000ff;">next</span> value <span style="color: #0000ff;">for</span> MYCATSEQ_MYCAT,<span style="color: #ff0000;">'</span><span style="color: #ff0000;">test1</span><span style="color: #ff0000;">'</span><span style="color: #000000;">);
+ERROR </span><span style="color: #800000; font-weight: bold;">1003</span> (HY000): mycat sequnce err.org.opencloudb.config.util.ConfigException: can<span style="color: #ff0000;">'</span><span style="color: #ff0000;">t find definition for sequence :MYCAT
+mysql&gt; insert into test(id,name) values(next value for MYCATSEQ_MYCAT,</span><span style="color: #ff0000;">'</span>test1<span style="color: #ff0000;">'</span><span style="color: #ff0000;">);
+Query OK, 1 row affected (0.11 sec)
+
+mysql&gt; select * from test;
++------+-------+
+| id   | name  |
++------+-------+
+|  101 | test1 |
++------+-------+
+1 row in set (0.09 sec)</span></pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="MyCAT%E5%85%A8%E5%B1%80%E5%BA%8F%E5%88%97%E5%8F%B7%20-%20iVictor%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p>第一次会报如下错误：</p>
+<p>ERROR 1003 (HY000): mycat sequnce err.org.opencloudb.config.util.ConfigException: can't find definition for sequence :MYCAT</p>
+<p>因为对于sequence_db_conf.properties的修改当前的mycat并不知晓，这时候，可重启mycat或者登录9066管理端口进行&nbsp;reload @@config;</p>
+<p>至此，测试完毕，关键还是两点：MYCAT_SEQUENCE必须大写，sequence_db_conf.properties文件中MYCAT=dn2必须大写。</p>
+</div>
+<div id="MySignature"></div>
+<div class="clear"></div>
+<div id="blog_post_info_block"><div id="BlogPostCategory">
+    分类: 
+            <a href="https://www.cnblogs.com/ivictor/category/776209.html" target="_blank">MyCAT</a></div>
+<div id="EntryTag">
+    标签: 
+            <a href="https://www.cnblogs.com/ivictor/tag/Mysql/">Mysql</a>,             <a href="https://www.cnblogs.com/ivictor/tag/MyCAT/">MyCAT</a></div>
+
+    <div id="blog_post_info">
+<div id="green_channel">
+        <a href="javascript:void(0);" id="green_channel_digg" onclick="DiggIt(5235147,cb_blogId,1);green_channel_success(this,'谢谢推荐！');">好文要顶</a>
+        <a id="green_channel_follow" onclick="follow('0c261817-f13a-e311-8d02-90b11c0b17d6');" href="javascript:void(0);">关注我</a>
+    <a id="green_channel_favorite" onclick="AddToWz(cb_entryId);return false;" href="javascript:void(0);">收藏该文</a>
+    <a id="green_channel_weibo" href="javascript:void(0);" title="分享至新浪微博" onclick="ShareToTsina()"><img src="MyCAT%E5%85%A8%E5%B1%80%E5%BA%8F%E5%88%97%E5%8F%B7%20-%20iVictor%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/icon_weibo_24.png" alt=""></a>
+    <a id="green_channel_wechat" href="javascript:void(0);" title="分享至微信" onclick="shareOnWechat()"><img src="MyCAT%E5%85%A8%E5%B1%80%E5%BA%8F%E5%88%97%E5%8F%B7%20-%20iVictor%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/wechat.png" alt=""></a>
+</div>
+<div id="author_profile">
+    <div id="author_profile_info" class="author_profile_info">
+            <a href="https://home.cnblogs.com/u/ivictor/" target="_blank"><img src="MyCAT%E5%85%A8%E5%B1%80%E5%BA%8F%E5%88%97%E5%8F%B7%20-%20iVictor%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/20180515084511.png" class="author_avatar" alt=""></a>
+        <div id="author_profile_detail" class="author_profile_info">
+            <a href="https://home.cnblogs.com/u/ivictor/">iVictor</a><br>
+            <a href="https://home.cnblogs.com/u/ivictor/followees/">关注 - 3</a><br>
+            <a href="https://home.cnblogs.com/u/ivictor/followers/">粉丝 - 397</a>
+        </div>
+    </div>
+    <div class="clear"></div>
+    <div id="author_profile_honor"></div>
+    <div id="author_profile_follow">
+                <a href="javascript:void(0);" onclick="follow('0c261817-f13a-e311-8d02-90b11c0b17d6');return false;">+加关注</a>
+    </div>
+</div>
+<div id="div_digg">
+    <div class="diggit" onclick="votePost(5235147,'Digg')">
+        <span class="diggnum" id="digg_count">2</span>
+    </div>
+    <div class="buryit" onclick="votePost(5235147,'Bury')">
+        <span class="burynum" id="bury_count">0</span>
+    </div>
+    <div class="clear"></div>
+    <div class="diggword" id="digg_tips">
+    </div>
+</div>
+
+<script type="text/javascript">
+    currentDiggType = 0;
+</script></div>
+    <div class="clear"></div>
+    <div id="post_next_prev">
+
+    <a href="https://www.cnblogs.com/ivictor/p/5242207.html" class="p_n_p_prefix">« </a> 上一篇：    <a href="https://www.cnblogs.com/ivictor/p/5242207.html" title="发布于 2016-03-04 15:27">MySQL常见错误</a>
+    <br>
+    <a href="https://www.cnblogs.com/ivictor/p/5261445.html" class="p_n_p_prefix">» </a> 下一篇：    <a href="https://www.cnblogs.com/ivictor/p/5261445.html" title="发布于 2016-03-14 11:17">LVS+Keepalived搭建MyCAT高可用负载均衡集群</a>
+
+</div>
+</div>
+		</div>
+		<div class="postDesc">posted @ 
+<span id="post-date">2016-03-12 23:00</span>&nbsp;
+<a href="https://www.cnblogs.com/ivictor/">iVictor</a>&nbsp;
+阅读(<span id="post_view_count">8014</span>)&nbsp;
+评论(<span id="post_comment_count">3</span>)&nbsp;
+<a href="https://i.cnblogs.com/EditPosts.aspx?postid=5235147" rel="nofollow">编辑</a>&nbsp;
+<a href="javascript:void(0)" onclick="AddToWz(5235147);return false;">收藏</a></div>
+	</div>
+	
+	
+</div><!--end: topics 文章、评论容器-->
+<script src="MyCAT%E5%85%A8%E5%B1%80%E5%BA%8F%E5%88%97%E5%8F%B7%20-%20iVictor%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/highlight.js"></script>
+<script>markdown_highlight();</script>
+<script>
+    var allowComments = true, cb_blogId = 166611, cb_blogApp = 'ivictor', cb_blogUserGuid = '0c261817-f13a-e311-8d02-90b11c0b17d6';
+    var cb_entryId = 5235147, cb_entryCreatedDate = '2016-03-12 23:00', cb_postType = 1; 
+    loadViewCount(cb_entryId);
+</script><a name="!comments"></a>
+<div id="blog-comments-placeholder">
+
+<div id="comment_pager_top">
+    
+</div>
+
+<!--done-->
+<br>
+<div class="feedback_area_title">评论</div>
+<div class="feedbackNoItems"><div class="feedbackNoItems"></div></div>
+	
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+				<div class="feedbackManage">
+					&nbsp;&nbsp;
+
+<span class="comment_actions">
+    
+    
+    
+    
+</span>
+
+
+				</div>
+				
+<a href="#4477135" class="layer">#1楼</a>
+<a name="4477135" id="comment_anchor_4477135"></a>
+
+
+<span class="comment_date">2020-01-05 12:53</span>
+
+ | 
+
+            <a id="a_comment_author_4477135" href="https://www.cnblogs.com/laoer/" target="_blank">laoer2009</a>
+
+			</div>
+			<div class="feedbackCon">
+				
+<div id="comment_body_4477135" data-format-type="Ubb" class="blog_comment_body cnblogs-ubb">
+    [WARN ][Thread-1] ServerConnection [id=1, schema=TESTDB, 
+host=127.0.0.1, user=root,txIsolation=3, autocommit=false, 
+schema=TESTDB]INSERT INTO `company` (ID,`name`)<br>INFO   | jvm 1    | 2020/01/05 12:33:15 | VALUES;<br>INFO   | jvm 1    | 2020/01/05 12:33:15 | SELECT `id`<br>INFO   | jvm 1    | 2020/01/05 12:33:15 | FROM `company`<br>INFO
+   | jvm 1    | 2020/01/05 12:33:15 | WHERE ROW_COUNT( 7,) 
+err:java.sql.SQLSyntaxErrorException: 
+com.alibaba.druid.sql.parser.ParserException: syntax error, expect ')' 
+java.sql.SQLSyntaxErrorException: 
+com.alibaba.druid.sql.parser.ParserException: syntax error, expect ')'<br><br><br><br>SELECT `id`  FROM `company` WHERE ROW_COUNT( 7,) ,怎么会产生这种语句
+</div>
+        <div class="comment_vote">
+            <span class="comment_error" style="color: red"></span>
+            <a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(4477135, 'Digg', this.parentElement, false);">
+                支持(0)
+            </a>
+            <a href="javascript:void(0);" class="comment_burry" onclick="return voteComment(4477135, 'Bury', this.parentElement, false);">
+                反对(0)
+            </a>
+        </div>
+        
+
+			</div>
+		</div>
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+				<div class="feedbackManage">
+					&nbsp;&nbsp;
+
+<span class="comment_actions">
+    
+    
+    
+    
+</span>
+
+
+				</div>
+				
+<a href="#4477240" class="layer">#2楼</a>
+<a name="4477240" id="comment_anchor_4477240"></a>
+[<span class="louzhu">楼主</span>]
+
+<span class="comment_date">2020-01-05 17:01</span>
+
+ | 
+
+            <a id="a_comment_author_4477240" href="https://www.cnblogs.com/ivictor/" target="_blank">iVictor</a>
+
+			</div>
+			<div class="feedbackCon">
+				
+<div id="comment_body_4477240" data-format-type="Ubb" class="blog_comment_body cnblogs-ubb">
+    <a href="#4477135" title="查看所回复的评论" onclick="commentManager.renderComments(0,50,4477135);">@</a>
+laoer2009<br>你这个是什么场景下的报错？
+</div>
+        <div class="comment_vote">
+            <span class="comment_error" style="color: red"></span>
+            <a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(4477240, 'Digg', this.parentElement, false);">
+                支持(0)
+            </a>
+            <a href="javascript:void(0);" class="comment_burry" onclick="return voteComment(4477240, 'Bury', this.parentElement, false);">
+                反对(0)
+            </a>
+        </div>
+        <span id="comment_4477240_avatar" style="display:none">
+            https://pic.cnblogs.com/face/576154/20180515084511.png
+        </span>
+
+			</div>
+		</div>
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+				<div class="feedbackManage">
+					&nbsp;&nbsp;
+
+<span class="comment_actions">
+    
+    
+    
+    
+</span>
+
+
+				</div>
+				
+<a href="#4477280" class="layer">#3楼</a>
+<a name="4477280" id="comment_anchor_4477280"></a>
+
+        <span id="comment-maxId" style="display:none">4477280</span>
+        <span id="comment-maxDate" style="display:none">2020/1/5 下午6:06:59</span>
+
+<span class="comment_date">2020-01-05 18:06</span>
+
+ | 
+
+            <a id="a_comment_author_4477280" href="https://www.cnblogs.com/laoer/" target="_blank">laoer2009</a>
+
+			</div>
+			<div class="feedbackCon">
+				
+<div id="comment_body_4477280" data-format-type="Ubb" class="blog_comment_body cnblogs-ubb">
+    mycat+efcore+mysql,全局序列号,数据库方式（Sequence），<br><br>            var entity = userContext.Companies.Add(new Company<br>            {<br>                name = "laoer" + DateTime.Now.ToString(),<br>            });<br>            try<br>            {<br><br>                userContext.SaveChanges();<br>            }<br>            catch (Exception ex)<br>            {<br><br><br>            }<br>就会报这样的问题
+</div>
+        <div class="comment_vote">
+            <span class="comment_error" style="color: red"></span>
+            <a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(4477280, 'Digg', this.parentElement, false);">
+                支持(0)
+            </a>
+            <a href="javascript:void(0);" class="comment_burry" onclick="return voteComment(4477280, 'Bury', this.parentElement, false);">
+                反对(0)
+            </a>
+        </div>
+        
+
+			</div>
+		</div>
+
+<div id="comment_pager_bottom">
+    
+</div>
+
+
+</div>
+<script>
+    var commentManager = new blogCommentManager();
+    commentManager.renderComments(0);
+</script>
+
+<div id="comment_form" class="commentform">
+    <a name="commentform"></a>
+    <div id="divCommentShow"></div>
+    <div id="comment_nav"><span id="span_refresh_tips"></span><a href="javascript:void(0);" onclick="return RefreshCommentList();" id="lnk_RefreshComments" runat="server" clientidmode="Static">刷新评论</a><a href="#" onclick="return RefreshPage();">刷新页面</a><a href="#top">返回顶部</a></div>
+    <div id="comment_form_container" style="visibility: visible;"><div class="login_tips">
+    注册用户登录后才能发表评论，请 
+    <a rel="nofollow" href="javascript:void(0);" class="underline" onclick="return login('commentform');">登录</a>
+     或 
+    <a rel="nofollow" href="javascript:void(0);" class="underline" onclick="return register();">注册</a>，
+    <a href="https://www.cnblogs.com/">访问</a> 网站首页。
+</div></div>
+    <div class="ad_text_commentbox" id="ad_text_under_commentbox"></div>
+    <div id="ad_t2"><a href="http://www.ucancode.com/index.htm" target="_blank" onclick="ga('send', 'event', 'Link', 'click', 'T2-ucancode')">【推荐】超50万行VC++源码: 大型组态工控、电力仿真CAD与GIS源码库</a><br><a href="https://developer.aliyun.com/topic/java2020?utm_content=g_1000113424" target="_blank" onclick="ga('send', 'event', 'Link', 'click', 'T2-阿里云开发者社区')">【重磅】会当凌绝顶，一览众山小，《Java开发手册》泰山版正式发布</a><br><a href="https://cloud.tencent.com/act/seckill?fromSource=gwzcw.3498755.3498755.3498755&amp;utm_medium=cpc&amp;utm_id=gwzcw.3498755.3498755.3498755" target="_blank" onclick="ga('send', 'event', 'Link', 'click', 'T2-腾讯云')">【推荐】腾讯云产品限时秒杀，爆款1核2G云服务器99元/年！</a><br><a href="https://developer.aliyun.com/article/757033?utm_content=g_1000114114" target="_blank" onclick="ga('send', 'event', 'Link', 'click', 'T2-阿里云开发者社区')">【推荐】Linux纯干货知识总结 | 面试专用</a><br><a href="https://developer.aliyun.com/article/744375?utm_content=g_1000104137" target="_blank" onclick="ga('send', 'event', 'Link', 'click', 'T2-阿里云开发者社区')">【推荐】合辑 | 学习python不可不知的开发者词条汇总！</a><br></div>
+    <div id="opt_under_post"></div>
+    <script async="async" src="MyCAT%E5%85%A8%E5%B1%80%E5%BA%8F%E5%88%97%E5%8F%B7%20-%20iVictor%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/gpt.js"></script>
+    <script>
+        var googletag = googletag || {};
+        googletag.cmd = googletag.cmd || [];
+    </script>
+    <script>
+        googletag.cmd.push(function () {
+            googletag.defineSlot("/1090369/C1", [300, 250], "div-gpt-ad-1546353474406-0").addService(googletag.pubads());
+            googletag.defineSlot("/1090369/C2", [468, 60], "div-gpt-ad-1539008685004-0").addService(googletag.pubads());
+            googletag.pubads().enableSingleRequest();
+            googletag.enableServices();
+        });
+    </script>
+    <div id="cnblogs_c1" class="c_ad_block"></div>
+    <div id="under_post_news"><div class="recomm-block"><b>相关博文：</b><br>·  <a title="MyCat  主键ID自增长配置" href="https://www.cnblogs.com/raphael5200/p/5900007.html" target="_blank" onclick="clickRecomItmem(5900007)">MyCat  主键ID自增长配置</a><br>·  <a title="mycat分布式mysql中间件（自增主键）" href="https://www.cnblogs.com/756623607-zhang/p/6850916.html" target="_blank" onclick="clickRecomItmem(6850916)">mycat分布式mysql中间件（自增主键）</a><br>·  <a title="Mycat探索之旅（4）----Mycat的自增长主键和返回生成主键ID的实现" href="https://www.cnblogs.com/doctorJoe/p/5261607.html" target="_blank" onclick="clickRecomItmem(5261607)">Mycat探索之旅（4）----Mycat的自增长主键和返回生成主键ID的实现</a><br>·  <a title="MyCAT简易入门" href="https://www.cnblogs.com/ivictor/p/5111495.html" target="_blank" onclick="clickRecomItmem(5111495)">MyCAT简易入门</a><br>·  <a title="Windows配置mycat" href="https://www.cnblogs.com/parryyang/p/5758087.html" target="_blank" onclick="clickRecomItmem(5758087)">Windows配置mycat</a><br>»  <a target="_blank" href="https://recomm.cnblogs.com/blogpost/5235147">更多推荐...</a><div id="cnblogs_t5"><a href="https://developer.aliyun.com/article/726591?utm_content=g_1000088942" target="_blank" onclick="ga('send', 'event', 'Link', 'click', 'T5-阿里云开发者社区')">96秒100亿！哪些“黑科技”支撑全球最大流量洪峰？</a></div></div></div>
+    <div id="cnblogs_c2" class="c_ad_block" style="display: none;">
+        <div id="div-gpt-ad-1539008685004-0" style="height:60px; width:468px;" data-google-query-id="CPD-iur3_-gCFZgAXAodO5YITw">
+            
+        <div id="google_ads_iframe_/1090369/C2_0__container__" style="border: 0pt none;"><iframe id="google_ads_iframe_/1090369/C2_0" title="3rd party ad content" name="google_ads_iframe_/1090369/C2_0" scrolling="no" marginwidth="0" marginheight="0" style="border: 0px none; vertical-align: bottom;" srcdoc="" data-google-container-id="2" data-load-complete="true" width="468" height="60" frameborder="0"></iframe></div></div>
+    </div>
+    <div id="under_post_kb">
+<div class="itnews c_ad_block">
+    <b>最新 IT 新闻</b>:
+    <br>
+ ·              <a href="https://news.cnblogs.com/n/660465/" target="_blank">华为发布nova7系列手机：搭载麒麟985处理器 售价2999元起|测评</a>
+            <br>
+ ·              <a href="https://news.cnblogs.com/n/660491/" target="_blank">人造肉的意义我们都懂，但它可能走错了路</a>
+            <br>
+ ·              <a href="https://news.cnblogs.com/n/660490/" target="_blank">微软发起“开放数据运动”，旨在解决“数据鸿沟”</a>
+            <br>
+ ·              <a href="https://news.cnblogs.com/n/660489/" target="_blank">Qt 开发者讨论将 Qt 5 代码移植到 Qt 6 的工具</a>
+            <br>
+ ·              <a href="https://news.cnblogs.com/n/660488/" target="_blank">一个月损失200亿之后 格力董明珠宣布抖音直播卖货</a>
+            <br>
+    » <a href="https://news.cnblogs.com/" title="IT 新闻" target="_blank">更多新闻...</a>
+</div></div>
+    <div id="HistoryToday" class="c_ad_block"></div>
+    <script type="text/javascript">
+        fixPostBody();
+        deliverBigBanner();
+setTimeout(function() { incrementViewCount(cb_entryId); }, 50);        deliverAdT2();
+        deliverAdC1();
+        deliverAdC2();
+        loadNewsAndKb();
+        loadBlogSignature();
+LoadPostCategoriesTags(cb_blogId, cb_entryId);        LoadPostInfoBlock(cb_blogId, cb_entryId, cb_blogApp, cb_blogUserGuid);
+        GetPrevNextPost(cb_entryId, cb_blogId, cb_entryCreatedDate, cb_postType);
+        loadOptUnderPost();
+        GetHistoryToday(cb_blogId, cb_blogApp, cb_entryCreatedDate);
+    </script>
+</div></div>
+
+
+	</div><!--end: forFlow -->
+	</div><!--end: mainContent 主体内容容器-->
+
+	<div id="sideBar">
+		<div id="sideBarMain">
+			
+<div id="sidebar_news" class="newsItem"><!--done-->
+<div class="newsItem">
+<h3 class="catListTitle">公告</h3>
+	
+<div id="blog-news">
+    <div>
+<h3>欢迎关注公众号：MySQL实战</h3>
+<br>
+   <img src="MyCAT%E5%85%A8%E5%B1%80%E5%BA%8F%E5%88%97%E5%8F%B7%20-%20iVictor%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/o_qrcode_for_gh_dc42b6aabe9f_258.jpg" width="180" height="180"><br>
+</div>
+    <div id="profile_block">
+        昵称：
+        <a href="https://home.cnblogs.com/u/ivictor/">
+            iVictor
+        </a>
+        <br>
+        园龄：
+        <a href="https://home.cnblogs.com/u/ivictor/" title="入园时间：2013-10-22">
+            6年6个月
+        </a>
+        <br>
+        粉丝：
+        <a href="https://home.cnblogs.com/u/ivictor/followers/">
+            397
+        </a>
+        <br>
+        关注：
+        <a href="https://home.cnblogs.com/u/ivictor/followees/">
+            3
+        </a>
+        <div id="p_b_follow">
+<a href="javascript:void(0)" onclick="follow('0c261817-f13a-e311-8d02-90b11c0b17d6')">+加关注</a></div>
+        <script>getFollowStatus('0c261817-f13a-e311-8d02-90b11c0b17d6');</script>
+    </div>
+</div>
+</div>
+
+</div>
+
+			<div id="calendar"><div id="blog-calendar" style="">
+
+<table id="blogCalendar" class="Cal" title="Calendar" cellspacing="0" cellpadding="0" border="0">
+    <tbody>
+        <tr>
+            <td colspan="7">
+                <table class="CalTitle" cellspacing="0" border="0">
+                    <tbody>
+                        <tr>
+                            <td class="CalNextPrev">
+                                <a href="javascript:void(0);" onclick="loadBlogCalendar('2020/03/24'); return false;">&lt;</a>
+                            </td>
+                            <td align="center">2020年4月</td>
+                            <td class="CalNextPrev" align="right">
+                                <a href="javascript:void(0);" onclick="loadBlogCalendar('2020/05/24'); return false;">&gt;</a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </td>
+        </tr>
+        <tr>
+                    <th class="CalDayHeader" abbr="日" scope="col" align="center">日</th>
+                    <th class="CalDayHeader" abbr="一" scope="col" align="center">一</th>
+                    <th class="CalDayHeader" abbr="二" scope="col" align="center">二</th>
+                    <th class="CalDayHeader" abbr="三" scope="col" align="center">三</th>
+                    <th class="CalDayHeader" abbr="四" scope="col" align="center">四</th>
+                    <th class="CalDayHeader" abbr="五" scope="col" align="center">五</th>
+                    <th class="CalDayHeader" abbr="六" scope="col" align="center">六</th>
+        </tr>
+            <tr>
+                            <td class="CalOtherMonthDay" align="center">29</td>
+                            <td class="CalOtherMonthDay" align="center">30</td>
+                            <td class="CalOtherMonthDay" align="center">31</td>
+                        <td class="" align="center">
+                            1
+                        </td>
+                        <td class="" align="center">
+                            2
+                        </td>
+                        <td class="" align="center">
+                            3
+                        </td>
+                    <td class="CalWeekendDay" align="center">
+                        4
+                    </td>
+            </tr>
+                <tr>
+                        <td class="CalWeekendDay" align="center">
+                            5
+                        </td>
+                            <td class="" align="center">
+                                6
+                            </td>
+                            <td class="" align="center">
+                                7
+                            </td>
+                            <td class="" align="center">
+                                8
+                            </td>
+                            <td class="" align="center">
+                                9
+                            </td>
+                            <td class="" align="center">
+                                10
+                            </td>
+                        <td class="CalWeekendDay" align="center">
+                            11
+                        </td>
+                </tr>
+                <tr>
+                        <td class="CalWeekendDay" align="center">
+                            12
+                        </td>
+                            <td class="" align="center">
+                                13
+                            </td>
+                            <td class="" align="center">
+                                14
+                            </td>
+                            <td class="" align="center">
+                                15
+                            </td>
+                            <td class="" align="center">
+                                16
+                            </td>
+                            <td class="" align="center">
+                                17
+                            </td>
+                        <td class="CalWeekendDay" align="center">
+                            18
+                        </td>
+                </tr>
+                <tr>
+                        <td class="CalWeekendDay" align="center">
+                            19
+                        </td>
+                            <td class="" align="center">
+                                20
+                            </td>
+                            <td class="" align="center">
+                                21
+                            </td>
+                            <td class="" align="center">
+                                22
+                            </td>
+                            <td class="" align="center">
+                                23
+                            </td>
+                            <td class="CalTodayDay" align="center">
+                                24
+                            </td>
+                        <td class="CalWeekendDay" align="center">
+                            25
+                        </td>
+                </tr>
+                <tr>
+                        <td class="CalWeekendDay" align="center">
+                            26
+                        </td>
+                            <td class="" align="center">
+                                27
+                            </td>
+                            <td class="" align="center">
+                                28
+                            </td>
+                            <td class="" align="center">
+                                29
+                            </td>
+                            <td class="" align="center">
+                                30
+                            </td>
+                            <td class="CalOtherMonthDay" align="center">
+                                1
+                            </td>
+                        <td class="CalOtherMonthDay" align="center">
+                            2
+                        </td>
+                </tr>
+                <tr>
+                        <td class="CalOtherMonthDay" align="center">
+                            3
+                        </td>
+                            <td class="CalOtherMonthDay" align="center">
+                                4
+                            </td>
+                            <td class="CalOtherMonthDay" align="center">
+                                5
+                            </td>
+                            <td class="CalOtherMonthDay" align="center">
+                                6
+                            </td>
+                            <td class="CalOtherMonthDay" align="center">
+                                7
+                            </td>
+                            <td class="CalOtherMonthDay" align="center">
+                                8
+                            </td>
+                        <td class="CalOtherMonthDay" align="center">
+                            9
+                        </td>
+                </tr>
+    </tbody>
+</table></div><script>loadBlogDefaultCalendar();</script></div>
+			
+			<div id="leftcontentcontainer">
+				<div id="blog-sidecolumn">
+<!-- 搜索 -->
+<div id="sidebar_search" class="sidebar-block">
+    <div id="sidebar_search" class="mySearch">
+        <h3 class="catListTitle">搜索</h3>
+        <div id="sidebar_search_box">
+            <div id="widget_my_zzk" class="div_my_zzk">
+                <input type="text" id="q" onkeydown="return zzk_go_enter(event);" class="input_my_zzk">&nbsp;<input onclick="zzk_go()" type="button" value="找找看" id="btnZzk" class="btn_my_zzk">
+            </div>
+            
+        </div>
+    </div>
+</div>
+
+<!-- 常用链接 -->
+
+
+<!-- 最新随笔 -->
+
+
+
+<!-- 我的标签 -->
+
+
+<!-- 积分与排名 -->
+<div id="sidebar_scorerank" class="sidebar-block">
+    <div class="catListBlogRank">
+<h3 class="catListTitle">积分与排名</h3>
+<ul>
+	<li class="liScore">
+        积分 -	
+448498
+    </li>
+	<li class="liRank">
+		排名 -	
+623
+	</li>
+</ul>
+</div>
+
+
+
+
+</div>
+
+<!-- 随笔分类、随笔档案、文章分类、新闻分类、相册、链接 -->
+<div id="sidebar_categories">
+    
+<div class="catListPostCategory">
+<h3 class="catListTitle">
+
+随笔分类
+<span style="font-size:11px;font-weight:normal">(254)</span>
+
+</h3>
+
+
+<ul>
+
+<li>
+<a href="https://www.cnblogs.com/ivictor/category/732393.html" rel="" target="">
+    Docker(7)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/ivictor/category/985679.html" rel="" target="">
+    Go(1)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/ivictor/category/726280.html" rel="" target="">
+    GoldenGate(2)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/ivictor/category/686050.html" rel="" target="">
+    Java(5)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/ivictor/category/563656.html" rel="" target="">
+    Linux(17)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/ivictor/category/855223.html" rel="" target="">
+    Mongodb(2)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/ivictor/category/776209.html" rel="" target="">
+    MyCAT(9)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/ivictor/category/734568.html" rel="" target="">
+    MySQL(35)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/ivictor/category/886997.html" rel="" target="">
+    MySQL Percona Toolkit(9)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/ivictor/category/1250837.html" rel="" target="">
+    MySQL Utilities(1)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/ivictor/category/923478.html" rel="" target="">
+    MySQL 备份恢复(5)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/ivictor/category/960851.html" rel="" target="">
+    MySQL 常用工具(4)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/ivictor/category/923512.html" rel="" target="">
+    MySQL 分区表(5)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/ivictor/category/923473.html" rel="" target="">
+    MySQL 复制(9)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/ivictor/category/923469.html" rel="" target="">
+    MySQL 高可用(5)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/ivictor/category/923489.html" rel="" target="">
+    MySQL 优化(3)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/ivictor/category/1211693.html" rel="" target="">
+    MySQL8的新特性(5)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/ivictor/category/775608.html" rel="" target="">
+    Nagios &amp; Zabbix(10)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/ivictor/category/565246.html" rel="" target="">
+    Oracle(28)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/ivictor/category/566014.html" rel="" target="">
+    Oracle Dataguard(4)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/ivictor/category/699031.html" rel="" target="">
+    Perl(6)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/ivictor/category/598799.html" rel="" target="">
+    PL/SQL(9)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/ivictor/category/669982.html" rel="" target="">
+    Python(7)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/ivictor/category/1137852.html" rel="" target="">
+    Python Web开发(1)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/ivictor/category/785927.html" rel="" target="">
+    Redis(8)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/ivictor/category/528369.html" rel="" target="">
+    Shell(10)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/ivictor/category/779566.html" rel="" target="">
+    Spark(1)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/ivictor/category/688094.html" rel="" target="">
+    SQL(9)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/ivictor/category/613591.html" rel="" target="">
+    SQL*Loader(11)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/ivictor/category/739921.html" rel="" target="">
+    大数据(4)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/ivictor/category/604414.html" rel="" target="">
+    其它(10)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/ivictor/category/966990.html" rel="" target="">
+    碎碎念(10)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/ivictor/category/845631.html" rel="" target="">
+    运维自动化(2)
+</a>
+ 
+</li>
+
+</ul>
+
+
+</div>
+<div class="catListPostArchive">
+<h3 class="catListTitle">
+
+随笔档案
+<span style="font-size:11px;font-weight:normal">(253)</span>
+
+</h3>
+
+
+<ul>
+
+<li>
+<a href="https://www.cnblogs.com/ivictor/archive/2019/11.html" rel="" target="">
+    2019年11月(1)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/ivictor/archive/2019/07.html" rel="" target="">
+    2019年7月(1)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/ivictor/archive/2019/03.html" rel="" target="">
+    2019年3月(1)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/ivictor/archive/2018/10.html" rel="" target="">
+    2018年10月(5)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/ivictor/archive/2018/08.html" rel="" target="">
+    2018年8月(3)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/ivictor/archive/2018/07.html" rel="" target="">
+    2018年7月(2)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/ivictor/archive/2018/06.html" rel="" target="">
+    2018年6月(1)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/ivictor/archive/2018/05.html" rel="" target="">
+    2018年5月(4)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/ivictor/archive/2018/01.html" rel="" target="">
+    2018年1月(1)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/ivictor/archive/2017/12.html" rel="" target="">
+    2017年12月(2)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/ivictor/archive/2017/05.html" rel="" target="">
+    2017年5月(7)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/ivictor/archive/2017/04.html" rel="" target="">
+    2017年4月(4)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/ivictor/archive/2017/03.html" rel="" target="">
+    2017年3月(2)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/ivictor/archive/2017/02.html" rel="" target="">
+    2017年2月(3)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/ivictor/archive/2017/01.html" rel="" target="">
+    2017年1月(2)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/ivictor/archive/2016/12.html" rel="" target="">
+    2016年12月(4)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/ivictor/archive/2016/11.html" rel="" target="">
+    2016年11月(2)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/ivictor/archive/2016/10.html" rel="" target="">
+    2016年10月(6)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/ivictor/archive/2016/09.html" rel="" target="">
+    2016年9月(6)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/ivictor/archive/2016/08.html" rel="" target="">
+    2016年8月(13)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/ivictor/archive/2016/07.html" rel="" target="">
+    2016年7月(2)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/ivictor/archive/2016/06.html" rel="" target="">
+    2016年6月(3)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/ivictor/archive/2016/05.html" rel="" target="">
+    2016年5月(6)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/ivictor/archive/2016/04.html" rel="" target="">
+    2016年4月(8)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/ivictor/archive/2016/03.html" rel="" target="">
+    2016年3月(10)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/ivictor/archive/2016/02.html" rel="" target="">
+    2016年2月(4)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/ivictor/archive/2016/01.html" rel="" target="">
+    2016年1月(17)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/ivictor/archive/2015/12.html" rel="" target="">
+    2015年12月(16)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/ivictor/archive/2015/11.html" rel="" target="">
+    2015年11月(5)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/ivictor/archive/2015/10.html" rel="" target="">
+    2015年10月(3)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/ivictor/archive/2015/09.html" rel="" target="">
+    2015年9月(8)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/ivictor/archive/2015/08.html" rel="" target="">
+    2015年8月(6)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/ivictor/archive/2015/07.html" rel="" target="">
+    2015年7月(10)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/ivictor/archive/2015/06.html" rel="" target="">
+    2015年6月(2)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/ivictor/archive/2015/05.html" rel="" target="">
+    2015年5月(6)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/ivictor/archive/2015/04.html" rel="" target="">
+    2015年4月(6)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/ivictor/archive/2015/03.html" rel="" target="">
+    2015年3月(3)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/ivictor/archive/2015/02.html" rel="" target="">
+    2015年2月(1)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/ivictor/archive/2015/01.html" rel="" target="">
+    2015年1月(4)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/ivictor/archive/2014/11.html" rel="" target="">
+    2014年11月(2)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/ivictor/archive/2014/10.html" rel="" target="">
+    2014年10月(3)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/ivictor/archive/2014/09.html" rel="" target="">
+    2014年9月(23)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/ivictor/archive/2014/08.html" rel="" target="">
+    2014年8月(10)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/ivictor/archive/2014/07.html" rel="" target="">
+    2014年7月(5)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/ivictor/archive/2014/06.html" rel="" target="">
+    2014年6月(4)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/ivictor/archive/2014/05.html" rel="" target="">
+    2014年5月(4)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/ivictor/archive/2014/04.html" rel="" target="">
+    2014年4月(4)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/ivictor/archive/2014/03.html" rel="" target="">
+    2014年3月(4)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/ivictor/archive/2013/10.html" rel="" target="">
+    2013年10月(4)
+</a>
+ 
+</li>
+
+</ul>
+
+
+</div>
+
+
+</div>
+
+<!-- 最新评论 -->
+<div id="sidebar_recentcomments" class="sidebar-block">
+    <div class="catListComment">
+<h3 class="catListTitle">最新评论</h3>
+
+	<div class="RecentCommentBlock">
+        <ul>
+                    <li class="recent_comment_title"><a href="https://www.cnblogs.com/ivictor/p/5146247.html">1. Re:CentOS 7下MySQL服务启动失败的解决思路</a></li>
+                    <li class="recent_comment_body"><p>感谢，解决了！</p>
+</li>
+                    <li class="recent_comment_author">--WangX。</li>
+                    <li class="recent_comment_title"><a href="https://www.cnblogs.com/ivictor/p/5032793.html">2. Re:MySQL基于时间字段进行分区的方案总结</a></li>
+                    <li class="recent_comment_body">@iVictor 一个 小的需求 觉得用这个合适 不然得每天一个表...</li>
+                    <li class="recent_comment_author">--gavin峰</li>
+                    <li class="recent_comment_title"><a href="https://www.cnblogs.com/ivictor/p/5032793.html">3. Re:MySQL基于时间字段进行分区的方案总结</a></li>
+                    <li class="recent_comment_body">@gavin峰 你们线上用了分区表了？...</li>
+                    <li class="recent_comment_author">--iVictor</li>
+                    <li class="recent_comment_title"><a href="https://www.cnblogs.com/ivictor/p/5032793.html">4. Re:MySQL基于时间字段进行分区的方案总结</a></li>
+                    <li class="recent_comment_body">@iVictor 嗯 就是有时候会扫第一个分区 有点不正常 总体还是可以的...</li>
+                    <li class="recent_comment_author">--gavin峰</li>
+                    <li class="recent_comment_title"><a href="https://www.cnblogs.com/ivictor/p/6693968.html">5. Re:MySQL高可用方案MHA在线切换的步骤及原理</a></li>
+                    <li class="recent_comment_body">@Fan() 所有连接，具体可以看看 master_ip_online_change脚本源码...</li>
+                    <li class="recent_comment_author">--iVictor</li>
+                    <li class="recent_comment_title"><a href="https://www.cnblogs.com/ivictor/p/6693968.html">6. Re:MySQL高可用方案MHA在线切换的步骤及原理</a></li>
+                    <li class="recent_comment_body">您好请教下 等待1.5s（$time_until_kill_threads*100ms），等待当前连接断开。 这个当前连接是只什么啊, show processlist里的空闲链接吗? 如果没有自动断...</li>
+                    <li class="recent_comment_author">--Fan()</li>
+                    <li class="recent_comment_title"><a href="https://www.cnblogs.com/ivictor/p/5032793.html">7. Re:MySQL基于时间字段进行分区的方案总结</a></li>
+                    <li class="recent_comment_body">@ gavin峰 mysql&gt; explain SELECT * FROM `test_innodb` where data_date&gt;= '2020-02-24'; + + + + + + + + ...</li>
+                    <li class="recent_comment_author">--iVictor</li>
+                    <li class="recent_comment_title"><a href="https://www.cnblogs.com/ivictor/p/5032793.html">8. Re:MySQL基于时间字段进行分区的方案总结</a></li>
+                    <li class="recent_comment_body">@ iVictormysql版本 5.7.29...</li>
+                    <li class="recent_comment_author">--gavin峰</li>
+                    <li class="recent_comment_title"><a href="https://www.cnblogs.com/ivictor/p/5032793.html">9. Re:MySQL基于时间字段进行分区的方案总结</a></li>
+                    <li class="recent_comment_body">@ iVictor建分区表create table test_innodb(id int,data_date date not null) ENGINE=INNODB partition by ran...</li>
+                    <li class="recent_comment_author">--gavin峰</li>
+                    <li class="recent_comment_title"><a href="https://www.cnblogs.com/ivictor/p/5032793.html">10. Re:MySQL基于时间字段进行分区的方案总结</a></li>
+                    <li class="recent_comment_body">@ gavin峰没测试，能具体贴贴测试过程么？...</li>
+                    <li class="recent_comment_author">--iVictor</li>
+        </ul>
+    </div>
+</div>
+
+
+</div>
+
+
+
+<!-- 阅读排行榜 -->
+<div id="sidebar_topviewedposts" class="sidebar-block">
+    <div class="catListView">
+<h3 class="catListTitle">阅读排行榜</h3>
+	<div id="TopViewPostsBlock">
+        <ul style="word-break:break-all">
+                    <li>
+                        <a href="https://www.cnblogs.com/ivictor/p/5146247.html">
+                            1. CentOS 7下MySQL服务启动失败的解决思路(195180)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/ivictor/p/5142809.html">
+                            2. ERROR 1819 (HY000): Your password does not satisfy the current policy requirements(176312)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/ivictor/p/4834864.html">
+                            3. 关于Docker目录挂载的总结(160373)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/ivictor/p/5111495.html">
+                            4. MyCAT简易入门(130535)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/ivictor/p/6099807.html">
+                            5. 关于Raid0,Raid1,Raid5,Raid10的总结(105519)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/ivictor/p/5028368.html">
+                            6. MySQL中有关TIMESTAMP和DATETIME的总结(96988)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/ivictor/p/9243259.html">
+                            7. MySQL root密码忘记，原来还有更优雅的解法！(87063)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/ivictor/p/5446503.html">
+                            8. 如何高效地向Redis插入大量的数据(70124)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/ivictor/p/4791274.html">
+                            9. Docker命令详解(52544)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/ivictor/p/5131480.html">
+                            10. MyCAT实现MySQL的读写分离(50711)
+                        </a>
+                    </li>
+        </ul>
+    </div>
+</div>
+
+
+</div>
+
+<!-- 评论排行榜 -->
+<div id="sidebar_topcommentedposts" class="sidebar-block">
+    <div class="catListFeedback">
+<h3 class="catListTitle">评论排行榜</h3>
+	<div id="TopFeedbackPostsBlock">
+        <ul style="word-break:break-all">
+                    <li>
+                        <a href="https://www.cnblogs.com/ivictor/p/5131480.html">
+                            1. MyCAT实现MySQL的读写分离(38)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/ivictor/p/4834864.html">
+                            2. 关于Docker目录挂载的总结(26)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/ivictor/p/9281488.html">
+                            3. 升级MySQL5.7，开发不得不注意的坑(23)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/ivictor/p/6249066.html">
+                            4. 闰秒导致MySQL服务器的CPU sys过高(18)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/ivictor/p/5146247.html">
+                            5. CentOS 7下MySQL服务启动失败的解决思路(15)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/ivictor/p/5111495.html">
+                            6. MyCAT简易入门(15)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/ivictor/p/5028368.html">
+                            7. MySQL中有关TIMESTAMP和DATETIME的总结(12)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/ivictor/p/9243259.html">
+                            8. MySQL root密码忘记，原来还有更优雅的解法！(11)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/ivictor/p/9807284.html">
+                            9. 来，看看MySQL 5.6, 5.7, 8.0的新特性(11)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/ivictor/p/5032793.html">
+                            10. MySQL基于时间字段进行分区的方案总结(10)
+                        </a>
+                    </li>
+        </ul>
+    </div>
+</div>
+
+
+</div>
+
+<!-- 推荐排行榜 -->
+<div id="sidebar_topdiggedposts" class="sidebar-block">
+    <div id="topdigg_posts_wrap">
+    <div class="catListView">
+        <h3 class="catListTitle">推荐排行榜</h3>
+        <div id="TopDiggPostsBlock">
+            <ul style="word-break: break-all">
+                        <li>
+                            <a href="https://www.cnblogs.com/ivictor/p/9243259.html">
+                                1. MySQL root密码忘记，原来还有更优雅的解法！(25)
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://www.cnblogs.com/ivictor/p/4834864.html">
+                                2. 关于Docker目录挂载的总结(22)
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://www.cnblogs.com/ivictor/p/5028368.html">
+                                3. MySQL中有关TIMESTAMP和DATETIME的总结(20)
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://www.cnblogs.com/ivictor/p/9281488.html">
+                                4. 升级MySQL5.7，开发不得不注意的坑(20)
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://www.cnblogs.com/ivictor/p/5142809.html">
+                                5. ERROR 1819 (HY000): Your password does not satisfy the current policy requirements(15)
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://www.cnblogs.com/ivictor/p/5522383.html">
+                                6. 基于keepalived搭建MySQL的高可用集群(13)
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://www.cnblogs.com/ivictor/p/9807284.html">
+                                7. 来，看看MySQL 5.6, 5.7, 8.0的新特性(12)
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://www.cnblogs.com/ivictor/p/5735580.html">
+                                8. MySQL半同步复制(11)
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://www.cnblogs.com/ivictor/p/5979731.html">
+                                9. MySQL中interactive_timeout和wait_timeout的区别(10)
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://www.cnblogs.com/ivictor/p/6249066.html">
+                                10. 闰秒导致MySQL服务器的CPU sys过高(10)
+                            </a>
+                        </li>
+            </ul>
+        </div>
+    </div>
+</div>
+</div></div>
+                    <script>loadBlogSideColumn();</script>
+			</div>
+			
+		</div><!--end: sideBarMain -->
+	</div><!--end: sideBar 侧边栏容器 -->
+	<div class="clear"></div>
+	</div><!--end: main -->
+	<div class="clear"></div>
+	<div id="footer">
+		<!--done-->
+Copyright © 2020 iVictor
+<br><span id="poweredby">Powered by .NET Core on Kubernetes</span>
+
+
+
+	</div><!--end: footer -->
+</div><!--end: home 自定义的最大容器 -->
+
+
+    
+
+</body></html>

@@ -1,0 +1,263 @@
+0. 搭建好mycat环境 (参考mycat读写分离)
+
+
+===========分库================
+将表分布再不同节点的数据库中
+1. 在所有数据库节点上创建order01
+some-mysql:
+create database order01;
+other-mysql:
+create database order01;
+
+2. 修改schema.xml
+<?xml version="1.0"?>
+<!DOCTYPE mycat:schema SYSTEM "schema.dtd">
+<mycat:schema xmlns:mycat="http://io.mycat/">
+
+	<schema name="druid" dataNode="dataNode1" checkSQLschema="true" sqlMaxLimit="100">
+		<!--subTables="boards_$0-127"-->
+		<table name="CUSTOMER" dataNode="dataNode2"></table>                 ========>CUSTOMER这个表会被分配到dataNode2,也就是dataHost2对应的172.17.0.3:3306中的数据库order01
+		<table name="orders" dataNode="dataNode1,dataNode2" rule="mod_rule">
+		  <childTable name="orders_detail" primaryKey="id" joinKey="order_id" parentKey="id" />
+		</table>
+		<table name="dict_order_type" dataNode="dataNode1,dataNode2" type="global" ></table>
+	</schema>
+
+	<dataNode name="dataNode1" dataHost="dataHost1" database="order01" />
+	<dataNode name="dataNode2" dataHost="dataHost2" database="order01" />
+	<!--
+	balance
+		0, 不开启读写分离机制，所有读操作都发送到当前可用的writeHost上。
+		1，全部的readHost与stand by writeHost参与select语句的负载均衡，简单的说，当双主双从模式(M1->S1，M2->S2，并且M1与M2互为主备)，正常情况下，M2,S1,S2都参与select语句的负载均衡。
+		2，所有读操作都随机的在writeHost、readhost上分发。
+		3，所有读请求随机的分发到wiriterHost对应的readhost执行，writerHost不负担读压力
+
+	writeType 表示写模式
+		0，所有的操作发送到配置的第一个writehost
+		1，随机发送到配置的所有writehost
+		2，不执行写操作
+
+	switchType 指的是切换的模式，目前的取值也有4种：
+		-1，表示不自动切换
+		 1，默认值，表示自动切换
+		 2，基于MySQL主从同步的状态决定是否切换,心跳语句为show slave status
+		 3，基于MySQL galary cluster的切换机制（适合集群）（1.4.1），心跳语句为show status like ‘wsrep%‘。
+	-->
+	<dataHost name="dataHost1" maxCon="1000" minCon="10" balance="0"
+			  writeType="0" dbType="mysql" dbDriver="jdbc" switchType="-1" slaveThreshold="100">
+		<heartbeat>select user()</heartbeat>
+		<writeHost
+				host="172.17.0.2"
+				url="jdbc:mysql://172.17.0.2:3306?useSSL=false&amp;serverTimezone=UTC"
+				user="root" password="123456">
+			<!--<readHost host="172.17.0.3" url="jdbc:mysql://172.17.0.3:3306?useSSL=false&amp;serverTimezone=UTC" user="root" password="123456" />-->
+		</writeHost>
+	</dataHost>
+		<dataHost name="dataHost2" maxCon="1000" minCon="10" balance="0"
+			  writeType="0" dbType="mysql" dbDriver="jdbc" switchType="-1" slaveThreshold="100">
+		<heartbeat>select user()</heartbeat>
+		<writeHost
+				host="172.17.0.3"
+				url="jdbc:mysql://172.17.0.3:3306?useSSL=false&amp;serverTimezone=UTC"
+				user="root" password="123456">
+			<!--<readHost host="172.17.0.3" url="jdbc:mysql://172.17.0.3:3306?useSSL=false&amp;serverTimezone=UTC" user="root" password="123456" />-->
+		</writeHost>
+	</dataHost>
+</mycat:schema>
+
+rule.xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- - - Licensed under the Apache License, Version 2.0 (the "License"); 
+	- you may not use this file except in compliance with the License. - You 
+	may obtain a copy of the License at - - http://www.apache.org/licenses/LICENSE-2.0 
+	- - Unless required by applicable law or agreed to in writing, software - 
+	distributed under the License is distributed on an "AS IS" BASIS, - WITHOUT 
+	WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. - See the 
+	License for the specific language governing permissions and - limitations 
+	under the License. -->
+<!DOCTYPE mycat:rule SYSTEM "rule.dtd">
+<mycat:rule xmlns:mycat="http://io.mycat/">
+	<tableRule name="mod_rule">
+		<rule>
+			<columns>customer_id</columns>
+			<algorithm>mod-long</algorithm>
+		</rule>
+	</tableRule>
+	<tableRule name="rule1">
+		<rule>
+			<columns>id</columns>
+			<algorithm>func1</algorithm>
+		</rule>
+	</tableRule>
+
+	<tableRule name="rule2">
+		<rule>
+			<columns>user_id</columns>
+			<algorithm>func1</algorithm>
+		</rule>
+	</tableRule>
+
+	<tableRule name="sharding-by-intfile">
+		<rule>
+			<columns>sharding_id</columns>
+			<algorithm>hash-int</algorithm>
+		</rule>
+	</tableRule>
+	<tableRule name="auto-sharding-long">
+		<rule>
+			<columns>id</columns>
+			<algorithm>rang-long</algorithm>
+		</rule>
+	</tableRule>
+	<tableRule name="mod-long">
+		<rule>
+			<columns>id</columns>
+			<algorithm>mod-long</algorithm>
+		</rule>
+	</tableRule>
+
+	<tableRule name="sharding-by-murmur">
+		<rule>
+			<columns>u_mid</columns>
+			<algorithm>murmur</algorithm>
+		</rule>
+	</tableRule>
+
+
+
+	<tableRule name="crc32slot">
+		<rule>
+			<columns>id</columns>
+			<algorithm>crc32slot</algorithm>
+		</rule>
+	</tableRule>
+	<tableRule name="sharding-by-month">
+		<rule>
+			<columns>create_time</columns>
+			<algorithm>partbymonth</algorithm>
+		</rule>
+	</tableRule>
+	<tableRule name="latest-month-calldate">
+		<rule>
+			<columns>calldate</columns>
+			<algorithm>latestMonth</algorithm>
+		</rule>
+	</tableRule>
+	
+	<tableRule name="auto-sharding-rang-mod">
+		<rule>
+			<columns>id</columns>
+			<algorithm>rang-mod</algorithm>
+		</rule>
+	</tableRule>
+	
+	<tableRule name="jch">
+		<rule>
+			<columns>id</columns>
+			<algorithm>jump-consistent-hash</algorithm>
+		</rule>
+	</tableRule>
+
+	<function name="murmur"
+		class="io.mycat.route.function.PartitionByMurmurHash">
+		<property name="seed">0</property><!-- 默认是0 -->
+		<property name="count">6</property><!-- 要分片的数据库节点数量，必须指定，否则没法分片 -->
+		<property name="virtualBucketTimes">160</property><!-- 一个实际的数据库节点被映射为这么多虚拟节点，默认是160倍，也就是虚拟节点数是物理节点数的160倍 -->
+		<!-- <property name="weightMapFile">weightMapFile</property> 节点的权重，没有指定权重的节点默认是1。以properties文件的格式填写，以从0开始到count-1的整数值也就是节点索引为key，以节点权重值为值。所有权重值必须是正整数，否则以1代替 -->
+		<!-- <property name="bucketMapPath">/etc/mycat/bucketMapPath</property> 
+			用于测试时观察各物理节点与虚拟节点的分布情况，如果指定了这个属性，会把虚拟节点的murmur hash值与物理节点的映射按行输出到这个文件，没有默认值，如果不指定，就不会输出任何东西 -->
+	</function>
+
+	<function name="crc32slot"
+			  class="io.mycat.route.function.PartitionByCRC32PreSlot">
+		<property name="count">2</property><!-- 要分片的数据库节点数量，必须指定，否则没法分片 -->
+	</function>
+	<function name="hash-int"
+		class="io.mycat.route.function.PartitionByFileMap">
+		<property name="mapFile">partition-hash-int.txt</property>
+	</function>
+	<function name="rang-long"
+		class="io.mycat.route.function.AutoPartitionByLong">
+		<property name="mapFile">autopartition-long.txt</property>
+	</function>
+	<function name="mod-long" class="io.mycat.route.function.PartitionByMod">
+		<!-- how many data nodes -->
+		<property name="count">2</property>
+	</function>
+
+	<function name="func1" class="io.mycat.route.function.PartitionByLong">
+		<property name="partitionCount">8</property>
+		<property name="partitionLength">128</property>
+	</function>
+	<function name="latestMonth"
+		class="io.mycat.route.function.LatestMonthPartion">
+		<property name="splitOneDay">24</property>
+	</function>
+	<function name="partbymonth"
+		class="io.mycat.route.function.PartitionByMonth">
+		<property name="dateFormat">yyyy-MM-dd</property>
+		<property name="sBeginDate">2015-01-01</property>
+	</function>
+	
+	<function name="rang-mod" class="io.mycat.route.function.PartitionByRangeMod">
+        	<property name="mapFile">partition-range-mod.txt</property>
+	</function>
+	
+	<function name="jump-consistent-hash" class="io.mycat.route.function.PartitionByJumpConsistentHash">
+		<property name="totalBuckets">3</property>
+	</function>
+</mycat:rule>
+
+效果: 
+- CUSTOMER这个表会被分配到dataNode2,也就是dataHost2对应的172.17.0.3:3306中的数据库order01
+<table name="CUSTOMER" dataNode="dataNode2"></table> 
+- 对于表orders， 将其分布在dataNode1和dataNode2中，根据rule "mod_rule" (定义在rule.xml中)来确定分配规则
+  对于orders的子表，也就是需要跟orders进行join的表，由于不能跨数据库进行join，所以必须将joinkey相同的记录放在同一个数据库。
+  这里用到了<childTable>，使用后，orders_detail中orders_detail.order_id等于orders.id的记录，就会和对应的orders里的记录放在同一个数据库 (要么是dataNode1，要么是dataNode2),这样才能对orders和orders_detail2个表进行join
+  
+<table name="orders" dataNode="dataNode1,dataNode2" rule="mod_rule">
+	<childTable name="orders_detail" primaryKey="id" joinKey="order_id" parentKey="id" />
+</table>
+- 全局表
+对dict_order_type的修改，在所有数据库(dataNode1,dataNode2)都生效，
+<table name="dict_order_type" dataNode="dataNode1,dataNode2" type="global" ></table>
+
+3. 修改后启动mycat
+cd /mycat/bin
+./mycat console
+
+4. 从任意装有Mysql的及其登录mycat
+mysql -umycat -pmycat -h 172.17.0.4 -p 8066    (mycat时server.xml中定义的mycat用户名及密码, 172.17.0.4是装有mycat的机器, 8066是mycat服务器的端口号)
+5. 登录后创建customer表 (测试分库)
+create table customer( id int auto_increment, name varchar(200), primary key(id));
+这样，customer就只会在dataNode1对应的数据库中(some-mysql)
+6. 在dataNode1和dataNode2都创建orders和orders_details表 
+create table orders(id int auto_increment, order_type int, customer_id int, amount decimal(10,2),primary key(id));
+create table orders_detail(id int auto_increment, detail verchar(2000), order_id int, primary key(id));
+7 插入数据到orders和orders_details表 (测试分表)
+insert into orders(id,order_type,customer_id,amount) values(1,101,100,100100);
+insert into orders(id,order_type,customer_id,amount) values(2,101,100,100300);
+insert into orders(id,order_type,customer_id,amount) values(3,101,101,120000);
+insert into orders(id,order_type,customer_id,amount) values(4,101,101,103000);
+insert into orders(id,order_type,customer_id,amount) values(5,102,101,100400);
+insert into orders(id,order_type,customer_id,amount) values(6,102,100,100020);
+
+insert into orders_detail(id,detail,order_id) values(1,'detail1',1);
+insert into orders_detail(id,detail,order_id) values(2,'detail1',2);
+insert into orders_detail(id,detail,order_id) values(3,'detail1',3);
+insert into orders_detail(id,detail,order_id) values(4,'detail1',4);
+insert into orders_detail(id,detail,order_id) values(5,'detail1',5);
+insert into orders_detail(id,detail,order_id) values(6,'detail1',6);
+
+执行后，这些记录将通过schema.xml中指定的rule来分配到dataNode1和dataNode2中 
+orders是根据customer_id来对dataNode的个数取模
+orders_detail是根据order_id来匹配orders的id，然后匹配上的就跟orders的记录放在同一个dataNode,这样后面可以对2个表进行join
+
+8 全局表
+在所有dataNode创建表
+ create table dict_order_type( id int auto_increment,order_type varchar(200), primary key(id));
+登录mycat后，添加记录
+insert into dict_order_type(id,order_type) values(101,'type1');
+insert into dict_order_type(id,order_type) values(102,'type2');
+
+效果就是所有的dataNode里的dict_order_type表都有了上面添加的2条记录
