@@ -4,5 +4,9 @@
 <html>
 <body>
 <h2>Welcome To Spring MVC!</h2>
+<form action="/myLogout" method="post">
+    <input type="submit" value="logout">
+    <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+</form>
 </body>
 </html>

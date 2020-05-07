@@ -12,9 +12,9 @@
     <option name="RECENT_TEMPLATES">
       <list>
         <option value="HTML File" />
-        <option value="JSP" />
         <option value="Interface" />
         <option value="Class" />
+        <option value="JSP" />
       </list>
     </option>
   </component>
@@ -28,30 +28,31 @@
   <component name="ProjectId" id="1YEgcaYVXXW2pF62iXsOXEjdOJ5" />
   <component name="PropertiesComponent">
     <property name="DefaultHtmlFileTemplate" value="HTML File" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/spring-mongo.xsd" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/src/main/webapp/WEB-INF" />
     <property name="project.structure.last.edited" value="Modules" />
     <property name="project.structure.proportion" value="0.0" />
     <property name="project.structure.side.proportion" value="0.2" />
-    <property name="settings.editor.selected.configurable" value="preferences.externalResources" />
+    <property name="restartRequiresConfirmation" value="false" />
+    <property name="settings.editor.selected.configurable" value="MavenSettings" />
   </component>
   <component name="RecentsManager">
-    <key name="MoveFile.RECENT_KEYS">
-      <recent name="C:\IdeaProjects\springmvclearning\src\main\webapp\WEB-INF\views" />
-      <recent name="C:\IdeaProjects\springmvclearning\src\main\webapp\WEB-INF\views\sunset" />
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\IdeaProjects\springmvclearning\src\main\webapp\WEB-INF" />
       <recent name="C:\IdeaProjects\springmvclearning\src\main\webapp\WEB-INF\views\html" />
       <recent name="C:\IdeaProjects\springmvclearning\src\main\webapp" />
-      <recent name="C:\IdeaProjects\springmvclearning\src\main\webapp\WEB-INF" />
+      <recent name="C:\IdeaProjects\springmvclearning\src\main\resources\tk\springmvc\mybatis\mapper" />
+      <recent name="C:\IdeaProjects\springmvclearning\src\main\java\tk\springmvc\mybatis\type" />
     </key>
     <key name="CopyClassDialog.RECENTS_KEY">
       <recent name="tk.springmvc.mybatis.mapper" />
       <recent name="tk.springmvc.model" />
     </key>
-    <key name="CopyFile.RECENT_KEYS">
-      <recent name="C:\IdeaProjects\springmvclearning\src\main\webapp\WEB-INF\views\html" />
+    <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\IdeaProjects\springmvclearning\src\main\webapp" />
-      <recent name="C:\IdeaProjects\springmvclearning\src\main\resources\tk\springmvc\mybatis\mapper" />
-      <recent name="C:\IdeaProjects\springmvclearning\src\main\java\tk\springmvc\mybatis\type" />
-      <recent name="C:\IdeaProjects\springmvclearning\src\main\resources" />
+      <recent name="C:\IdeaProjects\springmvclearning\src\main\webapp\WEB-INF" />
+      <recent name="C:\IdeaProjects\springmvclearning\src\main\webapp\WEB-INF\views" />
+      <recent name="C:\IdeaProjects\springmvclearning\src\main\webapp\WEB-INF\views\sunset" />
+      <recent name="C:\IdeaProjects\springmvclearning\src\main\webapp\WEB-INF\views\html" />
     </key>
   </component>
   <component name="RunDashboard">
@@ -186,9 +187,9 @@
       <item itemvalue="Application.Test1" />
       <item itemvalue="Application.Test2" />
       <item itemvalue="Application.Test3" />
-      <item itemvalue="Smart Tomcat.Tomcat9" />
       <item itemvalue="Application.TestMongoDb" />
       <item itemvalue="Application.TestRedis" />
+      <item itemvalue="Smart Tomcat.Tomcat9" />
     </list>
     <recent_temporary>
       <list>
@@ -212,5 +213,12 @@
       <updated>1582513247598</updated>
     </task>
     <servers />
+  </component>
+  <component name="XDebuggerManager">
+    <watches-manager>
+      <configuration name="com.poratu.idea.plugins.tomcat">
+        <watch expression="((java.util.ArrayList)((VirtualFilterChain)this).additionalFilters).get(1)" custom="org.springframework.security.web.FilterChainProxy.VirtualFilterChain,java.util.ArrayList" />
+      </configuration>
+    </watches-manager>
   </component>
 </project>
