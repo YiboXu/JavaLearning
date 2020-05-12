@@ -1,0 +1,89 @@
+server:
+  port: 8201
+
+spring:
+  application:
+    name: SCW-ORDER
+  thymeleaf:
+    cache: false
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 1000MB
+  datasource:
+    url: jdbc:mysql://localhost:3306/crowdfunding
+    username: root
+    password: 123456
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    type: com.alibaba.druid.pool.DruidDataSource
+    #Druid的相关配置
+    initialSize: 5
+    minIdle: 5
+    maxActive: 20
+    maxWait: 60000
+    timeBetweenEvictionRunsMillis: 60000
+    minEvictableIdleTimeMillis: 300000
+    validationQuery: SELECT 1 FROM DUAL
+    testWhileIdle: true
+    testOnBorrow: false
+    testOnReturn: false
+    poolPreparedStatements: true
+    filters: stat,wall
+    maxPoolPreparedStatementPerConnectionSize: 20
+    useGlobalDataSourceStat: true
+    connectionProperties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=500
+
+  #redis
+  redis:
+    host: 127.0.0.1
+    port: 6379
+
+#如果通过@FeignClient来访问微服务，通过下面的配置来设置timeout
+hystrix:
+  command:
+    default:  #default全局有效，service id指定应用有效
+      execution:
+        timeout:
+          #是否开启超时熔断
+          enabled: true
+        isolation:
+          thread:
+            timeoutInMilliseconds: 3000 #断路器超时时间，默认1000ms
+
+#开启服务降级功能，当服务不可用的时候，会调用对应的FallbackFactory里面提供的服务 参考tk.springlearning.springcloud.service.DeptClientService
+feign:
+  hystrix:
+    enabled: true
+
+# 设置feign客户端超时时间(OpenFeign默认支持ribbon)
+ribbon:
+  # 指的是建立连接所用的时间,适用于网络状态正常的情况下,两端连接所用的时间
+  ReadTimeout: 3000
+  # 指的是建立连接后从服务器读取到可用资源所用的时间
+  ConnectTimeout: 3000
+  # 关闭请求重试
+  MaxAutoRetries: 0
+  MaxAutoRetriesNextServer: 0
+
+mybatis:
+  config-location: classpath:mybatis/mybatis-config.xml
+  mapper-locations:
+    - classpath:mybatis/mapper/**/*.xml
+  type-aliases-package: tk.billhu.scw.order.entities
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:7001/eureka
+  instance:
+    instance-id: scw-order8201                  #自定义服务的名称信息
+    prefer-ip-address: true                    #访问路径可以显示IP地址
+
+info:
+  app.name: scw
+  company.name: www.springlearning.com
+  build.artifactId: ${project.artifactId}
+  build.version: ${project.version}
+
+swagger2:
+  enable: true

@@ -1,0 +1,19 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="zh_CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <div th:include="commons/include::#jsStyle"></div>
+    <script type="text/javascript">
+        $(function(){
+            $("#txtName").blur(function(){
+                $.post("ajax",{"name":$("#txtName").val()},function(data){
+                    alert(data);
+                });
+            });
+        });
+    </script>
+</head>
+<body>
+<h2>Hello Ajax!</h2>
+用户名<input type="text" id="txtName" />
+</body>
+</html>

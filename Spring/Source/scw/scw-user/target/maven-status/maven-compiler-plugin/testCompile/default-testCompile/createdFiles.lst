@@ -1,0 +1,5 @@
+tk\billhu\scw\user\MobileMessageSend.class
+tk\billhu\scw\user\TestDruidConnection.class
+tk\billhu\scw\user\TestSms.class
+tk\billhu\scw\user\CheckSumBuilder.class
+tk\billhu\scw\user\TestRedis.class

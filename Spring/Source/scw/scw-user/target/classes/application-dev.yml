@@ -1,0 +1,68 @@
+server:
+  port: 8001
+
+spring:
+  application:
+    name: SCW-USER
+  thymeleaf:
+    cache: false
+  datasource:
+    url: jdbc:mysql://localhost:3306/crowdfunding
+    username: root
+    password: 123456
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    type: com.alibaba.druid.pool.DruidDataSource
+    #Druid的相关配置
+    initialSize: 5
+    minIdle: 5
+    maxActive: 20
+    maxWait: 60000
+    timeBetweenEvictionRunsMillis: 60000
+    minEvictableIdleTimeMillis: 300000
+    validationQuery: SELECT 1 FROM DUAL
+    testWhileIdle: true
+    testOnBorrow: false
+    testOnReturn: false
+    poolPreparedStatements: true
+    filters: stat,wall
+    maxPoolPreparedStatementPerConnectionSize: 20
+    useGlobalDataSourceStat: true
+    connectionProperties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=500
+
+  #redis
+  redis:
+    host: 127.0.0.1
+    port: 6379
+
+mybatis:
+  config-location: classpath:mybatis/mybatis-config.xml
+  mapper-locations:
+    - classpath:mybatis/mapper/**/*.xml
+  type-aliases-package: tk.billhu.scw.user.entities
+
+#开启页面合理化，比如要求获取的页面pageNum大于最大的页面,那么就返回最后一页, 而不是一个空页面
+pagehelper:
+  reasonable: true
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:7001/eureka
+  instance:
+    instance-id: scw-user8001                  #自定义服务的名称信息
+    prefer-ip-address: true                    #访问路径可以显示IP地址
+
+info:
+  app.name: scw
+  company.name: www.springlearning.com
+  build.artifactId: ${project.artifactId}
+  build.version: ${project.version}
+
+swagger2:
+  enable: true
+
+sms:
+  host: http://dingxin.market.alicloudapi.com
+  path: /dx/sendSms
+  method: POST
+  appcode: 42c2ebd07c7c4a95b270feff6c896c6c

@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="zh_CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+	<div th:include="commons/include::cssStyle"></div>
+	<link rel="stylesheet" href="css/theme.css" th:href="@{/css/theme.css}">
+	<link rel="stylesheet" href="css/main.css" th:href="@{/css/main.css}">
+	<style>
+	.tree li {
+        list-style-type: none;
+		cursor:pointer;
+	}
+	table tbody tr:nth-child(odd){background:#F4F4F4;}
+	table tbody td:nth-child(even){color:#C00;}
+	</style>
+  </head>
+
+  <body>
+
+    <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <div><a class="navbar-brand" style="font-size:32px;" href="#">众筹平台 - 角色维护</a></div>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav navbar-right">
+            <li style="padding-top:8px;">
+				<div class="btn-group">
+					<button type="button" class="btn btn-default btn-success dropdown-toggle" data-toggle="dropdown">
+						<i class="glyphicon glyphicon-user"></i> [[${session.loginmember.loginacct}]] <span class="caret"></span>
+					</button>
+					<ul class="dropdown-menu" role="menu">
+						<li><a href="#"><i class="glyphicon glyphicon-cog"></i> 个人设置</a></li>
+						<li><a href="#"><i class="glyphicon glyphicon-comment"></i> 消息</a></li>
+						<li class="divider"></li>
+						<li><a href="index.html" th:href="@{/doLogout}"><i class="glyphicon glyphicon-off"></i> 退出系统</a></li>
+					</ul>
+				</div>
+			</li>
+            <li style="margin-left:10px;padding-top:8px;">
+				<button type="button" class="btn btn-default btn-danger">
+				  <span class="glyphicon glyphicon-question-sign"></span> 帮助
+				</button>
+			</li>
+          </ul>
+          <form class="navbar-form navbar-right">
+            <input type="text" class="form-control" placeholder="Search...">
+          </form>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container-fluid">
+      <div class="row">
+		  <div class="col-sm-3 col-md-2 sidebar">
+			  <div class="tree">
+				  <ul style="padding-left:0px;" class="list-group">
+					  <li class="list-group-item tree-closed" th:each="menu : ${session.menuList}">
+						  <div th:if="${menu.childMenu}==null">
+							  <a href="main.html" th:href="${menu.url}"><i th:class="${menu.icon}"></i> [[${menu.name}]]</a>
+						  </div>
+						  <div th:if="${menu.childMenu}!=null">
+							  <span><i th:class="${menu.icon}"></i> [[${menu.name}]] <span class="badge" style="float:right">3</span></span>
+							  <ul style="margin-top:10px;display:none;">
+								  <li style="height:30px;" th:each="child : ${menu.childMenu}">
+									  <a href="user.html" th:href="${child.url}"><i th:class="${child.icon}"></i> [[${child.name}]]</a>
+								  </li>
+							  </ul>
+						  </div>
+					  </li>
+				  </ul>
+			  </div>
+		  </div>
+        <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+			<div class="panel panel-default">
+			  <div class="panel-heading">
+				<h3 class="panel-title"><i class="glyphicon glyphicon-th"></i> 数据列表</h3>
+			  </div>
+			  <div class="panel-body">
+<form class="form-inline" role="form" style="float:left;">
+  <div class="form-group has-feedback">
+    <div class="input-group">
+      <div class="input-group-addon">查询条件</div>
+      <input id="condition" class="form-control has-success" type="text" placeholder="请输入查询条件">
+    </div>
+  </div>
+  <button id="queryBtn" type="button" class="btn btn-warning"><i class="glyphicon glyphicon-search"></i> 查询</button>
+</form>
+<button id="deleteBatchBtn" type="button" class="btn btn-danger" style="float:right;margin-left:10px;"><i class=" glyphicon glyphicon-remove"></i> 删除</button>
+<button id="addRoleBtn" type="button" class="btn btn-primary" style="float:right;" ><i class="glyphicon glyphicon-plus"></i> 新增</button>
+<br>
+ <hr style="clear:both;">
+          <div class="table-responsive">
+            <table class="table  table-bordered">
+              <thead>
+                <tr >
+                  <th width="30">#</th>
+				  <th width="30"><input id="selectAll" type="checkbox"></th>
+                  <th>名称</th>
+                  <th width="100">操作</th>
+                </tr>
+              </thead>
+              <tbody>
+              </tbody>
+			  <tfoot>
+			  </tfoot>
+            </table>
+          </div>
+			  </div>
+			</div>
+        </div>
+      </div>
+    </div>
+
+	<!-- 添加管理员角色 Modal -->
+	<div class="modal fade" id="addRoleModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+					<h4 class="modal-title" id="myModalLabel">添加管理员角色</h4>
+				</div>
+				<div class="modal-body">
+					<div class="form-group">
+						<label for="roleName">角色名称</label>
+						<input id="roleName" type="text" class="form-control" name="name" placeholder="请输入角色名称">
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+					<button id="saveRoleBtn" type="button" class="btn btn-primary">保存</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- 修改管理员角色 Modal -->
+	<div class="modal fade" id="updateRoleModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+					<h4 class="modal-title" id="myModalLabel">修改管理员角色</h4>
+				</div>
+				<div class="modal-body">
+					<div class="form-group">
+						<label for="roleName">角色名称</label>
+						<input name="roleId" type="hidden">
+						<input id="roleName" type="text" class="form-control" name="name" placeholder="请输入角色名称">
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+					<button id="updateRoleBtn" type="button" class="btn btn-primary">修改</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div th:include="commons/include::#jsStyle"></div>
+        <script type="text/javascript">
+        	//页面加载完成后需要执行的事件处理
+            $(function () {
+			    $(".list-group-item").click(function(){
+				    if ( $(this).find("ul") ) {
+						$(this).toggleClass("tree-closed");
+						if ( $(this).hasClass("tree-closed") ) {
+							$("ul", this).hide("fast");
+						} else {
+							$("ul", this).show("fast");
+						}
+					}
+				});
+            });
+            
+            $("tbody .btn-success").click(function(){
+                window.location.href = "assignPermission.html";
+            });
+
+			//=============================定义新增角色按钮事件=======================================
+			$("#addRoleBtn").click(function(){
+				$("#addRoleModal").modal({
+					show:true,
+					backdrop:'static',
+					keyboard:false
+				});
+			});
+
+
+			$("#saveRoleBtn").click(function(){
+				var name = $("#addRoleModal input[name='name']").val();
+				addRole(name);
+			});
+
+			//=============================定义修改角色事件====================================
+			$('tbody').on("click",".btn-updateRole",function(){
+				var roleId = $(this).attr('roleId');
+
+				$.get("/admin/role/getRole",{id:roleId},function(result){
+					$("#updateRoleModal input[name='name']").val(result.name);
+					$("#updateRoleModal input[name='roleId']").val(result.id);
+					$("#updateRoleModal").modal({
+						show:true,
+						backdrop:'static',
+						keyboard:false
+					});
+				});
+			});
+
+			$("#updateRoleBtn").click(function(){
+				var name = $("#updateRoleModal input[name='name']").val();
+				var roleId = $("#updateRoleModal input[name='roleId']").val();
+				updateRole(roleId,name);
+			});
+
+			//=============================定义删除角色事件====================================
+			$('tbody').on("click",".btn-deleteRole",function(){
+				var roleId = $(this).attr('roleId');
+				layer.confirm('请确认删除记录?',
+					{btn:['确认','取消']},
+					function(index){
+						//执行删除
+						deleteRole(roleId);
+						layer.close(index);
+					},
+					function(index){
+						layer.close(index);
+					}
+				);
+			});
+
+			//=============================复选框全选事件=====================================
+			$("#selectAll").click(function(){
+			  $("tbody input[type='checkbox']").prop("checked",this.checked);
+			});
+
+			$("#deleteBatchBtn").click(function(){
+			  var checkBoxList = $("tbody input[type='checkbox']:checked");
+
+			  if(checkBoxList.length == 0){
+			    layer.msg("请选择要删除的记录");
+			    return false;
+			  }
+
+			  var array = new Array();
+
+			  $.each(checkBoxList,function(i,e){
+			    var roleId = $(e).attr("roleId");
+			    array.push(roleId);
+			  });
+
+  		 	  var deleteIds = array.join(",");
+
+  		 	  //执行删除
+  		 	  deleteRoles(deleteIds);
+			});
+            //=============================加载页面数据=======================================
+            var json={pageNum:1,pageSize:6};
+
+            initData(1);
+
+			//=============================条件查询按钮事件=======================================
+			$("#queryBtn").click(function(){
+				var condition = $("#condition").val();
+				json.condition = condition;
+
+				initData(1);
+			});
+
+            //================================定义函数=========================================
+            //==========================获取页面数据===========================================
+            function initData(pageNum){
+            	//通过ajax异步获取数据
+            	json.pageNum = pageNum;
+
+				var index=-1;
+
+            	$.ajax({
+            		type:'get',
+            		url:"/admin/role/loadAllRole",
+            		data:json,
+            		beforeSend:function(){
+            			index=layer.load(0,{time:10*1000});
+            			return true;
+            		},
+            		success:function(result){
+            			console.log(result);
+            			layer.close(index);
+            			//展示数据
+            			initShow(result);
+            			//展示分页条
+            			initNavg(result);
+            		}
+            	});
+            }
+
+			//==========================初始化页面数据=========================================
+            function initShow(result){
+				var list = result.list;
+
+				$("tbody").empty();
+
+				$.each(list,function(i,e){
+					var tr = $('<tr></tr>');
+					tr.append('  <td>'+(i+1)+'</td>');
+					tr.append('  <td><input type="checkbox" roleId='+e.id+' ></td>');
+					tr.append('  <td>'+e.name+'</td>');
+
+					var td = $('<td></td>');
+					td.append('      <button type="button" class="btn btn-success btn-xs"><i class=" glyphicon glyphicon-check"></i></button>');
+					td.append('      <button type="button" roleId='+e.id+' class="btn-updateRole btn btn-primary btn-xs"><i class=" glyphicon glyphicon-pencil"></i></button>');
+					td.append('	  <button type="button" roleId='+e.id+' class="btn-deleteRole btn btn-danger btn-xs"><i class=" glyphicon glyphicon-remove"></i></button>');
+
+					tr.append(td);
+
+					tr.appendTo($("tbody"));
+				});
+            }
+
+			//==========================加载分页条=========================================
+            function initNavg(result){
+            	var tr = $('<tr></tr>');
+            	var td = $('<td colspan="6" align="center"></td>');
+            	var ul = $('<ul class="pagination"></ul>');
+
+				if(result.isFirstPage){
+            		ul.append('<li class="disabled"><a href="#">上一页</a></li>');
+            	}else{
+            		ul.append('<li><a href="#" onclick="initData('+(result.pageNum-1)+')">上一页</a></li>');
+            	}
+
+            	var list = result.navigatepageNums;
+
+            	$.each(list,function(i,e){
+					if(result.pageNum==e){
+						ul.append('<li class="active"><a href="#">'+e+'<span class="sr-only">(current)</span></a></li>');
+					}else{
+						ul.append('<li class="inactive"><a href="#" onclick="initData('+e+')">'+e+'</a></li>');
+					}
+            	});
+
+            	if(result.isLastPage){
+            		ul.append('<li class="disabled"><a href="#">下一页</a></li>');
+            	}else{
+            		ul.append('<li><a href="#" onclick="initData('+(result.pageNum+1)+')">下一页</a></li>');
+            	}
+
+            	td.append(ul);
+            	tr.append(td);
+
+				$("tfoot").empty();
+            	tr.appendTo($('tfoot'));
+            }
+
+			//==========================添加角色函数=========================================
+            function addRole(name){
+
+            	$.ajax({
+            		type:'post',
+            		url:"/admin/role/createRole",
+            		data:{name:name},
+            		beforeSend:function(){
+            			index=layer.load(0,{time:10*1000});
+            			return true;
+            		},
+            		success:function(result){
+            			console.log(result);
+            			layer.close(index);
+            			if(result=="ok"){
+            				layer.msg("保存成功",{time:1000},function(){
+            					$("#addRoleModal input[name='name']").val("")
+            					$("#addRoleModal").modal('hide');
+            					//展示数据 从第一页开始
+            					initData(1);
+            				});
+            			}else{
+            				layer.msg("保存失败");
+            			}
+            		}
+            	});
+            }
+
+            //==========================修改角色函数=========================================
+            function updateRole(roleId, name){
+
+            	$.ajax({
+            		type:'post',
+            		url:"/admin/role/updateRole",
+            		data:{id:roleId, name:name},
+            		beforeSend:function(){
+            			index=layer.load(0,{time:10*1000});
+            			return true;
+            		},
+            		success:function(result){
+            			console.log(result);
+            			layer.close(index);
+            			if(result=="ok"){
+            				layer.msg("修改成功",{time:1000},function(){
+            					$("#updateRoleModal").modal('hide');
+            					//展示数据 从当前页开始
+            					initData(json.pageNum);
+            				});
+            			}else{
+            				layer.msg("修改失败");
+            			}
+            		}
+            	});
+            }
+
+            //==========================删除角色函数=========================================
+            function deleteRole(roleId){
+
+            	$.ajax({
+            		type:'post',
+            		url:"/admin/role/deleteRole",
+            		data:{id:roleId},
+            		beforeSend:function(){
+            			index=layer.load(0,{time:10*1000});
+            			return true;
+            		},
+            		success:function(result){
+            			console.log(result);
+            			layer.close(index);
+            			if(result=="ok"){
+            				layer.msg("删除成功",{time:1000},function(){
+            					//展示数据 从当前页开始
+            					initData(json.pageNum);
+            				});
+            			}else{
+            				layer.msg("删除失败");
+            			}
+            		}
+            	});
+            }
+
+            //==========================批量删除角色函数=========================================
+            function deleteRoles(deleteIds){
+
+            	$.ajax({
+            		type:'post',
+            		url:"/admin/role/deleteRoles",
+            		data:{ids:deleteIds},
+            		beforeSend:function(){
+            			index=layer.load(0,{time:10*1000});
+            			return true;
+            		},
+            		success:function(result){
+            			console.log(result);
+            			layer.close(index);
+            			if(result=="ok"){
+            				layer.msg("删除成功",{time:1000},function(){
+            					//展示数据 从当前页开始
+            					initData(json.pageNum);
+            				});
+            			}else{
+            				layer.msg("删除失败");
+            			}
+            		}
+            	});
+            }
+        </script>
+  </body>
+</html>

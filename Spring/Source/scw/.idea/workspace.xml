@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="e6020266-fe78-47f7-9c27-d81a88f60ca7" name="Default Changelist" comment="" />
+    <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="HTML File" />
+        <option value="Interface" />
+        <option value="Class" />
+      </list>
+    </option>
+  </component>
+  <component name="MavenImportPreferences">
+    <option name="importingSettings">
+      <MavenImportingSettings>
+        <option name="importAutomatically" value="true" />
+        <option name="vmOptionsForImporter" value="-Xmx768m" />
+      </MavenImportingSettings>
+    </option>
+  </component>
+  <component name="MavenRunner">
+    <option name="skipTests" value="true" />
+  </component>
+  <component name="ProjectId" id="1b5A5I3SBCgkI3SJuVfFnmvWvxk" />
+  <component name="PropertiesComponent">
+    <property name="DefaultHtmlFileTemplate" value="HTML File" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/scw-user/src/main/java/tk/billhu/scw/user/vo/request" />
+    <property name="project.structure.last.edited" value="Modules" />
+    <property name="project.structure.proportion" value="0.0" />
+    <property name="project.structure.side.proportion" value="0.0" />
+    <property name="settings.editor.selected.configurable" value="File.Encoding" />
+  </component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\IdeaProjects\scw\scw-webui\src\main\resources\templates\admin" />
+      <recent name="C:\IdeaProjects\scw\scw-webui\src\main\resources\templates\admin\user" />
+      <recent name="C:\IdeaProjects\scw\scw-webui\src\main\resources\templates\member" />
+      <recent name="C:\IdeaProjects\scw\scw-order\src\main\resources\mybatis" />
+      <recent name="C:\IdeaProjects\scw\scw-webui\src\main\resources\templates\project" />
+    </key>
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\IdeaProjects\scw\scw-user\src\main\java\tk\billhu\scw\user\vo\request" />
+      <recent name="C:\IdeaProjects\scw\scw-webui\src\main\resources\templates\admin\menu" />
+      <recent name="C:\IdeaProjects\scw\scw-webui\src\main\resources\templates\admin\role" />
+      <recent name="C:\IdeaProjects\scw\scw-webui\src\main\java\tk\billhu\scw\webui\vo\request" />
+      <recent name="C:\IdeaProjects\scw\scw-webui\src\main\resources\static\jquery" />
+    </key>
+    <key name="CopyClassDialog.RECENTS_KEY">
+      <recent name="tk.billhu.scw.webui.vo.response" />
+      <recent name="tk.billhu.scw.user.vo.request" />
+      <recent name="tk.billhu.scw.webui.vo.request" />
+      <recent name="tk.billhu.scw.webui.entities" />
+      <recent name="tk.billhu.scw.webui.controller" />
+    </key>
+    <key name="CreateClassDialog.RecentsKey">
+      <recent name="tk.billhu.scw.user.vo.response" />
+    </key>
+  </component>
+  <component name="RunDashboard">
+    <option name="ruleStates">
+      <list>
+        <RuleState>
+          <option name="name" value="ConfigurationTypeDashboardGroupingRule" />
+        </RuleState>
+        <RuleState>
+          <option name="name" value="StatusDashboardGroupingRule" />
+        </RuleState>
+      </list>
+    </option>
+  </component>
+  <component name="RunManager" selected="Application.ScwWebuiApplication">
+    <configuration name="ScwOrder8201_App" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="tk.billhu.scw.order.ScwOrder8201_App" />
+      <module name="scw-order" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="tk.billhu.scw.order.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="ScwProject8101_App" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="tk.billhu.scw.project.ScwProject8101_App" />
+      <module name="scw-project" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="tk.billhu.scw.project.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="ScwUser8001_App" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="tk.billhu.scw.user.ScwUser8001_App" />
+      <module name="scw-user" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="tk.billhu.scw.user.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="ScwWebuiApplication" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="tk.billhu.scw.webui.ScwWebuiApplication" />
+      <module name="scw-webui" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="tk.billhu.scw.webui.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="All in scw-project" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="scw-project" />
+      <option name="PACKAGE_NAME" value="" />
+      <option name="TEST_OBJECT" value="package" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Application.ScwWebuiApplication" />
+        <item itemvalue="Application.ScwUser8001_App" />
+        <item itemvalue="Application.ScwProject8101_App" />
+        <item itemvalue="JUnit.All in scw-project" />
+        <item itemvalue="Application.ScwOrder8201_App" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="e6020266-fe78-47f7-9c27-d81a88f60ca7" name="Default Changelist" comment="" />
+      <created>1587911395488</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1587911395488</updated>
+    </task>
+    <servers />
+  </component>
+  <component name="XDebuggerManager">
+    <watches-manager>
+      <configuration name="Application">
+        <watch expression="this.this$0" custom="com.netflix.hystrix.HystrixCommand" />
+      </configuration>
+    </watches-manager>
+  </component>
+</project>

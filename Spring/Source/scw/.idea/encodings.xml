@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="Encoding" native2AsciiForPropertiesFiles="true" defaultCharsetForPropertiesFiles="UTF-8">
+    <file url="file://$PROJECT_DIR$" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/scw-common" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/scw-order" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/scw-project" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/scw-register" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/scw-user" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/scw-webui" charset="UTF-8" />
+    <file url="PROJECT" charset="UTF-8" />
+  </component>
+</project>
