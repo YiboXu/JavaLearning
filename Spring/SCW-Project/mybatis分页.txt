@@ -1,0 +1,64 @@
+（1）添加如下依赖（发布博客时的版本，可根据实际情况更新版本）：
+
+<dependency>  
+    <groupId>com.github.pagehelper</groupId>  
+    <artifactId>pagehelper</artifactId>  
+    <version>4.0.0</version>  
+</dependency>  
+
+（2）在mybatis.xml文件中配置:
+
+<!-- PageHelper分页插件配置 -->  
+    <plugins>  
+        <!-- com.github.pagehelper为PageHelper类所在包名 -->  
+        <plugin interceptor="com.github.pagehelper.PageHelper">  
+            <!-- 4.0.0以后版本可以不设置该参数 -->  
+            <property name="dialect" value="mysql" />  
+            <!-- 该参数默认为false -->  
+            <!-- 设置为true时，会将RowBounds第一个参数offset当成pageNum页码使用 -->  
+            <!-- 和startPage中的pageNum效果一样 -->  
+            <property name="offsetAsPageNum" value="true" />  
+            <!-- 该参数默认为false -->  
+            <!-- 设置为true时，使用RowBounds分页会进行count查询 -->  
+            <property name="rowBoundsWithCount" value="true" />  
+            <!-- 设置为true时，如果pageSize=0或者RowBounds.limit = 0就会查询出全部的结果 -->  
+            <!-- （相当于没有执行分页查询，但是返回结果仍然是Page类型） -->  
+            <property name="pageSizeZero" value="true" />  
+            <!-- 3.3.0版本可用 - 分页参数合理化，默认false禁用 -->  
+            <!-- 启用合理化时，如果pageNum<1会查询第一页，如果pageNum>pages会查询最后一页 -->  
+            <!-- 禁用合理化时，如果pageNum<1或pageNum>pages会返回空数据 -->  
+            <property name="reasonable" value="false" />  
+  
+            <!-- 支持通过Mapper接口参数来传递分页参数 -->  
+            <property name="supportMethodsArguments" value="false" />  
+            <!-- always总是返回PageInfo类型,check检查返回类型是否为PageInfo,none返回Page -->  
+            <property name="returnPageInfo" value="none" />  
+        </plugin>  
+    </plugins> 
+
+(3) 在Service的实现类中调用Dao中的查询方法时加入一段代码(当前页码，分页大小，排序的列)
+
+public List<ScoreList> getListBySemester(String likeStr,int epage, int pagesize) {  
+        // TODO Auto-generated method stub  
+        PageHelper.startPage(epage, pagesize,"addtime DESC");  
+        return scoreListDao.getListBySemester(likeStr);  
+    }  
+
+这样子分页插件会自动在你的查询语句后面添加 order by addtime DESC limit ?,?
+
+后面的两个问号表示从第几条数据开始、查几条数据
+
+（4）最后你在Controller层中加入
+
+PageInfo pageInfo=new PageInfo(list);
+
+后面放入的listcheck就是你service层返回的list集合。
+这样PageInfo就会自动给你进行计算分页了。很方便吧，使用的时候有什么问题也可以去他的github存放地址查看wiki说明。
+
+====================================================================================================
+如果在springboot框架中使用,则不需要第1,2步的配置，只用在pom.xml中添加如下依赖，然后按照第3,4步处理就可以了
+        <dependency>
+            <groupId>com.github.pagehelper</groupId>
+            <artifactId>pagehelper-spring-boot-starter</artifactId>
+            <version>1.2.5</version>
+        </dependency>

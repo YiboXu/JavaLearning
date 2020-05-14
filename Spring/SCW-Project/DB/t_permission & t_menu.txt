@@ -1,0 +1,49 @@
+mysql> select * from t_menu;
++----+------+--------+-------------------------------------+------------------------------------+
+| id | pid  | name   | icon                                | url                                |
++----+------+--------+-------------------------------------+------------------------------------+
+|  1 |    0 | ????   | glyphicon glyphicon-dashboard       | /admin/index                       |
+|  2 |    0 | ????   | glyphicon glyphicon glyphicon-tasks | NULL                               |
+|  3 |    2 | ????   | glyphicon glyphicon-user            | /admin/user/getAllUser             |
+|  4 |    2 | ????   | glyphicon glyphicon-king            | /admin/role/getAllRole             |
+|  5 |    2 | ????   | glyphicon glyphicon-lock            | /admin/permission/getAllPermission |
+|  6 |    2 | ????   | glyphicon glyphicon-th-list         | /admin/menu/getAllMenu             |
+|  7 |    0 | ????   | glyphicon glyphicon-ok              | NULL                               |
+|  8 |    7 | ?????? | glyphicon glyphicon-check           | auth_cert/index.html               |
+|  9 |    7 | ????   | glyphicon glyphicon-check           | auth_adv/index.html                |
+| 10 |    7 | ????   | glyphicon glyphicon-check           | auth_project/index.html            |
+| 11 |    0 | ????   | glyphicon glyphicon-th-large        | NULL                               |
+| 12 |   11 | ????   | glyphicon glyphicon-picture         | cert/index.html                    |
+| 13 |   11 | ????   | glyphicon glyphicon-equalizer       | certtype/index.html                |
+| 14 |   11 | ????   | glyphicon glyphicon-random          | process/index.html                 |
+| 15 |   11 | ????   | glyphicon glyphicon-hdd             | advert/index.html                  |
+| 16 |   11 | ????   | glyphicon glyphicon-comment         | message/index.html                 |
+| 17 |   11 | ????   | glyphicon glyphicon-list            | projectType/index.html             |
+| 18 |   11 | ????   | glyphicon glyphicon-tags            | tag/index.html                     |
+| 19 |    0 | ????   | glyphicon glyphicon-list-alt        | param/index.html                   |
++----+------+--------+-------------------------------------+------------------------------------+
+
+
+mysql> select * from t_permission;
++----+------------------------+-------+-----------------------------+------+
+| id | name                   | title | icon                        | pid  |
++----+------------------------+-------+-----------------------------+------+
+|  1 | NULL                   | ????  | glyphicon glyphicon-user    |    0 |
+|  2 | user:add               | ??    | glyphicon glyphicon-plus    |    1 |
+|  3 | user:delete            | ??    | glyphicon glyphicon-remove  |    1 |
+|  4 | user:update            | ??    | glyphicon glyphicon-pencil  |    1 |
+|  5 | user:get               | ??    | glyphicon glyphicon-zoom-in |    1 |
+|  6 | user:assign:role       | ????  | glyphicon glyphicon-user    |    1 |
+|  7 | NULL                   | ????  | glyphicon glyphicon-heart   |    0 |
+|  8 | role:add               | ??    | glyphicon glyphicon-plus    |    7 |
+|  9 | role:delete            | ??    | glyphicon glyphicon-remove  |    7 |
+| 10 | role:get               | ??    | glyphicon glyphicon-zoom-in |    7 |
+| 11 | role:update            | ??    | glyphicon glyphicon-pencil  |    7 |
+| 12 | role:assign:permission | ????  | glyphicon glyphicon-user    |    7 |
+| 13 | NULL                   | ????  | glyphicon glyphicon-th-list |    0 |
+| 14 | menu:add               | ??    | glyphicon glyphicon-plus    |   13 |
+| 15 | menu:delete            | ??    | glyphicon glyphicon-remove  |   13 |
+| 16 | menu:update            | ??    | glyphicon glyphicon-pencil  |   13 |
+| 17 | menu:get               | ??    | glyphicon glyphicon-zoom-in |   13 |
+| 18 | menu:assign:permission | ????  | glyphicon glyphicon-user    |   13 |
++----+------------------------+-------+-----------------------------+------+
