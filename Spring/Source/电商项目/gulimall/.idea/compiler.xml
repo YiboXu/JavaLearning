@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <annotationProcessing>
+      <profile default="true" name="Default" enabled="true" />
+      <profile name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <module name="gulimall-coupon" />
+        <module name="gulimall-order" />
+        <module name="gulimall-ware" />
+        <module name="renren-fast" />
+        <module name="gulimall-es6" />
+        <module name="gulimall-product" />
+        <module name="gulimall-vue" />
+        <module name="gulimall-gateway" />
+        <module name="renren-generator" />
+        <module name="gulimall-thirdparty" />
+        <module name="gulimall-member" />
+        <module name="gulimall-common" />
+      </profile>
+    </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="gulimall-vue" target="1.8" />
+      <module name="gulimall-ware-backup" target="1.8" />
+      <module name="gulimallproduct" target="1.8" />
+    </bytecodeTargetLevel>
+  </component>
+  <component name="JavacSettings">
+    <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="renren-fast" options="-parameters" />
+      <module name="renren-generator" options="-parameters" />
+    </option>
+  </component>
+</project>

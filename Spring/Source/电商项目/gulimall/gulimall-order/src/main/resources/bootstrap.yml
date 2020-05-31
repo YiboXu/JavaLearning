@@ -1,0 +1,22 @@
+spring:
+  application:
+    name: gulimall-order
+  cloud:
+    nacos:
+      discovery:
+        server-addr: localhost:8848 # 注册中心
+      config:
+        server-addr: localhost:8848 # 配置中心
+        file-extension: yml # 这里指定的文件格式需要和nacos上新建的配置文件后缀相同，否则读不到
+        group: order
+        namespace: gulimall
+        #指定额外的配置文件
+        #ext-config[0]:
+          #data-id=datasource.yml
+        #ext-config[1]:
+          #data-id=message.yml
+
+#配置文件匹配规则
+#  ${spring.application.name}-${spring.profile.active}.${spring.cloud.nacos.config.file-extension}
+
+#如果要开启自动刷新，比如在配置中心修改了配置后，让应用不用重启就能更新配置，那么在需要的controller类上标注 @RefreshScope

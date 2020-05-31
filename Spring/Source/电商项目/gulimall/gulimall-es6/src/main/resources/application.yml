@@ -1,0 +1,21 @@
+server:
+  port: 9000
+
+spring:
+  application:
+    name: gulimall-ex6
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+
+info:
+  app.name: gulimall
+  company.name: www.springlearning.com
+  build.artifactId: ${project.artifactId}
+  build.version: ${project.version}
+
+swagger2:
+  enable: true

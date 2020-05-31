@@ -1,0 +1,24 @@
+server:
+  port: 8601
+
+spring:
+  cloud:
+    alicloud:
+      access-key: LTAI4GCnXJRQADPA7PJ3suiv
+      secret-key: eySUXCmlmXOzSKyKwEVTw0lDOodaUT
+      oss:
+        endpoint: oss-cn-shanghai.aliyuncs.com
+        bucket: billhuscw20200428
+        path: gulimall-project
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+
+info:
+  app.name: gulimall
+  company.name: www.springlearning.com
+  build.artifactId: ${project.artifactId}
+  build.version: ${project.version}
