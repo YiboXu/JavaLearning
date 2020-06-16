@@ -4,8 +4,8 @@ server:
 spring:
   cloud:
     alicloud:
-      access-key: LTAI4GCnXJRQADPA7PJ3suiv
-      secret-key: eySUXCmlmXOzSKyKwEVTw0lDOodaUT
+      access-key: xxxxx
+      secret-key: yyyyy
       oss:
         endpoint: oss-cn-shanghai.aliyuncs.com
         bucket: billhuscw20200428
