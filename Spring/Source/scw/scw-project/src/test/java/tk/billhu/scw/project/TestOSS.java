@@ -11,8 +11,8 @@ import java.io.InputStream;
 public class TestOSS {
     public static void main(String[] args) throws FileNotFoundException {
         String endpoint = "http://oss-cn-shanghai.aliyuncs.com";
-        String accessKeyId = "LTAI4GCnXJRQADPA7PJ3suiv";
-        String accessKeySecret = "eySUXCmlmXOzSKyKwEVTw0lDOodaUT";
+        String accessKeyId = "xxxxxx";
+        String accessKeySecret = "yyyyyy";
         String bucketName = "billhuscw20200428";
         // <yourObjectName>上传文件到OSS时需要指定包含文件后缀在内的完整路径，例如abc/efg/123.jpg。
         String objectName = "scw-project/p1.jpg";
